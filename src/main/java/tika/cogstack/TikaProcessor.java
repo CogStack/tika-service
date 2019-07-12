@@ -1,77 +1,42 @@
-package tika.processor;
+package tika.cogstack;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.parser.ocr.TesseractOCRConfig;
-import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
-import org.apache.tika.utils.ParserUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tika.model.TikaBinaryDocument;
 import tika.model.TikaProcessingResult;
+import tika.processor.AbstractTikaProcessor;
 
 
-public class TikaProcessor {
+public class TikaProcessor extends AbstractTikaProcessor {
 
-    private AutoDetectParser defaultParser = new AutoDetectParser();
-    private ParseContext defaultParseContext = new ParseContext();
+    private AutoDetectParser defaultParser;
+    private ParseContext defaultParseContext;
+    private PdfProcessorConfig config;
 
-    private AutoDetectParser ocrParser = new AutoDetectParser();
-    private ParseContext ocrParseContext = new ParseContext();
-
-    private Logger log = LoggerFactory.getLogger(TikaProcessor.class);
+    private Logger log = LoggerFactory.getLogger(tika.cogstack.TikaProcessor.class);
 
 
-    public TikaProcessor() {
+    public TikaProcessor() throws Exception {
 
-        // set up default parse context -- no ocr
-        TesseractOCRConfig tessConfig = new TesseractOCRConfig();
-        PDFParserConfig pdfConfig = new PDFParserConfig();
-        pdfConfig.setExtractInlineImages(false);
-        pdfConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
+        config = new PdfProcessorConfig();
 
-        defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
-        defaultParseContext.set(PDFParserConfig.class, pdfConfig);
-        defaultParseContext.set(Parser.class, defaultParser);
+        defaultParseContext = new ParseContext();
+        defaultParseContext.set(TikaConfig.class, config.getTikaConfig());
 
-
-        // set up default parse context -- use ocr
-        tessConfig = new TesseractOCRConfig();
-        tessConfig.setApplyRotation(true);
-        tessConfig.setEnableImageProcessing(1);
-
-        pdfConfig = new PDFParserConfig();
-        pdfConfig.setExtractInlineImages(true);
-        pdfConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
-        pdfConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_ONLY);
-
-        ocrParseContext.set(TesseractOCRConfig.class, tessConfig);
-        ocrParseContext.set(PDFParserConfig.class, pdfConfig);
-        ocrParseContext.set(Parser.class, ocrParser);
+        defaultParser = new AutoDetectParser(config.getTikaConfig());
     }
 
-
-    public TikaProcessingResult process(final TikaBinaryDocument binaryDoc) {
-        return processTikaStream(TikaInputStream.get(binaryDoc.getContent()));
-    }
-
-    public TikaProcessingResult process(InputStream binaryStream) {
-        return processTikaStream(TikaInputStream.get(binaryStream));
-    }
-
-    private TikaProcessingResult processTikaStream(TikaInputStream stream) {
+    protected TikaProcessingResult processStream(TikaInputStream stream) {
         TikaProcessingResult result;
 
         try {
@@ -86,6 +51,7 @@ public class TikaProcessor {
             defaultParser.parse(stream, handler, metadata, defaultParseContext);
 
             // check whether we have content to parse and try ocr parser
+            /*
             if (metadata.get("Content-Type").equals("application/pdf")) {
                 if (handler.toString().length() < 100 && stream.getPosition() > 10000) {
 
@@ -96,6 +62,7 @@ public class TikaProcessor {
                     ocrParser.parse(stream, handler, metadata, ocrParseContext);
                 }
             }
+            */
 
             /*
             // set up default parse context -- use ocr

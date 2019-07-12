@@ -12,11 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 import tika.model.ServiceRequestContent;
 import tika.model.ServiceResponseContent;
 import tika.model.TikaProcessingResult;
-import tika.processor.TikaProcessor;
 
-import java.io.BufferedInputStream;
+import tika.cogstack.TikaProcessor;
+import tika.processor.CompositeTikaProcessor;
+
+
+import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 
@@ -30,11 +32,20 @@ public class TikaController {
 
     private Logger log = LoggerFactory.getLogger(TikaController.class);
 
-    private TikaProcessor tikaProcessor = new TikaProcessor();
+    private TikaProcessor cogstackTikaProcessor;
+    private CompositeTikaProcessor tikaProcessor;
 
 
+    @PostConstruct
+    void init() throws Exception {
+        cogstackTikaProcessor = new TikaProcessor();
+        tikaProcessor = new CompositeTikaProcessor();
+    }
+
+
+    /*
     @PostMapping(value = apiFullPath + "/process")
-    public ResponseEntity<ServiceResponseContent> process(@RequestBody /*@Valid*/ ServiceRequestContent content) {
+    public ResponseEntity<ServiceResponseContent> process(@RequestBody ServiceRequestContent content) {
 
         ServiceResponseContent response = new ServiceResponseContent();
 
@@ -56,7 +67,7 @@ public class TikaController {
         // process the content
         //
         try {
-            TikaProcessingResult result = tikaProcessor.process(content.getDocument());
+            TikaProcessingResult result = cogstackTikaProcessor.process(content.getDocument());
             response.setResult(result);
         }
         catch (Exception e) {
@@ -76,12 +87,17 @@ public class TikaController {
         //response.getResult().setFooter(content.getContent().getFooter());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    */
 
 
     @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" })
-    public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file,
+                                                          @RequestParam(name = "processor", required = false) String processorName) {
 
         ServiceResponseContent response = new ServiceResponseContent();
+
+        final boolean useCogstackProcessor = (processorName != null && processorName.equals("cogstack"));
+
 
         // check whether we need to perform any processing
         //
@@ -103,7 +119,13 @@ public class TikaController {
             //InputStream bufs = new BufferedInputStream(file.getInputStream(), (int)file.getSize());
             InputStream bufs = new ByteArrayInputStream(file.getBytes());
 
-            TikaProcessingResult result = tikaProcessor.process(bufs);
+            TikaProcessingResult result;
+            if (useCogstackProcessor) {
+                result = cogstackTikaProcessor.process(bufs);
+            }
+            else {
+                result = tikaProcessor.process(bufs);
+            }
             response.setResult(result);
         }
         catch (Exception e) {

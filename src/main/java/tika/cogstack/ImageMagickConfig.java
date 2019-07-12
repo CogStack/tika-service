@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tika.parser;
+package tika.cogstack;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

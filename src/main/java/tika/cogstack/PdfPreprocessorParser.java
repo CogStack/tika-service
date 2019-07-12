@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tika.parser;
+package tika.cogstack;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -55,17 +55,18 @@ import java.util.*;
 import java.util.concurrent.*;
 
 
-public class CogstackPdfParser extends AbstractParser {
+public class PdfPreprocessorParser extends AbstractParser {
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static Map<String, Boolean> IMAGEMAGICK_PRESENT = new HashMap<String, Boolean>();
     private static final ImageMagickConfig DEFAULT_IMAGEMAGICK_CONFIG = new ImageMagickConfig();
 
     private static final Set<MediaType> SUPPORTED_TYPES = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList(
+            new HashSet<>(Arrays.asList(new MediaType[]{
                     MediaType.application("pdf")
-            )));
-    private static final Logger LOG = LoggerFactory.getLogger(CogstackPdfParser.class);
+            })));
+    private static final Logger LOG = LoggerFactory.getLogger(PdfPreprocessorParser.class);
+
 
     @Override
     public Set<MediaType> getSupportedTypes(ParseContext context) {
@@ -132,12 +133,11 @@ public class CogstackPdfParser extends AbstractParser {
 
         if (body.toString().length() > 100 || !hasImageMagick(config)) {
             pdfParser.parse(stream, handler, metadata, context);
-            metadata.set("X-PDFPREPROC-OCR-APPLIED", "NA");
+            //metadata.set("X-PDFPREPROC-OCR-APPLIED", "NA");
             return;
         }
 
-        metadata.set("X-PDFPREPROC-ORIGINAL", body.toString());
-        metadata.set("X-PDFPREPROC-OCR-APPLIED", "FAIL");
+        //metadata.set("X-PDFPREPROC-ORIGINAL", body.toString());
         // "FAIL" will be overwritten if it succeeds later
 
         //add the PDF metadata to the official metadata object
@@ -145,6 +145,7 @@ public class CogstackPdfParser extends AbstractParser {
             metadata.add(name, pdfMetadata.get(name));
         });
 
+        metadata.set("X-OCR-APPLIED", "TRUE");
 
         //objects to hold file references for manipulation outside of Java
         File tiffFileOfPDF = null;
@@ -159,11 +160,19 @@ public class CogstackPdfParser extends AbstractParser {
                 TesseractOCRParser tesseract = new TesseractOCRParser();
 
                 tesseract.parse(FileUtils.openInputStream(tiffFileOfPDF), handler, metadata, context);
-                metadata.set("X-PDFPREPROC-OCR-APPLIED", "SUCCESS");
+
+                metadata.set("X-OCR-STATUS", "SUCCESS");
 
                 LOG.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
             }
-        } finally {
+        } catch (Exception e) {
+            LOG.warn("Error while running OCR over the document");
+
+            metadata.set("X-OCR-STATUS", "FAIL");
+
+            throw e;
+        }
+        finally {
             if (tiffFileOfPDF.exists()) {
                 tiffFileOfPDF.delete();
             }
@@ -247,7 +256,7 @@ public class CogstackPdfParser extends AbstractParser {
                 }
 
                 String msg = out.toString();
-                LogFactory.getLog(CogstackPdfParser.class).debug(msg);
+                LogFactory.getLog(PdfPreprocessorParser.class).debug(msg);
             }
         }.start();
     }
