@@ -1,4 +1,4 @@
-package tika.cogstack;
+package tika.cogstack.legacy;
 
 import lombok.Data;
 import org.apache.tika.config.TikaConfig;

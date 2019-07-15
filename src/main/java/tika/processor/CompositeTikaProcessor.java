@@ -1,9 +1,7 @@
 package tika.processor;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
@@ -14,6 +12,7 @@ import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
+import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
@@ -28,14 +27,31 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
     private TikaProcessorConfig config;
 
+    /*
+     In order to properly handle PDF documents and OCR we need three separate parsers:
+     - a generic parser
+     - one that will extract text only from PDFs
+     - one that will apply OCR on PDFs (when stored only images)
+
+     In the default configuration of PDFParser the OCR is disabled when extracting text from PDFs. However, OCR is
+     enabled when extracting text from documents of image type.
+
+     We would also like to know when OCR was applied as it will affect the accuracy of the extracted text that will be
+     passed to the downstream analysis applications.
+     */
+
+    // the default, generic parser for handling all document types (expect PDF)
     private AutoDetectParser defaultParser;
     private ParseContext defaultParseContext;
 
+    // the default parser for PDFs (no OCR)
     private PDFParser pdfTextParser;
     private ParseContext pdfTextParseContext;
 
+    // the parser to extract text from PDFs using OCR
     private PDFParser pdfOcrParser;
     private ParseContext pdfOcrParseContext;
+
 
     private Logger log = LoggerFactory.getLogger(tika.processor.CompositeTikaProcessor.class);
 
@@ -89,6 +105,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         //pdfOcrParseContext.set(Parser.class, pdfOcrParser);
     }
 
+
     private boolean isDocumentPdfType(InputStream stream) throws Exception {
         //final String CONTENT_TYPE = "Content-Type";
         //final String PDF_TYPE = "application/pdf";
@@ -97,6 +114,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         return mediaType.equals(MediaType.application("pdf"));
     }
+
 
     protected TikaProcessingResult processStream(TikaInputStream stream) {
         TikaProcessingResult result;
@@ -126,55 +144,49 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     stream.reset();
                     pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
                 }
+
+                // update the metadata with the name of the parser class used
+                //
+                metadata.add("X-Parsed-By", PDFParser.class.toString());
             }
             else {
                 // run default documents parser
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
             }
 
-            // check whether we have content to parse and try ocr parser
-            /*
-            if (metadata.get("Content-Type").equals("application/pdf")) {
-                if (handler.toString().length() < 100 && stream.getPosition() > 10000) {
 
-                    handler = new BodyContentHandler();
-                    metadata = new Metadata();
-
-                    stream.reset();
-                    ocrParser.parse(stream, handler, metadata, ocrParseContext);
-                }
+            // check whether OCR has been applied
+            //
+            if (metadata.get("X-Parsed-By") != null
+                    && Arrays.asList(metadata.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString())) {
+                metadata.add("X-OCR-Applied", "true");
             }
-            */
+            else {
+                metadata.add("X-OCR-Applied", "false");
+            }
 
-            /*
-            // set up default parse context -- use ocr
-            TesseractOCRConfig tessConfig = new TesseractOCRConfig();
-            tessConfig.setApplyRotation(true);
-            tessConfig.setEnableImageProcessing(1);
 
-            PDFParserConfig pdfConfig = new PDFParserConfig();
-            pdfConfig.setExtractInlineImages(true);
-            pdfConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
-            pdfConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_AND_TEXT_EXTRACTION);
-
-            AutoDetectParser parser = new AutoDetectParser();
-            ParseContext context = new ParseContext();
-
-            context.set(TesseractOCRConfig.class, tessConfig);
-            context.set(PDFParserConfig.class, pdfConfig);
-            context.set(Parser.class, parser);
-
-            parser.parse(stream, handler, metadata, context);
-            */
-
+            // parse the metadata
+            //
+            final String[] metaKeysSingleValue = {"Content-Type", "Creation-Date", "Last-Modified", "X-OCR-Applied"};
+            final String[] metaKeysMultiValue = {"X-Parsed-By"};
             final Metadata md = metadata;
 
-            Map<String, String[]> tm = new HashMap<>();
-            Arrays.stream(metadata.names()).forEach(name -> tm.put(name, md.getValues(name)));
+            Map<String, Object> resultMeta = new HashMap<>();
+
+            Arrays.stream(metaKeysSingleValue).forEach(name -> {
+                if (md.get(name) != null)
+                    resultMeta.put(name, md.get(name));
+            });
+
+            Arrays.stream(metaKeysMultiValue).forEach(name -> {
+                if (md.getValues(name) != null)
+                    resultMeta.put(name, md.getValues(name));
+            });
 
             result = TikaProcessingResult.builder()
-                    .documentContent(handler.toString())
-                    .metadata(tm)
+                    .text(handler.toString())
+                    .metadata(resultMeta)
                     .success(true)
                     .build();
         }
@@ -182,7 +194,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             log.error(e.getMessage());
 
             result = TikaProcessingResult.builder()
-                    .errorMessage("Exception caught while processing the document: " + e.getMessage())
+                    .error("Exception caught while processing the document: " + e.getMessage())
                     .success(false)
                     .build();
         }
