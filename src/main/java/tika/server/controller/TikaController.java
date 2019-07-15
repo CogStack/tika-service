@@ -5,21 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import tika.model.ServiceRequestContent;
+
 import tika.model.ServiceResponseContent;
 import tika.model.TikaProcessingResult;
-
-import tika.cogstack.TikaProcessor;
+import tika.cogstack.legacy.TikaProcessor;
+import tika.processor.AbstractTikaProcessor;
 import tika.processor.CompositeTikaProcessor;
 
-
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 
 @RestController
@@ -32,72 +30,62 @@ public class TikaController {
 
     private Logger log = LoggerFactory.getLogger(TikaController.class);
 
-    private TikaProcessor cogstackTikaProcessor;
+    private TikaProcessor legacyTikaProcessor;
     private CompositeTikaProcessor tikaProcessor;
 
 
     @PostConstruct
     void init() throws Exception {
-        cogstackTikaProcessor = new TikaProcessor();
+        legacyTikaProcessor = new TikaProcessor();
         tikaProcessor = new CompositeTikaProcessor();
     }
 
 
-    /*
     @PostMapping(value = apiFullPath + "/process")
-    public ResponseEntity<ServiceResponseContent> process(@RequestBody ServiceRequestContent content) {
+    public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request,
+                                                          @RequestParam(name = "processor", required = false) String processorName) {
 
-        ServiceResponseContent response = new ServiceResponseContent();
-
-        // check whether we need to perform any processing
-        //
-        if (content.getDocument() == null || content.getDocument().getContent() == null
-                || content.getDocument().getContent().length == 0) {
-            final String message = "Empty content";
-            log.info(message);
-
-            TikaProcessingResult result = TikaProcessingResult.builder()
-                    .success(false)
-                    .errorMessage(message).build();
-            response.setResult(result);
-
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
+        final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
 
         // process the content
         //
         try {
-            TikaProcessingResult result = cogstackTikaProcessor.process(content.getDocument());
-            response.setResult(result);
+            byte[] streamContent = request.getInputStream().readAllBytes();
+
+            if (streamContent.length == 0) {
+                final String message = "Empty content";
+                log.info(message);
+
+                return new ResponseEntity<>(createErrorResponse(message), HttpStatus.BAD_REQUEST);
+            }
+
+            // process
+            //
+            ByteArrayInputStream bufs = new ByteArrayInputStream(streamContent);
+            ServiceResponseContent response = processStream(bufs, useLegacyProcessor);
+
+
+            // remember to actually check the processing status
+            if (response.getResult().getSuccess())
+                return new ResponseEntity<>(response, HttpStatus.OK);
+
+            // an error occurred during processing
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
             log.error(message);
 
-            TikaProcessingResult result = TikaProcessingResult.builder()
-                    .success(false)
-                    .errorMessage(message).build();
-            response.setResult(result);
-
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        // set the original footer to return it back to the client
-        //
-        //response.getResult().setFooter(content.getContent().getFooter());
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
-    */
-
+    
 
     @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" })
     public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file,
                                                           @RequestParam(name = "processor", required = false) String processorName) {
 
-        ServiceResponseContent response = new ServiceResponseContent();
-
-        final boolean useCogstackProcessor = (processorName != null && processorName.equals("cogstack"));
-
+        final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
 
         // check whether we need to perform any processing
         //
@@ -105,45 +93,57 @@ public class TikaController {
             final String message = "Empty content";
             log.info(message);
 
-            TikaProcessingResult result = TikaProcessingResult.builder()
-                    .success(false)
-                    .errorMessage(message).build();
-            response.setResult(result);
-
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(createErrorResponse(message), HttpStatus.BAD_REQUEST);
         }
+
 
         // process the content
         //
         try {
-            //InputStream bufs = new BufferedInputStream(file.getInputStream(), (int)file.getSize());
-            InputStream bufs = new ByteArrayInputStream(file.getBytes());
+            ByteArrayInputStream bufs = new ByteArrayInputStream(file.getBytes());
 
-            TikaProcessingResult result;
-            if (useCogstackProcessor) {
-                result = cogstackTikaProcessor.process(bufs);
-            }
-            else {
-                result = tikaProcessor.process(bufs);
-            }
-            response.setResult(result);
+            ServiceResponseContent response = processStream(bufs, useLegacyProcessor);
+
+            // remember to actually check the processing status
+            if (response.getResult().getSuccess())
+                return new ResponseEntity<>(response, HttpStatus.OK);
+
+            // an error occurred during processing
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
             log.error(message);
 
-            TikaProcessingResult result = TikaProcessingResult.builder()
-                    .success(false)
-                    .errorMessage(message).build();
-            response.setResult(result);
-
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        // set the original footer to return it back to the client
-        //
-        //response.getResult().setFooter(content.getContent().getFooter());
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
+    private ServiceResponseContent createErrorResponse(String message) {
+        ServiceResponseContent response = new ServiceResponseContent();
+        TikaProcessingResult result = TikaProcessingResult.builder()
+                .success(false)
+                .error(message).build();
+        response.setResult(result);
+        return response;
+    }
+
+
+    private ServiceResponseContent processStream(ByteArrayInputStream stream, boolean useLegacyProcessor) {
+        AbstractTikaProcessor processor;
+        if (useLegacyProcessor) {
+            processor = legacyTikaProcessor;
+        }
+        else {
+            processor = tikaProcessor;
+        }
+        log.debug("Running processor: " + processor.getClass().toString());
+
+        TikaProcessingResult result = processor.process(stream);
+        ServiceResponseContent response = new ServiceResponseContent();
+        response.setResult(result);
+
+        return response;
+    }
 }

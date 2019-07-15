@@ -7,7 +7,7 @@
             <mime-exclude>application/pdf</mime-exclude>
         </parser>
         <!-- Use a different parser for PDF -->
-        <parser class="tika.cogstack.PdfPreprocessorParser">
+        <parser class="tika.cogstack.legacy.PdfPreprocessorParser">
             <mime>application/pdf</mime>
         </parser>
     </parsers>
