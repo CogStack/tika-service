@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import tika.legacy.LegacyTikaProcessor;
 import tika.model.ServiceResponseContent;
 import tika.model.TikaProcessingResult;
-import tika.cogstack.legacy.TikaProcessor;
 import tika.processor.AbstractTikaProcessor;
-import tika.processor.CompositeTikaProcessor;
+import tika.processor.TikaProcessor;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ import java.io.ByteArrayInputStream;
 
 
 @RestController
-@ComponentScan({"tika.cogstack.legacy", "tika.processor"})
+@ComponentScan({"tika.legacy", "tika.processor"})
 public class TikaController {
 
     private final String apiPathPrefix = "/**/api";
@@ -36,17 +36,17 @@ public class TikaController {
 
     @Autowired
     @Qualifier("legacyTikaProcessor")
-    private TikaProcessor legacyTikaProcessor;
+    private LegacyTikaProcessor legacyTikaProcessor;
 
     @Autowired
-    @Qualifier("tikaProcessor")
-    private CompositeTikaProcessor tikaProcessor;
+    @Qualifier("standardTikaProcessor")
+    private TikaProcessor tikaProcessor;
 
 
     @PostConstruct
     void init() throws Exception {
-        //legacyTikaProcessor = new TikaProcessor();
-        //tikaProcessor = new CompositeTikaProcessor();
+        //legacyTikaProcessor = new LegacyTikaProcessor();
+        //tikaProcessor = new TikaProcessor();
     }
 
 
