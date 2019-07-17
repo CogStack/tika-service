@@ -2,9 +2,7 @@ package tika.processor;
 
 import java.io.InputStream;
 import java.util.*;
-
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
@@ -12,7 +10,6 @@ import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
-import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
@@ -20,16 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import tika.model.TikaBinaryDocument;
 import tika.model.TikaProcessingResult;
-import tika.processor.TikaProcessorConfig;
-
 import javax.annotation.PostConstruct;
 
 
-@Component("tikaProcessor")
-public class CompositeTikaProcessor extends AbstractTikaProcessor {
+@Component("standardTikaProcessor")
+public class TikaProcessor extends AbstractTikaProcessor {
 
     @Autowired
     private TikaProcessorConfig tikaProcessorConfig;
@@ -48,6 +41,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
      passed to the downstream analysis applications.
      */
 
+    // common tika and parsers configuration
     private TikaConfig tikaConfig;
     private TesseractOCRConfig tessConfig;
 
@@ -64,7 +58,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private ParseContext pdfOcrParseContext;
 
 
-    private Logger log = LoggerFactory.getLogger(tika.processor.CompositeTikaProcessor.class);
+    private Logger log = LoggerFactory.getLogger(TikaProcessor.class);
 
 
     @PostConstruct
@@ -82,9 +76,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     }
 
 
-    private boolean isDocumentPdfType(InputStream stream) throws Exception {
-        //final String CONTENT_TYPE = "Content-Type";
-        //final String PDF_TYPE = "application/pdf";
+    private boolean isDocumentOfPdfType(InputStream stream) throws Exception {
         Metadata metadata = new Metadata();
         MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
 
@@ -107,18 +99,28 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             // try to detect whether the document is PDF
             // TODO: general document type -- to update whether OCR was used (also applied on images)
             // TODO: Q: shall we use manual conversion of the images to OCR?
-            if (isDocumentPdfType(stream)) {
+            if (isDocumentOfPdfType(stream)) {
                 // run default parser
                 pdfTextParser.parse(stream, handler, metadata, pdfTextParseContext);
 
                 // check if
-                if (handler.toString().length() < 100 && stream.getPosition() > 10000) {
+                if (handler.toString().length() < tikaProcessorConfig.getPdfMinDocTextLength()
+                        && stream.getPosition() > tikaProcessorConfig.getPdfMinDocByteSize()) {
 
                     handler = new BodyContentHandler();
-                    metadata = new Metadata();
+
+                    // copy the previous pdf metadata
+                    Metadata ocrMetadata = new Metadata();
+                    final Metadata md = metadata;
+                    Arrays.asList(md.names()).forEach(name -> {
+                        ocrMetadata.add(name, md.get(name));
+                    });
 
                     stream.reset();
-                    pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
+                    pdfOcrParser.parse(stream, handler, ocrMetadata, pdfOcrParseContext);
+
+                    // use the ocr metadata as the output
+                    metadata = ocrMetadata;
                 }
 
                 // update the metadata with the name of the parser class used
@@ -130,35 +132,9 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
             }
 
-
-            // check whether OCR has been applied
-            //
-            if (metadata.get("X-Parsed-By") != null
-                    && Arrays.asList(metadata.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString())) {
-                metadata.add("X-OCR-Applied", "true");
-            }
-            else {
-                metadata.add("X-OCR-Applied", "false");
-            }
-
-
             // parse the metadata
             //
-            final String[] metaKeysSingleValue = {"Content-Type", "Creation-Date", "Last-Modified", "X-OCR-Applied"};
-            final String[] metaKeysMultiValue = {"X-Parsed-By"};
-            final Metadata md = metadata;
-
-            Map<String, Object> resultMeta = new HashMap<>();
-
-            Arrays.stream(metaKeysSingleValue).forEach(name -> {
-                if (md.get(name) != null)
-                    resultMeta.put(name, md.get(name));
-            });
-
-            Arrays.stream(metaKeysMultiValue).forEach(name -> {
-                if (md.getValues(name) != null)
-                    resultMeta.put(name, md.getValues(name));
-            });
+            Map<String, Object> resultMeta = extractMetadata(metadata);
 
             result = TikaProcessingResult.builder()
                     .text(handler.toString())
@@ -178,6 +154,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         return result;
     }
 
+
     private void initializeTesseractConfig() {
         tessConfig = new TesseractOCRConfig();
 
@@ -192,6 +169,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         tessConfig.setLanguage(tikaProcessorConfig.getOcrLanguage());
     }
 
+
     private void initializeDefaultParser() {
         defaultParser = new AutoDetectParser(tikaConfig);
 
@@ -201,6 +179,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         defaultParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
 
     }
+
 
     private void initializePdfTextOnlyParser() {
         PDFParserConfig pdfTextOnlyConfig = new PDFParserConfig();
@@ -214,6 +193,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         pdfTextParseContext.set(PDFParserConfig.class, pdfTextOnlyConfig);
         pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
+
 
     private void initializePdfOcrParser() {
         PDFParserConfig pdfOcrConfig = new PDFParserConfig();

@@ -12,10 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-package tika.cogstack.legacy;
-
-/*
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -31,7 +28,7 @@ package tika.cogstack.legacy;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+package tika.legacy;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.LogFactory;
@@ -49,13 +46,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
 
-public class PdfPreprocessorParser extends AbstractParser {
+public class LegacyPdfProcessorParser extends AbstractParser {
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static Map<String, Boolean> IMAGEMAGICK_PRESENT = new HashMap<String, Boolean>();
@@ -65,7 +61,7 @@ public class PdfPreprocessorParser extends AbstractParser {
             new HashSet<>(Arrays.asList(new MediaType[]{
                     MediaType.application("pdf")
             })));
-    private static final Logger LOG = LoggerFactory.getLogger(PdfPreprocessorParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LegacyPdfProcessorParser.class);
 
 
     @Override
@@ -131,7 +127,9 @@ public class PdfPreprocessorParser extends AbstractParser {
         stream.reset();
         //if there's content - reparse with official handlers/metadata. What else can you do? Also check imagemagick is available
 
-        if (body.toString().length() > 100 || !hasImageMagick(config)) {
+        LegacyPdfProcessorConfig generalConfig = context.get(LegacyPdfProcessorConfig.class);
+
+        if (body.toString().length() > generalConfig.getPdfMinDocTextLength() || !hasImageMagick(config)) {
             pdfParser.parse(stream, handler, metadata, context);
             //metadata.set("X-PDFPREPROC-OCR-APPLIED", "NA");
             return;
@@ -141,17 +139,14 @@ public class PdfPreprocessorParser extends AbstractParser {
         // "FAIL" will be overwritten if it succeeds later
 
         //add the PDF metadata to the official metadata object
-        Arrays.asList(pdfMetadata.names()).stream().forEach(name -> {
+        Arrays.asList(pdfMetadata.names()).forEach(name -> {
             metadata.add(name, pdfMetadata.get(name));
         });
-
-        metadata.set("X-OCR-APPLIED", "TRUE");
 
         //objects to hold file references for manipulation outside of Java
         File tiffFileOfPDF = null;
         File pdfFileFromStream = File.createTempFile("tempPDF", ".pdf");
         try {
-
             FileUtils.copyInputStreamToFile(stream, pdfFileFromStream);
             tiffFileOfPDF = File.createTempFile("tempTIFF", ".tiff");
             makeTiffFromPDF(pdfFileFromStream,tiffFileOfPDF, config);
@@ -161,15 +156,13 @@ public class PdfPreprocessorParser extends AbstractParser {
 
                 tesseract.parse(FileUtils.openInputStream(tiffFileOfPDF), handler, metadata, context);
 
-                metadata.set("X-OCR-STATUS", "SUCCESS");
+                //metadata.set("X-OCR-Applied", "true");
+                metadata.add("X-Parsed-By", TesseractOCRParser.class.toString());
 
                 LOG.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
             }
         } catch (Exception e) {
             LOG.warn("Error while running OCR over the document");
-
-            metadata.set("X-OCR-STATUS", "FAIL");
-
             throw e;
         }
         finally {
@@ -202,8 +195,8 @@ public class PdfPreprocessorParser extends AbstractParser {
         InputStream out = process.getInputStream();
         InputStream err = process.getErrorStream();
 
-        logStream("IMAGEMAGICK MSG", out, input);
-        logStream("IMAGEMAGICK ERROR", err, input);
+        logStream("ImageMagick-stdout", out, input);
+        logStream("ImageMagick-stderr", err, input);
 
         FutureTask<Integer> waitTask = new FutureTask<Integer>(new Callable<Integer>() {
             public Integer call() throws Exception {
@@ -221,7 +214,7 @@ public class PdfPreprocessorParser extends AbstractParser {
             waitThread.interrupt();
             process.destroy();
             Thread.currentThread().interrupt();
-            throw new TikaException("ImageMagickOCRPDFParser interrupted", e);
+            throw new TikaException("ImageMagick-OCR-PDFParser: interrupted", e);
 
         } catch (ExecutionException e) {
             // should not be thrown
@@ -229,7 +222,7 @@ public class PdfPreprocessorParser extends AbstractParser {
         } catch (TimeoutException e) {
             waitThread.interrupt();
             process.destroy();
-            throw new TikaException("ImageMagickOCRPDFParser timeout", e);
+            throw new TikaException("ImageMagick-OCR-PDFParser: timeout", e);
         }
         return null;
     }
@@ -256,7 +249,7 @@ public class PdfPreprocessorParser extends AbstractParser {
                 }
 
                 String msg = out.toString();
-                LogFactory.getLog(PdfPreprocessorParser.class).debug(msg);
+                LogFactory.getLog(LegacyPdfProcessorParser.class).debug(msg);
             }
         }.start();
     }
