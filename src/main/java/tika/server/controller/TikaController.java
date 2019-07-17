@@ -2,6 +2,9 @@ package tika.server.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +24,7 @@ import java.io.ByteArrayInputStream;
 
 
 @RestController
+@ComponentScan({"tika.cogstack.legacy", "tika.processor"})
 public class TikaController {
 
     private final String apiPathPrefix = "/**/api";
@@ -30,14 +34,19 @@ public class TikaController {
 
     private Logger log = LoggerFactory.getLogger(TikaController.class);
 
+    @Autowired
+    @Qualifier("legacyTikaProcessor")
     private TikaProcessor legacyTikaProcessor;
+
+    @Autowired
+    @Qualifier("tikaProcessor")
     private CompositeTikaProcessor tikaProcessor;
 
 
     @PostConstruct
     void init() throws Exception {
-        legacyTikaProcessor = new TikaProcessor();
-        tikaProcessor = new CompositeTikaProcessor();
+        //legacyTikaProcessor = new TikaProcessor();
+        //tikaProcessor = new CompositeTikaProcessor();
     }
 
 

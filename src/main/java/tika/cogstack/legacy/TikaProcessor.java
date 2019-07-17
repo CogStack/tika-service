@@ -10,10 +10,13 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 
 
+@Component("legacyTikaProcessor")
 public class TikaProcessor extends AbstractTikaProcessor {
 
     private AutoDetectParser defaultParser;

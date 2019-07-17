@@ -19,7 +19,7 @@ public class PdfProcessorConfig {
 
     public PdfProcessorConfig() throws IOException, SAXException, TikaException  {
         tikaConfig = new TikaConfig(this.getClass().getClassLoader()
-                .getResourceAsStream("tika-config.xml"));
+                .getResourceAsStream("legacy-tika-config.xml"));
     }
 
 }

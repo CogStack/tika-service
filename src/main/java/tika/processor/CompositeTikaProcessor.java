@@ -18,14 +18,21 @@ import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import tika.model.TikaBinaryDocument;
 import tika.model.TikaProcessingResult;
 import tika.processor.TikaProcessorConfig;
 
+import javax.annotation.PostConstruct;
 
+
+@Component("tikaProcessor")
 public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
-    private TikaProcessorConfig config;
+    @Autowired
+    private TikaProcessorConfig tikaProcessorConfig;
 
     /*
      In order to properly handle PDF documents and OCR we need three separate parsers:
@@ -34,7 +41,8 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
      - one that will apply OCR on PDFs (when stored only images)
 
      In the default configuration of PDFParser the OCR is disabled when extracting text from PDFs. However, OCR is
-     enabled when extracting text from documents of image type.
+     enabled when extracting text from documents of image type. When using default parser with OCR enabled (strategy:
+     extract both text and OCR), it will actually always apply OCR on the PDFs even when there is text-only provided.
 
      We would also like to know when OCR was applied as it will affect the accuracy of the extracted text that will be
      passed to the downstream analysis applications.
@@ -56,9 +64,10 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private Logger log = LoggerFactory.getLogger(tika.processor.CompositeTikaProcessor.class);
 
 
-    public CompositeTikaProcessor() throws Exception {
+    @PostConstruct
+    public void init() {
 
-        config = new TikaProcessorConfig();
+        //config = new TikaProcessorConfig();
 
         // general OCR config
         //
@@ -69,12 +78,12 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         // initialize default parser
         //
-        defaultParser = new AutoDetectParser(config.getTikaConfig());
+        defaultParser = new AutoDetectParser(tikaProcessorConfig.getTikaConfig());
 
         defaultParseContext = new ParseContext();
-        defaultParseContext.set(TikaConfig.class, config.getTikaConfig());
+        defaultParseContext.set(TikaConfig.class, tikaProcessorConfig.getTikaConfig());
         defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
-        //defaultParseContext.set(Parser.class, defaultParser);
+        defaultParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
 
 
         // initialize default pdf parser
@@ -87,7 +96,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         pdfTextParser = new PDFParser();
         pdfTextParseContext = new ParseContext();
         pdfTextParseContext.set(PDFParserConfig.class, pdfTextOnlyConfig);
-        //pdfTextParseContext.set(Parser.class, pdfTextParser);
+        pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
 
 
         // initialize ocr pdf parser
@@ -102,7 +111,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         pdfOcrParseContext.set(PDFParserConfig.class, pdfOcrConfig);
         pdfOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
-        //pdfOcrParseContext.set(Parser.class, pdfOcrParser);
+        pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
 
