@@ -1,6 +1,7 @@
-package tika.model;
+package server.model;
 
 import lombok.Data;
+import tika.model.TikaBinaryDocument;
 
 
 @Data

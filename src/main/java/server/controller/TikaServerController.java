@@ -1,4 +1,4 @@
-package tika.server.controller;
+package server.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,28 +11,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import tika.legacy.LegacyTikaProcessor;
-import tika.model.ServiceResponseContent;
+import server.model.ServiceResponseContent;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import tika.processor.TikaProcessor;
-
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 
 
 @RestController
 @ComponentScan({"tika.legacy", "tika.processor"})
-public class TikaController {
+public class TikaServerController {
 
     private final String apiPathPrefix = "/**/api";
     //private final String apiVersion = "v1";
     private final String apiFullPath = apiPathPrefix;
 
 
-    private Logger log = LoggerFactory.getLogger(TikaController.class);
+    private Logger log = LoggerFactory.getLogger(TikaServerController.class);
 
     @Autowired
     @Qualifier("legacyTikaProcessor")
@@ -43,18 +40,13 @@ public class TikaController {
     private TikaProcessor tikaProcessor;
 
 
-    @PostConstruct
-    void init() throws Exception {
-        //legacyTikaProcessor = new LegacyTikaProcessor();
-        //tikaProcessor = new TikaProcessor();
-    }
-
-
     @PostMapping(value = apiFullPath + "/process")
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request,
                                                           @RequestParam(name = "processor", required = false) String processorName) {
 
         final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
+
+        log.info("Processing request");
 
         // process the content
         //
@@ -95,6 +87,8 @@ public class TikaController {
                                                           @RequestParam(name = "processor", required = false) String processorName) {
 
         final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
+
+        log.info("Processing file: " + file.getName());
 
         // check whether we need to perform any processing
         //

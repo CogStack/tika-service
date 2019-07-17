@@ -1,5 +1,6 @@
 package tika.processor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
 import org.apache.tika.config.TikaConfig;
@@ -85,10 +86,13 @@ public class TikaProcessor extends AbstractTikaProcessor {
 
 
     protected TikaProcessingResult processStream(TikaInputStream stream) {
-        TikaProcessingResult result;
+        final int MIN_TEXT_BUFFER_SIZE = 1024;
 
+        TikaProcessingResult result;
         try {
-            BodyContentHandler handler = new BodyContentHandler();
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream(MIN_TEXT_BUFFER_SIZE);
+            BodyContentHandler handler = new BodyContentHandler(outStream);
+
             Metadata metadata = new Metadata();
 
             // firstly try the default parser
@@ -104,23 +108,17 @@ public class TikaProcessor extends AbstractTikaProcessor {
                 pdfTextParser.parse(stream, handler, metadata, pdfTextParseContext);
 
                 // check if
-                if (handler.toString().length() < tikaProcessorConfig.getPdfMinDocTextLength()
+                if (outStream.size() < tikaProcessorConfig.getPdfMinDocTextLength()
                         && stream.getPosition() > tikaProcessorConfig.getPdfMinDocByteSize()) {
 
-                    handler = new BodyContentHandler();
-
-                    // copy the previous pdf metadata
-                    Metadata ocrMetadata = new Metadata();
-                    final Metadata md = metadata;
-                    Arrays.asList(md.names()).forEach(name -> {
-                        ocrMetadata.add(name, md.get(name));
-                    });
-
                     stream.reset();
-                    pdfOcrParser.parse(stream, handler, ocrMetadata, pdfOcrParseContext);
 
-                    // use the ocr metadata as the output
-                    metadata = ocrMetadata;
+                    outStream.reset();
+                    handler = new BodyContentHandler(outStream);
+                    metadata = new Metadata();
+
+                    // shall we use a clean metadata or re-use some of the previously parsed fields???
+                    pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
                 }
 
                 // update the metadata with the name of the parser class used
@@ -137,7 +135,7 @@ public class TikaProcessor extends AbstractTikaProcessor {
             Map<String, Object> resultMeta = extractMetadata(metadata);
 
             result = TikaProcessingResult.builder()
-                    .text(handler.toString())
+                    .text(outStream.toString())
                     .metadata(resultMeta)
                     .success(true)
                     .build();
@@ -177,7 +175,6 @@ public class TikaProcessor extends AbstractTikaProcessor {
         defaultParseContext.set(TikaConfig.class, tikaConfig);
         defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
         defaultParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
-
     }
 
 
@@ -191,7 +188,7 @@ public class TikaProcessor extends AbstractTikaProcessor {
         pdfTextParseContext = new ParseContext();
         pdfTextParseContext.set(TikaConfig.class, tikaConfig);
         pdfTextParseContext.set(PDFParserConfig.class, pdfTextOnlyConfig);
-        pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        //pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
 
@@ -199,12 +196,13 @@ public class TikaProcessor extends AbstractTikaProcessor {
         PDFParserConfig pdfOcrConfig = new PDFParserConfig();
         pdfOcrConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
         if (tikaProcessorConfig.isPdfOcrOnlyStrategy()) {
-            pdfOcrConfig.setExtractInlineImages(true);
-            pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_AND_TEXT_EXTRACTION);
-        }
-        else {
             pdfOcrConfig.setExtractInlineImages(false);
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_ONLY);
+        }
+        else {
+            pdfOcrConfig.setExtractInlineImages(true);
+            // warn: note that applying 'OCR_AND_TEXT_EXTRACTION' the content can be duplicated
+            pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_AND_TEXT_EXTRACTION);
         }
 
         pdfOcrParser = new PDFParser();
@@ -212,6 +210,6 @@ public class TikaProcessor extends AbstractTikaProcessor {
         pdfOcrParseContext.set(TikaConfig.class, tikaConfig);
         pdfOcrParseContext.set(PDFParserConfig.class, pdfOcrConfig);
         pdfOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
-        pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        //pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 }

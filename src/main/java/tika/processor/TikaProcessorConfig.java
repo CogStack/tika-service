@@ -24,19 +24,22 @@ public class TikaProcessorConfig {
     @Value("${tika.parsers.tesseract-ocr.enable-image-processing:false}")
     private boolean ocrEnableImageProcessing;
 
-    // the language used in OCR corrections
+    // the language used in the OCR for corrections
     @Value("${tika.parsers.tesseract-ocr.language:eng}")
     private String ocrLanguage;
 
-    // wherher to apply OCR only
+    // wherher to apply OCR only on the documents or also extract the embeded text (if present)
+    // warn: note that applying 'OCR_AND_TEXT_EXTRACTION' the content can be duplicated
     @Value("${tika.parsers.pdf-ocr-parser.ocr-only-strategy:true}")
     private boolean pdfOcrOnlyStrategy;
 
-    // apply OCR when trying to extract text ...
+    // apply OCR only when trying to extract text from previously parsed document (w/o OCR)
+    // that extracted characters were less than N
     @Value("${tika.parsers.pdf-ocr-parser.min-doc-text-length:100}")
     private int pdfMinDocTextLength;
 
-    // the minimum size in bytes over ...
+    // apply OCR only when trying to extract text from previously parsed document (w/o OCR)
+    // that the read bytes were at least N
     @Value("${tika.parsers.pdf-ocr-parser.min-doc-byte-size:10000}")
     private int pdfMinDocByteSize;
 }
