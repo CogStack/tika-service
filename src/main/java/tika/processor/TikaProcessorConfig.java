@@ -8,21 +8,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import javax.annotation.PostConstruct;
+
 
 @Data
 @Configuration
-@PropertySource("classpath:tika-config.properties")
+@PropertySource("classpath:tika-processor-config.properties")
 public class TikaProcessorConfig {
-
-    // Apache Tika configuration and used parsers
-    //
-    private TikaConfig tikaConfig;
-
-    private TesseractOCRConfig tesseractConfig;
-
-    private PDFParserConfig pdfTextOnlyConfig;
-    private PDFParserConfig pdfOcrConfig;
-
 
     // external configuration parameter values
     //
@@ -40,19 +32,8 @@ public class TikaProcessorConfig {
 
     // strategy can be: "ocr-only"
     @Value("${tika.parsers.pdf-ocr-parser.ocr-only-strategy:true}")
-    private int pdfOcrOnlyStrategy;
+    private boolean pdfOcrOnlyStrategy;
 
     @Value("${tika.parsers.pdf-ocr-parser.min-text-length:100}")
     private int pdfMinTextLength;
-
-
-    public TikaProcessorConfig() throws Exception {
-        tikaConfig = new TikaConfig();
-        tesseractConfig = new TesseractOCRConfig();
-    }
-
-    public TikaProcessorConfig(TikaConfig tikaConfig, TesseractOCRConfig tesseractConfig) {
-        this.tikaConfig = tikaConfig;
-        this.tesseractConfig = tesseractConfig;
-    }
 }
