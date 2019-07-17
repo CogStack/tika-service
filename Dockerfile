@@ -86,10 +86,11 @@ RUN mkdir -p /app
 WORKDIR /app
 
 # copy artifacts
-COPY --from=server-builder /devel/build/libs/tika-*.jar ./
+COPY --from=server-builder /devel/build/libs/server-*.jar ./
 
 # copy external tools configuration files
 COPY ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
 
 # entry point
-CMD /bin/bash
+ENTRYPOINT /bin/bash
+CMD ["java", "-jar", "server-*.jar"]
