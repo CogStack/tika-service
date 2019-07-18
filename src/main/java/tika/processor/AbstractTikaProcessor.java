@@ -29,7 +29,7 @@ public abstract class AbstractTikaProcessor {
 
     // helper methods used to extract document metadata
     //
-    protected int getPageCount(final Metadata docMeta) {
+    static public int getPageCount(final Metadata docMeta) {
         Map<String, Object> resultMeta = new HashMap<>();
         extractPageCount(docMeta, resultMeta);
 
@@ -39,7 +39,7 @@ public abstract class AbstractTikaProcessor {
         return -1;
     }
 
-    private void extractPageCount(final Metadata docMeta, Map<String, Object> resultMeta) {
+    static private void extractPageCount(final Metadata docMeta, Map<String, Object> resultMeta) {
         if (docMeta.get("xmpTPg:NPages") != null) {
             resultMeta.put("Page-Count", docMeta.get("xmpTPg:NPages"));
         }
@@ -51,7 +51,7 @@ public abstract class AbstractTikaProcessor {
         }
     }
 
-    private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
+    static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
         if (docMeta.get("X-Parsed-By") != null
                 && Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString())) {
             resultMeta.put("X-OCR-Applied", "true");

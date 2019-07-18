@@ -46,6 +46,11 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
         defaultParser = new AutoDetectParser(config.getTikaConfig());
     }
 
+    public void reset() {
+        // actually, we only need to re-initialize all the resources apart from the configuration
+        init();
+    }
+
     protected TikaProcessingResult processStream(TikaInputStream stream) {
         TikaProcessingResult result;
 
