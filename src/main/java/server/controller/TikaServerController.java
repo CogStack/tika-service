@@ -1,5 +1,7 @@
 package server.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import common.JsonPropertyAccessView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tika.legacy.LegacyTikaProcessor;
 import server.model.ServiceResponseContent;
@@ -39,8 +39,18 @@ public class TikaServerController {
     @Qualifier("compositeTikaProcessor")
     private CompositeTikaProcessor compositeTikaProcessor;
 
+    @Autowired
+    TikaServerInformation serverInfo;
 
-    @PostMapping(value = apiFullPath + "/process")
+
+    @GetMapping(value = apiFullPath + "/info", produces = "application/json")
+    @JsonView(JsonPropertyAccessView.Public.class)
+    public @ResponseBody TikaServerInformation info() {
+        return serverInfo;
+    }
+
+
+    @PostMapping(value = apiFullPath + "/process", produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request,
                                                           @RequestParam(name = "processor", required = false) String processorName) {
 
@@ -82,7 +92,7 @@ public class TikaServerController {
     }
     
 
-    @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" })
+    @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" }, produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file,
                                                           @RequestParam(name = "processor", required = false) String processorName) {
 
