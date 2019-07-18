@@ -10,7 +10,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Data
 @Configuration
-@PropertySource("classpath:tika-config/tika-processor-config.properties")
+@PropertySource("classpath:tika-config/tika-processor-config.yaml")
 public class CompositeTikaProcessorConfig {
 
     // the timeout value (s) when performing OCR over documents
@@ -57,6 +57,6 @@ public class CompositeTikaProcessorConfig {
     // (NB: when exporting single-page PDFs from LibreOffice that contain only one image,
     //   some additional clutter may be embedded in the PDF content)
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${tika.parsers.pdf-ocr-parser.use-legacy-parser-for-single-page-doc:false}")
+    @Value("${tika.parsers.use-legacy-ocr-parser-for-single-page-doc:false}")
     private boolean useLegacyOcrParserForSinglePageDocuments;
 }

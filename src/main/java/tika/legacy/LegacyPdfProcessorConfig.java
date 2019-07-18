@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Data
 @Configuration
-@PropertySource("classpath:tika-config/tika-processor-config.properties")
+@PropertySource("classpath:tika-config/tika-processor-config.yaml")
 public class LegacyPdfProcessorConfig {
 
     @JsonIgnore
