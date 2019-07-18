@@ -43,7 +43,7 @@ public class LegacyPdfProcessorConfig {
 
 
     @PostConstruct
-    void init() throws IOException, SAXException, TikaException  {
+    public void init() throws IOException, SAXException, TikaException  {
         tikaConfig = new TikaConfig(this.getClass().getClassLoader()
                 .getResourceAsStream("tika-config/legacy-parser-config.xml"));
     }
