@@ -15,7 +15,7 @@ import tika.legacy.LegacyTikaProcessor;
 import server.model.ServiceResponseContent;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
-import tika.processor.TikaProcessor;
+import tika.processor.CompositeTikaProcessor;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 
@@ -36,8 +36,8 @@ public class TikaServerController {
     private LegacyTikaProcessor legacyTikaProcessor;
 
     @Autowired
-    @Qualifier("standardTikaProcessor")
-    private TikaProcessor tikaProcessor;
+    @Qualifier("compositeTikaProcessor")
+    private CompositeTikaProcessor compositeTikaProcessor;
 
 
     @PostMapping(value = apiFullPath + "/process")
@@ -46,7 +46,7 @@ public class TikaServerController {
 
         final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
 
-        log.info("Processing request");
+        log.info("Processing request...");
 
         // process the content
         //
@@ -88,7 +88,7 @@ public class TikaServerController {
 
         final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
 
-        log.info("Processing file: " + file.getName());
+        log.info("Received a new document -- processing...");
 
         // check whether we need to perform any processing
         //
@@ -139,7 +139,7 @@ public class TikaServerController {
             processor = legacyTikaProcessor;
         }
         else {
-            processor = tikaProcessor;
+            processor = compositeTikaProcessor;
         }
         log.debug("Running processor: " + processor.getClass().toString());
 

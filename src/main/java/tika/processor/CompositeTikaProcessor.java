@@ -18,15 +18,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tika.legacy.ImageMagickConfig;
+import tika.legacy.LegacyPdfProcessorConfig;
+import tika.legacy.LegacyPdfProcessorParser;
 import tika.model.TikaProcessingResult;
 import javax.annotation.PostConstruct;
 
 
-@Component("standardTikaProcessor")
-public class TikaProcessor extends AbstractTikaProcessor {
+@Component("compositeTikaProcessor")
+public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
     @Autowired
-    private TikaProcessorConfig tikaProcessorConfig;
+    private CompositeTikaProcessorConfig compositeTikaProcessorConfig;
+
+    @Autowired
+    private LegacyPdfProcessorConfig legacyPdfProcessorConfig;
 
     /*
      In order to properly handle PDF documents and OCR we need three separate parsers:
@@ -58,8 +64,13 @@ public class TikaProcessor extends AbstractTikaProcessor {
     private PDFParser pdfOcrParser;
     private ParseContext pdfOcrParseContext;
 
+    // the parser to extract text from PDFs using OCR only for single-pages
+    // (used to strip-off clutter from LibreOffice-generated PDFs just with images)
+    private LegacyPdfProcessorParser pdfSinglePageOcrParser;
+    private ParseContext pdfSinglePageOcrParseContext;
 
-    private Logger log = LoggerFactory.getLogger(TikaProcessor.class);
+
+    private Logger log = LoggerFactory.getLogger(CompositeTikaProcessor.class);
 
 
     @PostConstruct
@@ -74,6 +85,10 @@ public class TikaProcessor extends AbstractTikaProcessor {
         initializePdfTextOnlyParser();
 
         initializePdfOcrParser();
+
+        if (compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()) {
+            initializePdfLegacyOcrParser();
+        }
     }
 
 
@@ -92,48 +107,61 @@ public class TikaProcessor extends AbstractTikaProcessor {
         try {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream(MIN_TEXT_BUFFER_SIZE);
             BodyContentHandler handler = new BodyContentHandler(outStream);
-
             Metadata metadata = new Metadata();
 
-            // firstly try the default parser
+            // mark the stream for multi-pass processing
             if (stream.markSupported()) {
                 stream.mark(Integer.MAX_VALUE);
             }
 
             // try to detect whether the document is PDF
-            // TODO: general document type -- to update whether OCR was used (also applied on images)
-            // TODO: Q: shall we use manual conversion of the images to OCR?
             if (isDocumentOfPdfType(stream)) {
-                // run default parser
+
+                // firstly try the default parser
                 pdfTextParser.parse(stream, handler, metadata, pdfTextParseContext);
 
-                // check if
-                if (outStream.size() < tikaProcessorConfig.getPdfMinDocTextLength()
-                        && stream.getPosition() > tikaProcessorConfig.getPdfMinDocByteSize()) {
+                // check if there have been enough characters read / extracted and the we read enough bytes from the stream
+                // (images embedded in the documents will occupy quite more space than just raw text)
+                if (outStream.size() < compositeTikaProcessorConfig.getPdfMinDocTextLength()
+                        && stream.getPosition() > compositeTikaProcessorConfig.getPdfMinDocByteSize()) {
 
+                    // since we are perfoming a second pass over the document, we need to reset cursor position
+                    // in both input and output streams
                     stream.reset();
-
                     outStream.reset();
+
+                    final boolean useOcrLegacyParser = compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()
+                            && getPageCount(metadata) == 1;
+
+                    // TODO: Q: shall we use a clean metadata or re-use some of the previously parsed fields???
                     handler = new BodyContentHandler(outStream);
                     metadata = new Metadata();
 
-                    // shall we use a clean metadata or re-use some of the previously parsed fields???
-                    pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
-                }
+                    if (useOcrLegacyParser) {
+                        pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
 
-                // update the metadata with the name of the parser class used
-                //
-                metadata.add("X-Parsed-By", PDFParser.class.toString());
+                        // since we use the parser manually, update the metadata with the name of the parser class used
+                        metadata.add("X-Parsed-By", LegacyPdfProcessorParser.class.toString());
+                    }
+                    else {
+                        pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
+
+                        // since we use the parser manually, update the metadata with the name of the parser class used
+                        metadata.add("X-Parsed-By", PDFParser.class.toString());
+                    }
+                }
+                else {
+                    // since we use the parser manually, update the metadata with the name of the parser class used
+                    metadata.add("X-Parsed-By", PDFParser.class.toString());
+                }
             }
             else {
-                // run default documents parser
+                // otherwise, run default documents parser
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
             }
 
-            // parse the metadata
-            //
+            // parse the metadata and store the result
             Map<String, Object> resultMeta = extractMetadata(metadata);
-
             result = TikaProcessingResult.builder()
                     .text(outStream.toString())
                     .metadata(resultMeta)
@@ -156,15 +184,15 @@ public class TikaProcessor extends AbstractTikaProcessor {
     private void initializeTesseractConfig() {
         tessConfig = new TesseractOCRConfig();
 
-        tessConfig.setTimeout(tikaProcessorConfig.getOcrTimeout());
-        tessConfig.setApplyRotation(tikaProcessorConfig.isOcrApplyRotation());
-        if (tikaProcessorConfig.isOcrEnableImageProcessing()) {
+        tessConfig.setTimeout(compositeTikaProcessorConfig.getOcrTimeout());
+        tessConfig.setApplyRotation(compositeTikaProcessorConfig.isOcrApplyRotation());
+        if (compositeTikaProcessorConfig.isOcrEnableImageProcessing()) {
             tessConfig.setEnableImageProcessing(1);
         }
         else {
             tessConfig.setEnableImageProcessing(0);
         }
-        tessConfig.setLanguage(tikaProcessorConfig.getOcrLanguage());
+        tessConfig.setLanguage(compositeTikaProcessorConfig.getOcrLanguage());
     }
 
 
@@ -195,7 +223,7 @@ public class TikaProcessor extends AbstractTikaProcessor {
     private void initializePdfOcrParser() {
         PDFParserConfig pdfOcrConfig = new PDFParserConfig();
         pdfOcrConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
-        if (tikaProcessorConfig.isPdfOcrOnlyStrategy()) {
+        if (compositeTikaProcessorConfig.isPdfOcrOnlyStrategy()) {
             pdfOcrConfig.setExtractInlineImages(false);
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_ONLY);
         }
@@ -210,6 +238,24 @@ public class TikaProcessor extends AbstractTikaProcessor {
         pdfOcrParseContext.set(TikaConfig.class, tikaConfig);
         pdfOcrParseContext.set(PDFParserConfig.class, pdfOcrConfig);
         pdfOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
+        //pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+    }
+
+    private void initializePdfLegacyOcrParser() {
+        pdfSinglePageOcrParser = new LegacyPdfProcessorParser();
+
+        pdfSinglePageOcrParseContext = new ParseContext();
+        pdfSinglePageOcrParseContext.set(TikaConfig.class, tikaConfig);
+        pdfSinglePageOcrParseContext.set(LegacyPdfProcessorConfig.class, legacyPdfProcessorConfig);
+
+        TesseractOCRConfig tessConfig = new TesseractOCRConfig();
+        tessConfig.setTimeout(legacyPdfProcessorConfig.getOcrTimeout());
+        pdfSinglePageOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
+
+        ImageMagickConfig imgConfig = new ImageMagickConfig();
+        imgConfig.setTimeout(legacyPdfProcessorConfig.getConversionTimeout());
+        pdfSinglePageOcrParseContext.set(ImageMagickConfig.class, imgConfig);
+
         //pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 }
