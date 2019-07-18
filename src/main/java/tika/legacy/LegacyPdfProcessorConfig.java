@@ -13,7 +13,7 @@ import java.io.IOException;
 
 @Data
 @Configuration
-@PropertySource("classpath:tika-config/legacy-processor-config.properties")
+@PropertySource("classpath:tika-config/tika-processor-config.properties")
 public class LegacyPdfProcessorConfig {
 
     private TikaConfig tikaConfig;

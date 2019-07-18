@@ -17,9 +17,11 @@ RUN apt-get update && \
 #	apt-get dist-upgrade -y && \
 #	apt-get install -y tesseract-ocr && \
     apt-get update && \
+    apt-get install -y software-properties-common && \
 	apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
 ###	apt-get install -y tesseract-ocr-osd=3.04.00-1 tesseract-ocr-eng=3.04.00-1 tesseract-ocr=3.04.01-5 && \
 	apt-get install -y imagemagick=$IMAGEMAGICK_VERSION --fix-missing && \
+	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
 	apt-get clean autoclean && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
@@ -67,9 +69,11 @@ RUN apt-get update && \
 #	apt-get dist-upgrade -y && \
 #	apt-get install -y tesseract-ocr && \
     apt-get update && \
+    apt-get install -y software-properties-common && \
 	apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
 ###	apt-get install -y tesseract-ocr-osd=3.04.00-1 tesseract-ocr-eng=3.04.00-1 tesseract-ocr=3.04.01-5 && \
 	apt-get install -y imagemagick=$IMAGEMAGICK_VERSION --fix-missing && \
+	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
 	apt-get clean autoclean && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*

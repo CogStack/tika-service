@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
@@ -30,6 +29,16 @@ public abstract class AbstractTikaProcessor {
 
     // helper methods used to extract document metadata
     //
+    protected int getPageCount(final Metadata docMeta) {
+        Map<String, Object> resultMeta = new HashMap<>();
+        extractPageCount(docMeta, resultMeta);
+
+        if (resultMeta.containsKey("Page-Count")) {
+            return Integer.parseInt(resultMeta.get("Page-Count").toString());
+        }
+        return -1;
+    }
+
     private void extractPageCount(final Metadata docMeta, Map<String, Object> resultMeta) {
         if (docMeta.get("xmpTPg:NPages") != null) {
             resultMeta.put("Page-Count", docMeta.get("xmpTPg:NPages"));
@@ -43,10 +52,6 @@ public abstract class AbstractTikaProcessor {
     }
 
     private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
-        //if (docMeta.get("X-OCR-Applied") != null) {
-        //    resultMeta.put("X-OCR-Applied", docMeta.get("X-OCR-Applied"));
-        //}
-        //else
         if (docMeta.get("X-Parsed-By") != null
                 && Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString())) {
             resultMeta.put("X-OCR-Applied", "true");

@@ -6,6 +6,7 @@ import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.sax.BodyContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,16 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
     @PostConstruct
     public void init() {
         defaultParseContext = new ParseContext();
-        defaultParseContext.set(LegacyPdfProcessorConfig.class, config);
         defaultParseContext.set(TikaConfig.class, config.getTikaConfig());
+        defaultParseContext.set(LegacyPdfProcessorConfig.class, config);
+
+        TesseractOCRConfig tessConfig = new TesseractOCRConfig();
+        tessConfig.setTimeout(config.getOcrTimeout());
+        defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
+
+        ImageMagickConfig imgConfig = new ImageMagickConfig();
+        imgConfig.setTimeout(config.getConversionTimeout());
+        defaultParseContext.set(ImageMagickConfig.class, imgConfig);
 
         defaultParser = new AutoDetectParser(config.getTikaConfig());
     }
@@ -46,8 +55,8 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
 
             defaultParser.parse(stream, handler, metadata, defaultParseContext);
 
+            // parse the metadata and store the result
             Map<String, Object> resultMetadata = extractMetadata(metadata);
-
             result = TikaProcessingResult.builder()
                     .text(handler.toString())
                     .metadata(resultMetadata)
