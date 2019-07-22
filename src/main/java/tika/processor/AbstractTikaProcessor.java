@@ -53,7 +53,7 @@ public abstract class AbstractTikaProcessor {
 
     static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
         if (docMeta.get("X-Parsed-By") != null
-                && Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString())) {
+                && Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.getName())) {
             resultMeta.put("X-OCR-Applied", "true");
         }
         else {

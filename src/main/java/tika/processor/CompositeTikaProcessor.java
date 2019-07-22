@@ -141,18 +141,18 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                         pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
 
                         // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add("X-Parsed-By", LegacyPdfProcessorParser.class.toString());
+                        metadata.add("X-Parsed-By", LegacyPdfProcessorParser.class.getName());
                     }
                     else {
                         pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
 
                         // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add("X-Parsed-By", PDFParser.class.toString());
+                        metadata.add("X-Parsed-By", PDFParser.class.getName());
                     }
                 }
                 else {
                     // since we use the parser manually, update the metadata with the name of the parser class used
-                    metadata.add("X-Parsed-By", PDFParser.class.toString());
+                    metadata.add("X-Parsed-By", PDFParser.class.getName());
                 }
             }
             else {
