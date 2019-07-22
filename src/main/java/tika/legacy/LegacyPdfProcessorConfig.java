@@ -26,13 +26,13 @@ public class LegacyPdfProcessorConfig {
     // the timeout value (s) when performing PDF->TIFF conversion of the documents
     // the default value in Tika is 120s, but this may be too short for multi-page documents
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${tika.parsers.legacy-pdf-parser.image-magick.timeout:300}")
+    @Value("${tika.parsers.legacy-pdf-parser.image-magick.timeout:120}")
     private int conversionTimeout;
 
     // the timeout value (s) when performing OCR over the documents
     // the default value in Tika is 120s, but this may be too short for multi-page documents
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${tika.parsers.legacy-pdf-parser.tesseract-ocr.timeout:300}")
+    @Value("${tika.parsers.legacy-pdf-parser.tesseract-ocr.timeout:120}")
     private int ocrTimeout;
 
     // apply OCR only when trying to extract text from previously parsed document (w/o OCR)
