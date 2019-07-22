@@ -1,5 +1,6 @@
 package tika.legacy;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
@@ -55,7 +56,8 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
         TikaProcessingResult result;
 
         try {
-            BodyContentHandler handler = new BodyContentHandler();
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream(64 * 1024);
+            BodyContentHandler handler = new BodyContentHandler(outStream);
             Metadata metadata = new Metadata();
 
             defaultParser.parse(stream, handler, metadata, defaultParseContext);
@@ -63,7 +65,7 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
             // parse the metadata and store the result
             Map<String, Object> resultMetadata = extractMetadata(metadata);
             result = TikaProcessingResult.builder()
-                    .text(handler.toString())
+                    .text(outStream.toString())
                     .metadata(resultMetadata)
                     .success(true)
                     .build();

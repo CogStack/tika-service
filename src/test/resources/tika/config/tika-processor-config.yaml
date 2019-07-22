@@ -2,7 +2,7 @@ tika:
   parsers:
     tesseract-ocr:
       language: eng
-      timeout: 120
+      timeout: 300
       enable-image-processing: false
       apply-rotation: false
 
@@ -14,7 +14,7 @@ tika:
 
     legacy-pdf-parser:
       image-magick:
-        timeout: 120
+        timeout: 300
       tesseract-ocr:
-        timeout: 120
+        timeout: 300
       min-doc-text-length: 100

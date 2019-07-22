@@ -7,21 +7,24 @@ import java.util.Map;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
+import tika.model.MetadataKeys;
 import tika.model.TikaBinaryDocument;
 import tika.model.TikaProcessingResult;
 
 
 public abstract class AbstractTikaProcessor {
 
-    private final String[] metaKeysSingleValue = {"Content-Type", "Creation-Date", "Last-Modified", "X-OCR-Applied"};
-    private final String[] metaKeysMultiValue = {"X-Parsed-By"};
+    private static final String[] metaKeysSingleValue = {MetadataKeys.CONTENT_TYPE, MetadataKeys.CREATION_DATE,
+            MetadataKeys.LAST_MODIFIED, MetadataKeys.OCR_APPLIED};
+    private static final String[] metaKeysMultiValue = {MetadataKeys.PARSED_BY};
+
 
     public TikaProcessingResult process(final TikaBinaryDocument binaryDoc) {
         return processStream(TikaInputStream.get(binaryDoc.getContent()));
     }
 
-    public TikaProcessingResult process(InputStream binaryStream) {
-        return processStream(TikaInputStream.get(binaryStream));
+    public TikaProcessingResult process(InputStream stream) {
+        return processStream(TikaInputStream.get(stream));
     }
 
     protected abstract TikaProcessingResult processStream(TikaInputStream stream);
@@ -33,31 +36,39 @@ public abstract class AbstractTikaProcessor {
         Map<String, Object> resultMeta = new HashMap<>();
         extractPageCount(docMeta, resultMeta);
 
-        if (resultMeta.containsKey("Page-Count")) {
-            return Integer.parseInt(resultMeta.get("Page-Count").toString());
+        if (resultMeta.containsKey(MetadataKeys.PAGE_COUNT)) {
+            return Integer.parseInt(resultMeta.get(MetadataKeys.PAGE_COUNT).toString());
         }
         return -1;
     }
 
     static private void extractPageCount(final Metadata docMeta, Map<String, Object> resultMeta) {
+        String pgValue = null;
         if (docMeta.get("xmpTPg:NPages") != null) {
-            resultMeta.put("Page-Count", docMeta.get("xmpTPg:NPages"));
-        }
-        else if (docMeta.get("Page-Count") != null) {
-            resultMeta.put("Page-Count", docMeta.get("Page-Count"));
+            pgValue = docMeta.get("xmpTPg:NPages");
         }
         else if (docMeta.get("meta:page-count") != null) {
-            resultMeta.put("Page-Count", docMeta.get("meta:page-count"));
+            pgValue = docMeta.get("meta:page-count");
+        }
+        else if (docMeta.get("exif:PageCount") != null) {
+            pgValue = docMeta.get("exif:PageCount");
+        }
+        else if (docMeta.get("Page-Count") != null) {
+            pgValue = docMeta.get("Page-Count");
+        }
+
+        if (pgValue != null) {
+            resultMeta.put(MetadataKeys.PAGE_COUNT, pgValue);
         }
     }
 
     static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
         if (docMeta.get("X-Parsed-By") != null
                 && Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.getName())) {
-            resultMeta.put("X-OCR-Applied", "true");
+            resultMeta.put(MetadataKeys.OCR_APPLIED, "true");
         }
         else {
-            resultMeta.put("X-OCR-Applied", "false");
+            resultMeta.put(MetadataKeys.OCR_APPLIED, "false");
         }
     }
 
