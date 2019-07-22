@@ -31,7 +31,8 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
 
 
     @PostConstruct
-    public void init() {
+    @Override
+    public void init() throws Exception {
         defaultParseContext = new ParseContext();
         defaultParseContext.set(TikaConfig.class, config.getTikaConfig());
         defaultParseContext.set(LegacyPdfProcessorConfig.class, config);
@@ -47,7 +48,8 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
         defaultParser = new AutoDetectParser(config.getTikaConfig());
     }
 
-    public void reset() {
+    @Override
+    public void reset() throws Exception {
         // actually, we only need to re-initialize all the resources apart from the configuration
         init();
     }

@@ -74,6 +74,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
 
     @PostConstruct
+    @Override
     public void init() throws Exception {
 
         tikaConfig = new TikaConfig();
@@ -89,6 +90,12 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         if (compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()) {
             initializePdfLegacyOcrParser();
         }
+    }
+
+    @Override
+    public void reset() throws Exception {
+        // actually, we only need to re-initialize all the resources apart from the configuration
+        init();
     }
 
 

@@ -19,6 +19,10 @@ public abstract class AbstractTikaProcessor {
     private static final String[] metaKeysMultiValue = {MetadataKeys.PARSED_BY};
 
 
+    public void init() throws Exception {}
+
+    public void reset() throws Exception {}
+
     public TikaProcessingResult process(final TikaBinaryDocument binaryDoc) {
         return processStream(TikaInputStream.get(binaryDoc.getContent()));
     }
@@ -64,7 +68,9 @@ public abstract class AbstractTikaProcessor {
 
     static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
         if (docMeta.get("X-Parsed-By") != null
-                && Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.getName())) {
+                && (Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.getName())
+                // note that some parsers are also adding class prefix to the name: 'class org...
+               || Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString()))) {
             resultMeta.put(MetadataKeys.OCR_APPLIED, "true");
         }
         else {

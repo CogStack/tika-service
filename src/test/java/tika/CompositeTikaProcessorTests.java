@@ -9,22 +9,27 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import tika.legacy.LegacyPdfProcessorConfig;
-import tika.legacy.LegacyTikaProcessor;
 import tika.processor.AbstractTikaProcessor;
+import tika.processor.CompositeTikaProcessor;
+import tika.processor.CompositeTikaProcessorConfig;
 
 
-@SpringBootTest(classes = LegacyTikaProcessor.class)
+@SpringBootTest(classes = CompositeTikaProcessor.class)
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@ContextConfiguration(classes = {LegacyPdfProcessorConfig.class})
+@ContextConfiguration(classes = {LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
 @TestPropertySource(properties = {"spring.config.location = classpath:tika/config/tika-processor-config.yaml"})
-public class LegacyTikaProcessorTests extends DocumentProcessorTests {
+public class CompositeTikaProcessorTests extends DocumentProcessorTests {
 
     @Autowired
-    LegacyPdfProcessorConfig defaultConfig;
+    LegacyPdfProcessorConfig legacyProcessorConfig;
 
     @Autowired
-    LegacyTikaProcessor processor;
+    CompositeTikaProcessorConfig compositeProcessorConfig;
+
+    @Autowired
+    CompositeTikaProcessor processor;
+
 
     @Override
     protected AbstractTikaProcessor getProcessor() {
