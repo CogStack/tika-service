@@ -6,23 +6,22 @@ import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public abstract class DocumentProcessorTests {
 
-    private DocumentTestUtils utils = new DocumentTestUtils();
+    protected DocumentTestUtils utils = new DocumentTestUtils();
 
-    protected abstract AbstractTikaProcessor getProcessor();
+    protected AbstractTikaProcessor getProcessor() { return null; }
 
-    
+
     @Test
     public void testGenericExtractPattern1SourceTxt() throws Exception {
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".txt";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".txt");
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         // test parsing status
@@ -36,10 +35,9 @@ public abstract class DocumentProcessorTests {
     @Test
     public void testGenericExtractPattern1Doc() throws Exception {
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".doc";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".doc");
-
-
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         utils.testContentMatch(result, docPathPrefix);
@@ -52,8 +50,9 @@ public abstract class DocumentProcessorTests {
     @Test
     public void testGenericExtractPattern1Docx() throws Exception {
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".docx";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".docx");
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         utils.testContentMatch(result, docPathPrefix);
@@ -65,10 +64,10 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testGenericExtractPattern1Odt() throws Exception {
-        // read document
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".odt";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".odt");
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         utils.testContentMatch(result, docPathPrefix);
@@ -80,10 +79,10 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testGenericExtractPattern1Rtf() throws Exception {
-        // read document
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".txt";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".rtf");
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         utils.testContentMatch(result, docPathPrefix);
@@ -95,10 +94,10 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testGenericExtractPattern1Png() throws Exception {
-        // read document
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".png";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".png");
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         utils.testContentMatch(result, docPathPrefix);
@@ -110,10 +109,10 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testGenericExtractPattern1Pdf() throws Exception {
-        // read document
         final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".pdf";
 
-        TikaProcessingResult result = processDocument(docPathPrefix, ".pdf");
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
         utils.testContentMatch(result, docPathPrefix);
@@ -125,10 +124,9 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testExtractPdfEx1WithoutOcr() throws Exception {
-        InputStream stream = utils.getDocumentStream("pdf/ex1.pdf");
+        final String docPath = "pdf/ex1.pdf";
 
-        AbstractTikaProcessor processor = getProcessor();
-        TikaProcessingResult result = processor.process(stream);
+        TikaProcessingResult result = processDocument(docPath);
 
         // check an example string
         assertTrue(result.getSuccess());
@@ -141,10 +139,9 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testExtractPdfEx1Encrypted() throws Exception  {
-        InputStream stream = utils.getDocumentStream("pdf/ex1_enc.pdf");
+        final String docPath = "pdf/ex1_enc.pdf";
 
-        AbstractTikaProcessor processor = getProcessor();
-        TikaProcessingResult result = processor.process(stream);
+        TikaProcessingResult result = processDocument(docPath);
 
         // extraction from encrypted PDF will fail with the proper error message
         assertFalse(result.getSuccess());
@@ -153,10 +150,9 @@ public abstract class DocumentProcessorTests {
 
     @Test
     public void testExtractPdfEx2WithOcr() throws Exception {
-        InputStream stream = utils.getDocumentStream("pdf/ex2_ocr.pdf");
+        final String docPath = "pdf/ex2_ocr.pdf";
 
-        AbstractTikaProcessor processor = getProcessor();
-        TikaProcessingResult result = processor.process(stream);
+        TikaProcessingResult result = processDocument(docPath);
 
         // check the content
         assertTrue(result.getSuccess());
@@ -218,10 +214,11 @@ public abstract class DocumentProcessorTests {
 
     // helper methods
     //
-    private TikaProcessingResult processDocument(final String docPathPrefix,
-                                                 final String fileExt) throws Exception  {
+    protected TikaProcessingResult processDocument(final String docPath) throws Exception  {
         AbstractTikaProcessor processor = getProcessor();
-        InputStream stream = utils.getDocumentStream(docPathPrefix + fileExt);
+        assertNotNull(processor);
+
+        InputStream stream = utils.getDocumentStream(docPath);
         return processor.process(stream);
     }
 }

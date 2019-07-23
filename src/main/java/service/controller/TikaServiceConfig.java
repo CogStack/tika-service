@@ -13,4 +13,8 @@ public class TikaServiceConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${application.version}")
     String appVersion;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${application.use-legacy-tika-processor-as-default:false}")
+    boolean useLegacyTikaProcessor;
 }
