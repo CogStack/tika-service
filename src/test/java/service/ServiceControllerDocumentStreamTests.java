@@ -18,13 +18,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import service.controller.TikaServiceConfig;
 import service.model.ServiceInformation;
 import service.model.ServiceResponseContent;
+import tika.DocumentProcessorTests;
+import tika.DocumentTestUtils;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.model.TikaProcessingResult;
 import tika.processor.CompositeTikaProcessorConfig;
+
 import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -33,33 +35,49 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {TikaServiceConfig.class, LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
 @TestPropertySource(properties = {"spring.config.location = classpath:tika/config/tika-processor-config.yaml,classpath:application.properties"})
-public class ServiceControllerTests  {
+public class ServiceControllerDocumentStreamTests extends DocumentProcessorTests  {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ServiceInformation serviceinfo;
+    final private String PROCESS_ENDPOINT_URL = "/api/process";
 
-    final private String INFO_ENDPOINT_URL = "/api/info";
 
-    @Test
-    public void testGetApplicationInfo() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
-                .get(INFO_ENDPOINT_URL)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+    @Override
+    public void testExtractPdfEx1Encrypted() throws Exception {
+        final String docPath = "pdf/ex1_enc.pdf";
+
+        TikaProcessingResult result = sendFileProcessingRequest(docPath, HttpStatus.BAD_REQUEST);
+
+        // extraction from encrypted PDF will fail with the proper error message
+        assertFalse(result.getSuccess());
+        assertTrue(result.getError().contains("document is encrypted"));
+    }
+
+    @Override
+    protected TikaProcessingResult processDocument(final String docPath) throws Exception  {
+        return sendFileProcessingRequest(docPath, HttpStatus.OK);
+    }
+
+    private TikaProcessingResult sendFileProcessingRequest(final String docPath, HttpStatus expectedStatus) throws Exception  {
+        InputStream stream = utils.getDocumentStream(docPath);
+
+        byte[] content = stream.readAllBytes();
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(PROCESS_ENDPOINT_URL)
+                .content(content))
+                //.param("some-random", "4"))
+                .andExpect(status().is(expectedStatus.value()))
                 .andReturn();
 
-        // check response status
-        int status = result.getResponse().getStatus();
-        assertEquals(HttpStatus.OK.value(), status);
+        assertEquals(expectedStatus.value(), result.getResponse().getStatus());
+        assertNotNull(result.getResponse().getContentAsString());
 
         // parse content
         ObjectMapper mapper = new ObjectMapper();
-        ServiceInformation response = mapper.readValue(result.getResponse().getContentAsString(),
-                ServiceInformation.class);
+        TikaProcessingResult tikaResult = mapper.readValue(result.getResponse().getContentAsString(),
+                ServiceResponseContent.class).getResult();
 
-        // check example content
-        assertEquals(response.getServiceConfig().getAppVersion(), serviceinfo.getServiceConfig().getAppVersion());
+        return tikaResult;
     }
 }

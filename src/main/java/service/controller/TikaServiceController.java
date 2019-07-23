@@ -17,6 +17,7 @@ import tika.legacy.LegacyTikaProcessor;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import tika.processor.CompositeTikaProcessor;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 
@@ -41,24 +42,34 @@ public class TikaServiceController {
     private CompositeTikaProcessor compositeTikaProcessor;
 
     @Autowired
-    ServiceInformation serverInfo;
+    ServiceInformation serviceInfo;
+
+    private AbstractTikaProcessor tikaProcessor;
+
+
+    @PostConstruct
+    void init() {
+        if (serviceInfo.getServiceConfig().isUseLegacyTikaProcessor()) {
+            tikaProcessor = legacyTikaProcessor;
+        }
+        else {
+            tikaProcessor = compositeTikaProcessor;
+        }
+    }
 
 
     @GetMapping(value = apiFullPath + "/info", produces = "application/json")
     @JsonView(JsonPropertyAccessView.Public.class)
     public @ResponseBody
     ServiceInformation info() {
-        return serverInfo;
+        return serviceInfo;
     }
 
 
     @PostMapping(value = apiFullPath + "/process", produces = "application/json")
-    public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request,
-                                                          @RequestParam(name = "processor", required = false) String processorName) {
+    public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request) {
 
-        final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
-
-        log.info("Processing request...");
+        //log.info("Processing request...");
 
         // process the content
         //
@@ -75,15 +86,15 @@ public class TikaServiceController {
             // process
             //
             ByteArrayInputStream bufs = new ByteArrayInputStream(streamContent);
-            ServiceResponseContent response = processStream(bufs, useLegacyProcessor);
+            ServiceResponseContent response = processStream(bufs);
 
 
             // remember to actually check the processing status
             if (response.getResult().getSuccess())
                 return new ResponseEntity<>(response, HttpStatus.OK);
 
-            // an error occurred during processing
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            // an error occurred during processing -- assume it's a faulty document
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
@@ -95,12 +106,9 @@ public class TikaServiceController {
     
 
     @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" }, produces = "application/json")
-    public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file,
-                                                          @RequestParam(name = "processor", required = false) String processorName) {
+    public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file) {
 
-        final boolean useLegacyProcessor = (processorName != null && processorName.equals("legacy"));
-
-        log.info("Received a new document -- processing...");
+        //log.info("Received a new document -- processing...");
 
         // check whether we need to perform any processing
         //
@@ -117,14 +125,14 @@ public class TikaServiceController {
         try {
             ByteArrayInputStream bufs = new ByteArrayInputStream(file.getBytes());
 
-            ServiceResponseContent response = processStream(bufs, useLegacyProcessor);
+            ServiceResponseContent response = processStream(bufs);
 
             // remember to actually check the processing status
             if (response.getResult().getSuccess())
                 return new ResponseEntity<>(response, HttpStatus.OK);
 
-            // an error occurred during processing
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            // an error occurred during processing -- assume it's a faulty document
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
@@ -145,17 +153,10 @@ public class TikaServiceController {
     }
 
 
-    private ServiceResponseContent processStream(ByteArrayInputStream stream, boolean useLegacyProcessor) {
-        AbstractTikaProcessor processor;
-        if (useLegacyProcessor) {
-            processor = legacyTikaProcessor;
-        }
-        else {
-            processor = compositeTikaProcessor;
-        }
-        log.debug("Running processor: " + processor.getClass().toString());
+    private ServiceResponseContent processStream(ByteArrayInputStream stream) {
+        log.info("Running processor: " + tikaProcessor.getClass().toString());
 
-        TikaProcessingResult result = processor.process(stream);
+        TikaProcessingResult result = tikaProcessor.process(stream);
         ServiceResponseContent response = new ServiceResponseContent();
         response.setResult(result);
 
