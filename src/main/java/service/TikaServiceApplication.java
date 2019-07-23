@@ -1,13 +1,13 @@
-package server;
+package service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TikaServerApplication {
+public class TikaServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TikaServerApplication.class, args);
+		SpringApplication.run(TikaServiceApplication.class, args);
 	}
 
 }

@@ -13,15 +13,11 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class DocumentProcessorTests {
 
-    private DocumentTestUtils utils;
-
-    DocumentProcessorTests() {
-        utils = new DocumentTestUtils();
-    }
+    private DocumentTestUtils utils = new DocumentTestUtils();
 
     protected abstract AbstractTikaProcessor getProcessor();
 
-
+    
     @Test
     public void testGenericExtractPattern1SourceTxt() throws Exception {
         final String docPathPrefix = "generic/pat_id_1";

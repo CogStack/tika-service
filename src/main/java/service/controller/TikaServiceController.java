@@ -1,4 +1,4 @@
-package server.controller;
+package service.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import common.JsonPropertyAccessView;
@@ -11,8 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import service.model.ServiceInformation;
+import service.model.ServiceResponseContent;
 import tika.legacy.LegacyTikaProcessor;
-import server.model.ServiceResponseContent;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import tika.processor.CompositeTikaProcessor;
@@ -22,14 +23,14 @@ import java.io.ByteArrayInputStream;
 
 @RestController
 @ComponentScan({"tika.legacy", "tika.processor"})
-public class TikaServerController {
+public class TikaServiceController {
 
     private final String apiPathPrefix = "/**/api";
     //private final String apiVersion = "v1";
     private final String apiFullPath = apiPathPrefix;
 
 
-    private Logger log = LoggerFactory.getLogger(TikaServerController.class);
+    private Logger log = LoggerFactory.getLogger(TikaServiceController.class);
 
     @Autowired
     @Qualifier("legacyTikaProcessor")
@@ -40,12 +41,13 @@ public class TikaServerController {
     private CompositeTikaProcessor compositeTikaProcessor;
 
     @Autowired
-    TikaServerInformation serverInfo;
+    ServiceInformation serverInfo;
 
 
     @GetMapping(value = apiFullPath + "/info", produces = "application/json")
     @JsonView(JsonPropertyAccessView.Public.class)
-    public @ResponseBody TikaServerInformation info() {
+    public @ResponseBody
+    ServiceInformation info() {
         return serverInfo;
     }
 
