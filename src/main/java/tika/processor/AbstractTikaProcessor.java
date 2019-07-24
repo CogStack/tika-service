@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
 import tika.model.MetadataKeys;
 import tika.model.TikaBinaryDocument;
@@ -34,7 +35,7 @@ public abstract class AbstractTikaProcessor {
     protected abstract TikaProcessingResult processStream(TikaInputStream stream);
 
 
-    // helper methods used to extract document metadata
+    // helper methods used to extract document metadata -- TODO: can be moved to utils
     //
     static public int getPageCount(final Metadata docMeta) {
         Map<String, Object> resultMeta = new HashMap<>();
@@ -44,6 +45,12 @@ public abstract class AbstractTikaProcessor {
             return Integer.parseInt(resultMeta.get(MetadataKeys.PAGE_COUNT).toString());
         }
         return -1;
+    }
+
+    static public boolean isValidDocumentType(final Map<String, Object> resultMeta) {
+        return !( !resultMeta.containsKey(MetadataKeys.CONTENT_TYPE) ||
+                   resultMeta.get(MetadataKeys.CONTENT_TYPE).equals(MediaType.OCTET_STREAM.toString()) ||
+                   resultMeta.get(MetadataKeys.CONTENT_TYPE).equals(MediaType.EMPTY.toString()));
     }
 
     static private void extractPageCount(final Metadata docMeta, Map<String, Object> resultMeta) {

@@ -7,17 +7,14 @@ import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.xml.sax.SAXException;
 import common.JsonPropertyAccessView;
-
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 
 @Data
 @Configuration
-@PropertySource("classpath:tika-config/tika-processor-config.yaml")
 public class LegacyPdfProcessorConfig {
 
     @JsonIgnore

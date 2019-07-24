@@ -68,33 +68,21 @@ public class TikaServiceController {
 
     @PostMapping(value = apiFullPath + "/process", produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request) {
-
-        //log.info("Processing request...");
-
         // process the content
-        //
         try {
             byte[] streamContent = request.getInputStream().readAllBytes();
-
             if (streamContent.length == 0) {
                 final String message = "Empty content";
                 log.info(message);
 
-                return new ResponseEntity<>(createErrorResponse(message), HttpStatus.BAD_REQUEST);
+                return createEmptyDocumentResponseEntity(message);
             }
 
-            // process
-            //
+            // prepare and process the stream
             ByteArrayInputStream bufs = new ByteArrayInputStream(streamContent);
-            ServiceResponseContent response = processStream(bufs);
+            TikaProcessingResult result = processStream(bufs);
 
-
-            // remember to actually check the processing status
-            if (response.getResult().getSuccess())
-                return new ResponseEntity<>(response, HttpStatus.OK);
-
-            // an error occurred during processing -- assume it's a faulty document
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return createProcessedDocumentResponseEntiy(result);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
@@ -107,32 +95,20 @@ public class TikaServiceController {
 
     @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" }, produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file) {
-
-        //log.info("Received a new document -- processing...");
-
         // check whether we need to perform any processing
-        //
         if (file.isEmpty()) {
             final String message = "Empty content";
             log.info(message);
 
-            return new ResponseEntity<>(createErrorResponse(message), HttpStatus.BAD_REQUEST);
+            return createEmptyDocumentResponseEntity(message);
         }
 
-
         // process the content
-        //
         try {
             ByteArrayInputStream bufs = new ByteArrayInputStream(file.getBytes());
 
-            ServiceResponseContent response = processStream(bufs);
-
-            // remember to actually check the processing status
-            if (response.getResult().getSuccess())
-                return new ResponseEntity<>(response, HttpStatus.OK);
-
-            // an error occurred during processing -- assume it's a faulty document
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            TikaProcessingResult result = processStream(bufs);
+            return createProcessedDocumentResponseEntiy(result);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
@@ -153,13 +129,44 @@ public class TikaServiceController {
     }
 
 
-    private ServiceResponseContent processStream(ByteArrayInputStream stream) {
+    private TikaProcessingResult processStream(ByteArrayInputStream stream) {
         log.info("Running processor: " + tikaProcessor.getClass().toString());
+        return tikaProcessor.process(stream);
+    }
 
-        TikaProcessingResult result = tikaProcessor.process(stream);
+
+    private ResponseEntity<ServiceResponseContent> createEmptyDocumentResponseEntity(String errorMessage) {
+        HttpStatus status;
+        if (serviceInfo.getServiceConfig().isFailOnEmptyDocuments()) {
+            status = HttpStatus.BAD_REQUEST;
+        }
+        else {
+            status = HttpStatus.OK;
+        }
+
+        return new ResponseEntity<>(createErrorResponse(errorMessage), status);
+    }
+
+    private ResponseEntity<ServiceResponseContent> createProcessedDocumentResponseEntiy(TikaProcessingResult result) {
+        // remember to actually check the processing status
+        HttpStatus status;
+        if (result.getSuccess()) {
+            if (serviceInfo.getServiceConfig().isFailOnNonDocumentTypes()
+                    & !AbstractTikaProcessor.isValidDocumentType(result.getMetadata())) {
+                // assume fail on non-document types
+                status = HttpStatus.BAD_REQUEST;
+            }
+            else {
+                status = HttpStatus.OK;
+            }
+        }
+        else {
+            // an error occurred during processing -- assume it's actually faulty document
+            status = HttpStatus.BAD_REQUEST;
+        }
+
         ServiceResponseContent response = new ServiceResponseContent();
         response.setResult(result);
-
-        return response;
+        return new ResponseEntity<>(response, status);
     }
 }
