@@ -5,12 +5,10 @@ import common.JsonPropertyAccessView;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 
 @Data
 @Configuration
-@PropertySource("classpath:tika-config/tika-processor-config.yaml")
 public class CompositeTikaProcessorConfig {
 
     // the timeout value (s) when performing OCR over documents

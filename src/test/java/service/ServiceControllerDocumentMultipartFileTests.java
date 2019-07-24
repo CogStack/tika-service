@@ -1,29 +1,23 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import service.controller.TikaServiceConfig;
-import service.model.ServiceInformation;
 import service.model.ServiceResponseContent;
 import tika.DocumentProcessorTests;
-import tika.DocumentTestUtils;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.model.TikaProcessingResult;
 import tika.processor.CompositeTikaProcessorConfig;
-
 import java.io.InputStream;
 
 import static org.junit.Assert.*;
@@ -34,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {TikaServiceConfig.class, LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
-@TestPropertySource(properties = {"spring.config.location = classpath:tika/config/tika-processor-config.yaml,classpath:application.properties"})
 public class ServiceControllerDocumentMultipartFileTests extends DocumentProcessorTests  {
 
 	@Autowired

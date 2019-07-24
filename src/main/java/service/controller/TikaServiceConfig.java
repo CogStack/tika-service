@@ -15,6 +15,14 @@ public class TikaServiceConfig {
     String appVersion;
 
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${application.use-legacy-tika-processor-as-default:false}")
+    @Value("${processing.use-legacy-tika-processor-as-default:true}")
     boolean useLegacyTikaProcessor;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${processing.fail-on-empty-documents:true}")
+    boolean failOnEmptyDocuments;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${processing.fail-on-non-document-types:true}")
+    boolean failOnNonDocumentTypes;
 }

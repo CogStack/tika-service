@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.processor.AbstractTikaProcessor;
@@ -16,7 +15,6 @@ import tika.processor.CompositeTikaProcessorConfig;
 @SpringBootTest(classes = CompositeTikaProcessor.class)
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
-@TestPropertySource(properties = {"spring.config.location = classpath:tika/config/tika-processor-config.yaml"})
 public class CompositeTikaProcessorTests extends DocumentProcessorTests {
 
     @Autowired
