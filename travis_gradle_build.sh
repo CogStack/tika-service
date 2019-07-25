@@ -6,7 +6,7 @@ export PING_SLEEP=30s
 export WORKDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BUILD_OUTPUT=$WORKDIR/build.out
 
-DUMP_LINES=2000
+DUMP_LINES=200000
 
 touch $BUILD_OUTPUT
 
@@ -29,7 +29,8 @@ bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
 PING_LOOP_PID=$!
 
 # Build Commands
-./gradlew build --stacktrace --info >> $BUILD_OUTPUT 2>&1
+#./gradlew build --stacktrace --debug  >> $BUILD_OUTPUT 2>&1
+./gradlew build --full-stacktrace --debug  >> $BUILD_OUTPUT
 
 # The build finished without returning an error so dump a tail of the output
 dump_output
