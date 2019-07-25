@@ -5,6 +5,24 @@ language: java
 jdk:
   - openjdk11
 
+env:
+  # limit the number of processing theads used by tesseract
+  OMP_THREAD_LIMIT: 1
+
+addons:
+  apt:
+    sources:
+    # tesseract-ocr >= 4.0 is not available in the standard Xenial / Trusty distro
+    - sourceline: 'ppa:alex-p/tesseract-ocr'
+    packages:
+      - tesseract-ocr
+      - libtesseract-dev
+      - imagemagick
+      - libmagickcore-dev
+      - libmagickwand-dev
+      - libmagic-dev
+      - apache2-utils
+
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -15,7 +33,9 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-#before_install:
+before_install:
+  - tesseract --version
+  - convert --version
 #  - ./gradlew downloadDependencies > /dev/null
 
 script:
