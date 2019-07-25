@@ -1,0 +1,20 @@
+tika:
+  parsers:
+    tesseract-ocr:
+      language: eng
+      timeout: 300
+      enable-image-processing: false
+      apply-rotation: false
+
+    pdf-ocr-parser:
+      ocr-only-strategy: true
+      min-doc-text-length: 100
+      min-doc-byte-size: 10000
+      use-legacy-ocr-parser-for-single-page-doc: false
+
+    legacy-pdf-parser:
+      image-magick:
+        timeout: 300
+      tesseract-ocr:
+        timeout: 300
+      min-doc-text-length: 100
