@@ -1,5 +1,5 @@
 #!/bin/bash
-# Abort on Error
+# Abort on error, unitialized variables and pipe errors
 set -ue
 set -o pipefail
 #set -v
@@ -44,15 +44,24 @@ dump_test_output() {
   fi
 }
 
+print_log() {
+  print_log_separator
+  dump_build_output
+
+  print_log_separator
+  dump_test_output
+}
+
 run_build() {
   ./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
 }
 
 error_handler() {
   echo ERROR: An error was encountered with the build.
-  dump_output
+  print_log
   exit 1
 }
+
 
 # If an error occurs, run our error handler to output a tail of the build
 trap 'error_handler' ERR
@@ -65,12 +74,9 @@ PING_LOOP_PID=$!
 #./gradlew build --stacktrace --debug  >> $BUILD_OUTPUT 2>&1
 run_build
 
-# The build finished without returning an error so dump a tail of the output
-print_log_separator
-dump_build_output
+# print the log
+print_log
 
-print_log_separator
-dump_test_output
 
 # nicely terminate the ping output loop
 kill $PING_LOOP_PID
