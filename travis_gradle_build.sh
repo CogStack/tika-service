@@ -32,7 +32,7 @@ print_log_separator() {
 
 dump_output() {
   if [ "$2" -eq "-1" ]; then
-    echo "Printing all the $1 output: $1"
+    echo "Printing all the output: $1"
     cat $1 
   else
     echo "Tailing the last $2 lines of build output: $1"
@@ -53,7 +53,7 @@ print_log() {
 
 run_build() {
   #./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
-  ./gradlew assemble --full-stacktrace --debug 2>&1 >> $BUILD_OUTPUT
+  ./gradlew assemble --full-stacktrace 2>&1 >> $BUILD_OUTPUT
 }
 
 run_tests() {
