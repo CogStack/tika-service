@@ -1,6 +1,7 @@
 #!/bin/bash
 # Abort on Error
-set -e
+set -ue
+set -o pipefail
 #set -v
 
 export PING_SLEEP=30s
