@@ -9,7 +9,7 @@ export BUILD_OUTPUT=$WORKDIR/build.out
 export TEST_LOG_OUTPUT=$WORKDIR/testlog.out
 
 DUMP_LINES_BUILD=2000
-DUMP_LINES_TEST=20000
+DUMP_LINES_TEST=2000
 
 touch $BUILD_OUTPUT
 touch $TEST_LOG_OUTPUT
@@ -44,7 +44,7 @@ dump_test_output() {
 }
 
 run_build() {
-  ./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger >> $TEST_LOG_OUTPUT) >> $BUILD_OUTPUT
+  ./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
 }
 
 error_handler() {
