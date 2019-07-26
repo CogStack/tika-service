@@ -1,60 +1,70 @@
 #!/bin/bash
 # Abort on error, unitialized variables and pipe errors
-set -ue
-set -o pipefail
+set -eu
 #set -v
 
 export PING_SLEEP=30s
 export WORKDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BUILD_OUTPUT=$WORKDIR/build.out
-export TEST_LOG_OUTPUT=$WORKDIR/testlog.out
+export TEST_PROC_LOG_OUTPUT=$WORKDIR/test-proc.out
+export TEST_API_LOG_OUTPUT=$WORKDIR/test-api.out
 
+DUMP_LINES_TEST_PROC=20000
+DUMP_LINES_TEST_API=2000
 DUMP_LINES_BUILD=2000
-DUMP_LINES_TEST=2000
 
 touch $BUILD_OUTPUT
-touch $TEST_LOG_OUTPUT
+touch $TEST_PROC_LOG_OUTPUT
+touch $TEST_API_LOG_OUTPUT
+
 
 print_log_separator() {
   echo "----------------------------------------------------------------"
-  echo ""
-  echo ""
-  echo ""
-  echo ""
+  echo "-"
+  echo "-"
+  echo "-"
+  echo "-"
+  echo "-"
+  echo "-"
   echo "----------------------------------------------------------------"
 }
 
-dump_build_output() {
+dump_output() {
   if [ "$DUMP_LINES_BUILD" -eq "-1" ]; then
-    echo "Printing all the build output:"
-    cat $BUILD_OUTPUT 
+    echo "Printing all the $1 output:"
+    cat $1 
   else
     echo "Tailing the last $DUMP_LINES_BUILD lines of build output:"
-    tail -$DUMP_LINES_BUILD $BUILD_OUTPUT
-  fi
-}
-
-dump_test_output() {
-  if [ "$DUMP_LINES_TEST" -eq "-1" ]; then
-    echo "Printing all the tests logger output:"
-    cat $TEST_LOG_OUTPUT
-  else 
-    echo "Tailing the last $DUMP_LINES_TEST lines of build output:"
-    tail -$DUMP_LINES_TEST $TEST_LOG_OUTPUT
+    tail -$2 $1
   fi
 }
 
 print_log() {
   print_log_separator
-  dump_build_output
+  dump_output $BUILD_OUTPUT $DUMP_LINES_BUILD
 
   print_log_separator
-  dump_test_output
+  dump_output $TEST_PROC_LOG_OUTPUT $DUMP_LINES_TEST_PROC
+
+  print_log_separator
+  dump_output $TEST_API_LOG_OUTPUT $DUMP_LINES_TEST_API
 }
 
 run_build() {
-  ./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
+  #./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
+  ./gradlew assemble --full-stacktrace --debug >> $BUILD_OUTPUT
 }
+
+run_tests() {
+  # enable debug output here to spot the errors
+  ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests >> $TEST_PROC_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests >> $TEST_PROC_LOG_OUTPUT
+  # disable debug here, too much verbose
+  ./gradlew test --full-stacktrace --tests=ServiceControllerTests >> $TEST_API_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentMultipartFileTests >> $TEST_API_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentStreamTests >> $TEST_API_LOG_OUTPUT
+}
+
 
 error_handler() {
   echo ERROR: An error was encountered with the build.
@@ -73,6 +83,9 @@ PING_LOOP_PID=$!
 # Build Commands
 #./gradlew build --stacktrace --debug  >> $BUILD_OUTPUT 2>&1
 run_build
+
+run_tests
+
 
 # print the log
 print_log
