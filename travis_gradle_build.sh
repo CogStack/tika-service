@@ -1,6 +1,6 @@
 #!/bin/bash
 # Abort on error, unitialized variables and pipe errors
-set -eu
+set -eEu
 #set -v
 
 export PING_SLEEP=30s
@@ -52,17 +52,17 @@ print_log() {
 
 run_build() {
   #./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
-  ./gradlew assemble --full-stacktrace --debug >> $BUILD_OUTPUT
+  ./gradlew assemble --full-stacktrace --debug 2>&1 >> $BUILD_OUTPUT
 }
 
 run_tests() {
   # enable debug output here to spot the errors
-  ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests >> $TEST_PROC_LOG_OUTPUT
-  ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests >> $TEST_PROC_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests 2>&1 >> $TEST_PROC_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests 2>&1 >> $TEST_PROC_LOG_OUTPUT
   # disable debug here, too much verbose
-  ./gradlew test --full-stacktrace --tests=ServiceControllerTests >> $TEST_API_LOG_OUTPUT
-  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentMultipartFileTests >> $TEST_API_LOG_OUTPUT
-  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentStreamTests >> $TEST_API_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --tests=ServiceControllerTests 2>&1 >> $TEST_API_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentMultipartFileTests 2>&1 >> $TEST_API_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentStreamTests 2>&1 >> $TEST_API_LOG_OUTPUT
 }
 
 
@@ -74,7 +74,7 @@ error_handler() {
 
 
 # If an error occurs, run our error handler to output a tail of the build
-trap 'error_handler' ERR
+trap 'error_handler' ERR EXIT
 
 # Set up a repeating loop to send some output to Travis.
 bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
@@ -88,7 +88,7 @@ run_tests
 
 
 # print the log
-print_log
+#print_log
 
 
 # nicely terminate the ping output loop
