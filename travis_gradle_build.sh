@@ -1,6 +1,7 @@
 #!/bin/bash
 # Abort on error, unitialized variables and pipe errors
 set -eEu
+set -o pipefail
 #set -v
 
 export PING_SLEEP=30s
@@ -9,7 +10,7 @@ export BUILD_OUTPUT=$WORKDIR/build.out
 export TEST_PROC_LOG_OUTPUT=$WORKDIR/test-proc.out
 export TEST_API_LOG_OUTPUT=$WORKDIR/test-api.out
 
-DUMP_LINES_TEST_PROC=20000
+DUMP_LINES_TEST_PROC=5000
 DUMP_LINES_TEST_API=2000
 DUMP_LINES_BUILD=2000
 
@@ -30,11 +31,11 @@ print_log_separator() {
 }
 
 dump_output() {
-  if [ "$DUMP_LINES_BUILD" -eq "-1" ]; then
-    echo "Printing all the $1 output:"
+  if [ "$2" -eq "-1" ]; then
+    echo "Printing all the $1 output: $1"
     cat $1 
   else
-    echo "Tailing the last $DUMP_LINES_BUILD lines of build output:"
+    echo "Tailing the last $2 lines of build output: $1"
     tail -$2 $1
   fi
 }
@@ -57,8 +58,8 @@ run_build() {
 
 run_tests() {
   # enable debug output here to spot the errors
-  ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests 2>&1 >> $TEST_PROC_LOG_OUTPUT
-  ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests 2>&1 >> $TEST_PROC_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests 2>&1 | grep TestEventLogger >> $TEST_PROC_LOG_OUTPUT
+  ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests 2>&1 | grep TestEventLogger >> $TEST_PROC_LOG_OUTPUT
   # disable debug here, too much verbose
   ./gradlew test --full-stacktrace --tests=ServiceControllerTests 2>&1 >> $TEST_API_LOG_OUTPUT
   ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentMultipartFileTests 2>&1 >> $TEST_API_LOG_OUTPUT
@@ -74,7 +75,7 @@ error_handler() {
 
 
 # If an error occurs, run our error handler to output a tail of the build
-trap 'error_handler' ERR EXIT
+trap 'error_handler' ERR EXIT SIGPIPE
 
 # Set up a repeating loop to send some output to Travis.
 bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
