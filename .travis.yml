@@ -19,6 +19,7 @@ addons:
       - tesseract-ocr-osd
       - tesseract-ocr-eng
       - imagemagick
+      - ghostscript
       - libtesseract-dev
       - libmagickcore-dev
       - libmagickwand-dev
@@ -40,7 +41,7 @@ install:
 
 before_script:
   - convert --version
-  - convert -list policy
+#  - convert -list policy
   - tesseract --version
 #  - ./gradlew downloadDependencies > /dev/null
 
