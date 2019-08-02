@@ -39,7 +39,7 @@ before_install:
 #  - ./gradlew downloadDependencies > /dev/null
 
 before_script:
-  - cp $HOME/extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
+  - cp ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
 
 script:
   - bash travis_gradle_build.sh
