@@ -70,7 +70,7 @@ run_tests() {
 
 error_handler() {
   echo ERROR: An error was encountered with the build.
-  print_log
+  print_logs
   exit 1
 }
 
@@ -93,4 +93,5 @@ run_tests
 kill $PING_LOOP_PID
 
 # Print the logs
+echo SUCCESS
 print_logs
