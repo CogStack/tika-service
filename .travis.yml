@@ -34,12 +34,10 @@ cache:
     - $HOME/.gradle/wrapper/
 
 before_install:
-  - tesseract --version
+  - sudo cp ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
   - convert --version
+  - tesseract --version
 #  - ./gradlew downloadDependencies > /dev/null
-
-before_script:
-  - cp ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
 
 script:
   - bash travis_gradle_build.sh
