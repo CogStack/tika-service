@@ -9,6 +9,7 @@
 #
 FROM adoptopenjdk/openjdk11:slim AS jdk-11-base
 
+# freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.00~git2288-10f4998a-2
 ENV TESSERACT_RES_VERSION 4.00~git24-0e00fe6-1.2
 ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.7
@@ -31,7 +32,7 @@ RUN apt-get update && \
 #
 # Tika Server Builder
 #
-FROM jdk-11-base AS server-builder
+FROM jdk-11-base AS service-builder
 
 # setup the build environment
 RUN mkdir -p /devel
@@ -46,6 +47,11 @@ COPY ./settings.gradle /devel/
 COPY . /devel/
 
 # build service
+# TIP: uncomment the two lines below to both build the service
+#      and run the tests during the build
+#COPY ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
+#RUN ./gradlew build --no-daemon
+
 RUN ./gradlew bootJar --no-daemon
 
 
@@ -61,6 +67,7 @@ RUN ./gradlew bootJar --no-daemon
 #
 FROM adoptopenjdk/openjdk11:jre AS jre-11-base
 
+# freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.00~git2288-10f4998a-2
 ENV TESSERACT_RES_VERSION 4.00~git24-0e00fe6-1.2
 ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.7
@@ -81,20 +88,22 @@ RUN apt-get update && \
 
 ################################
 #
-# Tika Server
+# Tika Service
 #
-FROM jre-11-base AS server-runner
+FROM jre-11-base AS service-runner
 
 # setup env
-RUN mkdir -p /app
+RUN mkdir -p /app/config
 WORKDIR /app
 
-# copy artifacts
-COPY --from=server-builder /devel/build/libs/server-*.jar ./
+# copy tika-server artifacts
+COPY --from=service-builder /devel/build/libs/service-*.jar ./
+COPY --from=service-builder /devel/src/main/resources/application.yaml ./config/
+
+COPY --from=service-builder /devel/scripts/run.sh ./
 
 # copy external tools configuration files
 COPY ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
 
 # entry point
-ENTRYPOINT /bin/bash
-CMD ["java", "-jar", "server-*.jar"]
+CMD ["/bin/bash", "/app/run.sh"]
