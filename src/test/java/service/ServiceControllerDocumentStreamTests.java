@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import service.controller.TikaServiceConfig;
 import service.model.ServiceResponseContent;
-import tika.DocumentProcessorTests;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.model.TikaProcessingResult;
 import tika.processor.CompositeTikaProcessorConfig;
@@ -31,28 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {TikaServiceConfig.class, LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
-public class ServiceControllerDocumentStreamTests extends DocumentProcessorTests  {
+public class ServiceControllerDocumentStreamTests extends ServiceControllerDocumentTests  {
 
     @Autowired
     private MockMvc mockMvc;
 
     final private String PROCESS_ENDPOINT_URL = "/api/process";
 
-
     @Override
-    public void testExtractPdfEx1Encrypted() throws Exception {
-        final String docPath = "pdf/ex1_enc.pdf";
-
-        TikaProcessingResult result = sendFileProcessingRequest(docPath, HttpStatus.BAD_REQUEST);
-
-        // extraction from encrypted PDF will fail with the proper error message
-        assertFalse(result.getSuccess());
-        assertTrue(result.getError().contains("document is encrypted"));
-    }
-
-    @Override
-    protected TikaProcessingResult processDocument(final String docPath) throws Exception  {
-        return sendFileProcessingRequest(docPath, HttpStatus.OK);
+    protected TikaProcessingResult sendProcessingRequest(final String docPath, HttpStatus expectedStatus) throws Exception  {
+        return sendFileProcessingRequest(docPath, expectedStatus);
     }
 
     private TikaProcessingResult sendFileProcessingRequest(final String docPath, HttpStatus expectedStatus) throws Exception  {
