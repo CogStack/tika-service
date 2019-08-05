@@ -43,5 +43,5 @@ tika:
 #
 processing:
   use-legacy-tika-processor-as-default: true
-  fail-on-empty-documents: false
-  fail-on-non-document-types: false
+  fail-on-empty-files: false
+  fail-on-non-document-types: true

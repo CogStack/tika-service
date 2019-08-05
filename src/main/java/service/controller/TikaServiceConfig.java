@@ -24,11 +24,11 @@ public class TikaServiceConfig {
     @Value("${processing.use-legacy-tika-processor-as-default:true}")
     boolean useLegacyTikaProcessor;
 
-    // specifies whether providing an empty document shall result in reporting failure
+    // specifies whether providing an empty file shall result in reporting failure
     // due to invalid input provided by the client
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${processing.fail-on-empty-documents:true}")
-    boolean failOnEmptyDocuments;
+    @Value("${processing.fail-on-empty-files:true}")
+    boolean failOnEmptyFiles;
 
     // specifies whether providing a non-document type of data (e.g. executable) should fail
     // due to invalid input provided by the client

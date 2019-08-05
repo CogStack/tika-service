@@ -157,7 +157,7 @@ public class TikaServiceController {
 
     private ResponseEntity<ServiceResponseContent> createEmptyDocumentResponseEntity(String errorMessage) {
         HttpStatus status;
-        if (serviceInfo.getServiceConfig().isFailOnEmptyDocuments()) {
+        if (serviceInfo.getServiceConfig().isFailOnEmptyFiles()) {
             status = HttpStatus.BAD_REQUEST;
         }
         else {
