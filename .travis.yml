@@ -7,7 +7,7 @@ jdk:
 
 env:
   # limit the number of processing theads used by tesseract
-  OMP_THREAD_LIMIT: 1
+  - OMP_THREAD_LIMIT=1
 
 addons:
   apt:
@@ -16,8 +16,11 @@ addons:
     - sourceline: 'ppa:alex-p/tesseract-ocr'
     packages:
       - tesseract-ocr
-      - libtesseract-dev
+      - tesseract-ocr-osd
+      - tesseract-ocr-eng
       - imagemagick
+      - ghostscript
+      - libtesseract-dev
       - libmagickcore-dev
       - libmagickwand-dev
       - libmagic-dev
@@ -33,9 +36,13 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-before_install:
-  - tesseract --version
+install:
+  - sudo cp ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
+
+before_script:
   - convert --version
+#  - convert -list policy
+  - tesseract --version
 #  - ./gradlew downloadDependencies > /dev/null
 
 script:
