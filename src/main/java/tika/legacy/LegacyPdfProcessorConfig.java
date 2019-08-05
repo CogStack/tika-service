@@ -13,6 +13,10 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 
+/**
+ * The legacy PDF processor configuration, as used in CogStack-Pipeline
+ * with some minor additions
+ */
 @Data
 @Configuration
 public class LegacyPdfProcessorConfig {

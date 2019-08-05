@@ -18,18 +18,32 @@ import tika.processor.AbstractTikaProcessor;
 import javax.annotation.PostConstruct;
 
 
+/**
+ * The "legacy" Tika processor, using parser from CogStack-Pipeline
+ * to provide compatibility with the migration of the pipeline.
+ *
+ * Processes PDF documents by running manually:
+ * - 1x ImageMagick - to create one large temporary TIFF image
+ * - 1x Tesseract - to extract the text from the TIFF
+ */
 @Component("legacyTikaProcessor")
 public class LegacyTikaProcessor extends AbstractTikaProcessor {
 
     @Autowired
     private LegacyPdfProcessorConfig config;
 
+    /**
+     * Document-type based automatic detection of the parser to be used by Tika
+     */
     private AutoDetectParser defaultParser;
     private ParseContext defaultParseContext;
 
     private Logger log = LoggerFactory.getLogger(LegacyTikaProcessor.class);
 
 
+    /**
+     * Initializes the processor using provided (autowired) configuration
+     */
     @PostConstruct
     @Override
     public void init() throws Exception {
@@ -48,12 +62,18 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
         defaultParser = new AutoDetectParser(config.getTikaConfig());
     }
 
+    /**
+     * Resets the component with any intermediate data used
+     */
     @Override
     public void reset() throws Exception {
         // actually, we only need to re-initialize all the resources apart from the configuration
         init();
     }
 
+    /**
+     * Processes the input stream returning the extracted text
+     */
     protected TikaProcessingResult processStream(TikaInputStream stream) {
         TikaProcessingResult result;
 

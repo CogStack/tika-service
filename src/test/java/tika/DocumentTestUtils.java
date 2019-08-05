@@ -2,7 +2,6 @@ package tika;
 
 import tika.model.MetadataKeys;
 import tika.model.TikaProcessingResult;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
@@ -13,6 +12,9 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 
 
+/**
+ * Helper utilities used in tests
+ */
 public class DocumentTestUtils {
     public InputStream getDocumentStream(final String docName) throws Exception {
         final String fullPath = "tika/docs/" + docName;
@@ -35,7 +37,10 @@ public class DocumentTestUtils {
         return new String(getDocumentStream(path).readAllBytes());
     }
 
+
     public void assertContentMatches(final String expected, final String actual) {
+        // note that this check is a very naive method of content comparison, as we only
+        // strip all the special characters and compare the content in lowercase
         final String regexPattern = "[^\\dA-Za-z]";
         final String s1parsed = expected.replaceAll(regexPattern, "");
         final String s2parsed = actual.replaceAll(regexPattern, "");
@@ -57,6 +62,7 @@ public class DocumentTestUtils {
             assertFalse(expectedStatus);
         }
     }
+
 
     public void testContentMatch(final TikaProcessingResult result, final String docPathPrefix) throws Exception {
         // read truth document

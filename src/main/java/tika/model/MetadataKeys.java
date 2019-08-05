@@ -1,5 +1,10 @@
 package tika.model;
 
+/**
+ * Metadata keys that are to be used to extract relevant information
+ * from the document alongside the text.
+ * Note that some of these keys may not be available, depending on the document type.
+ */
 public class MetadataKeys {
     public final static String CONTENT_TYPE = "Content-Type";
     public final static String CREATION_DATE = "Creation-Date";

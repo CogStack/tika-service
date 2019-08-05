@@ -12,6 +12,9 @@ import tika.processor.CompositeTikaProcessor;
 import tika.processor.CompositeTikaProcessorConfig;
 
 
+/**
+ * Implements the tests using CompositeTikaProcessor as the documents processor
+ */
 @SpringBootTest(classes = CompositeTikaProcessor.class)
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})

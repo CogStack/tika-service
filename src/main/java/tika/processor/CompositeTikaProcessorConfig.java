@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 
+/**
+ * The composite PDF processor configuration
+ */
 @Data
 @Configuration
 public class CompositeTikaProcessorConfig {

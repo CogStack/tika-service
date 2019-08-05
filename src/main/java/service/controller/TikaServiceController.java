@@ -22,6 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 
 
+/**
+ * Main Tika Service REST controller
+ */
 @RestController
 @ComponentScan({"tika.legacy", "tika.processor"})
 public class TikaServiceController {
@@ -30,9 +33,11 @@ public class TikaServiceController {
     //private final String apiVersion = "v1";
     private final String apiFullPath = apiPathPrefix;
 
-
     private Logger log = LoggerFactory.getLogger(TikaServiceController.class);
 
+    /**
+     * Tika document processors
+     */
     @Autowired
     @Qualifier("legacyTikaProcessor")
     private LegacyTikaProcessor legacyTikaProcessor;
@@ -41,14 +46,18 @@ public class TikaServiceController {
     @Qualifier("compositeTikaProcessor")
     private CompositeTikaProcessor compositeTikaProcessor;
 
+    /**
+     * All the necessary information about the service, incl. config
+     */
     @Autowired
     ServiceInformation serviceInfo;
 
-    private AbstractTikaProcessor tikaProcessor;
 
+    private AbstractTikaProcessor tikaProcessor;
 
     @PostConstruct
     void init() {
+        // select the appropriate document processor depending on the configuration
         if (serviceInfo.getServiceConfig().isUseLegacyTikaProcessor()) {
             tikaProcessor = legacyTikaProcessor;
         }
@@ -58,6 +67,9 @@ public class TikaServiceController {
     }
 
 
+    /**
+     * The endpoint returning service information with configuration
+     */
     @GetMapping(value = apiFullPath + "/info", produces = "application/json")
     @JsonView(JsonPropertyAccessView.Public.class)
     public @ResponseBody
@@ -66,9 +78,11 @@ public class TikaServiceController {
     }
 
 
+    /**
+     * The endpoint used for processing documents (e.g. sent as [ocet] stream)
+     */
     @PostMapping(value = apiFullPath + "/process", produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request) {
-        // process the content
         try {
             byte[] streamContent = request.getInputStream().readAllBytes();
             if (streamContent.length == 0) {
@@ -78,7 +92,8 @@ public class TikaServiceController {
                 return createEmptyDocumentResponseEntity(message);
             }
 
-            // prepare and process the stream
+            // we are buffering the stream using ByteArrayInputStream in order to enable
+            // re-reading the binary document content
             ByteArrayInputStream bufs = new ByteArrayInputStream(streamContent);
             TikaProcessingResult result = processStream(bufs);
 
@@ -91,8 +106,11 @@ public class TikaServiceController {
             return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
 
+
+    /**
+     * The endpoint used for processing documents sent as multi-part files
+     */
     @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" }, produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file) {
         // check whether we need to perform any processing
@@ -105,6 +123,8 @@ public class TikaServiceController {
 
         // process the content
         try {
+            // we are buffering the stream using ByteArrayInputStream in order to enable
+            // re-reading the binary document content
             ByteArrayInputStream bufs = new ByteArrayInputStream(file.getBytes());
 
             TikaProcessingResult result = processStream(bufs);

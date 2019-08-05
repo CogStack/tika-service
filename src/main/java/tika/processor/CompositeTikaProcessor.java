@@ -25,6 +25,13 @@ import tika.model.TikaProcessingResult;
 import javax.annotation.PostConstruct;
 
 
+/**
+ * A default, composite Tika processor.
+ *
+ * In contrast to "legacy" processor it uses the default approach implemented in Tika, i.e. when
+ * parsing PDF documents, it runs the processing independently per each PDF page,
+ * and hence running Tesseract Page-Count times.
+ */
 @Component("compositeTikaProcessor")
 public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
@@ -34,11 +41,11 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     @Autowired
     private LegacyPdfProcessorConfig legacyPdfProcessorConfig;
 
-    /*
+    /**
      In order to properly handle PDF documents and OCR we need three separate parsers:
-     - a generic parser
-     - one that will extract text only from PDFs
-     - one that will apply OCR on PDFs (when stored only images)
+     - a generic parser (for any, non-PDF document type),
+     - one that will extract text only from PDFs,
+     - one that will apply OCR on PDFs (when stored only images).
 
      In the default configuration of PDFParser the OCR is disabled when extracting text from PDFs. However, OCR is
      enabled when extracting text from documents of image type. When using default parser with OCR enabled (strategy:
@@ -97,15 +104,6 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         // actually, we only need to re-initialize all the resources apart from the configuration
         init();
     }
-
-
-    private boolean isDocumentOfPdfType(InputStream stream) throws Exception {
-        Metadata metadata = new Metadata();
-        MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
-
-        return mediaType.equals(MediaType.application("pdf"));
-    }
-
 
     protected TikaProcessingResult processStream(TikaInputStream stream) {
         final int MIN_TEXT_BUFFER_SIZE = 1024;
@@ -185,6 +183,14 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         }
 
         return result;
+    }
+
+
+    private boolean isDocumentOfPdfType(InputStream stream) throws Exception {
+        Metadata metadata = new Metadata();
+        MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
+
+        return mediaType.equals(MediaType.application("pdf"));
     }
 
 
