@@ -68,8 +68,8 @@ the service will be listening on port `8090` on the host machine.
 
 Tika Service, by default, will be listening on port `8090` and the returned result will be in JSON format. It exposes such endpoints:
 - GET `/api/info` - returns information about the service with its configuration,
-- POST `/api/process_file` - processes a multi-part file,
-- POST `/api/process` - processes a binary data stream with the file content.
+- POST `/api/process` - processes a binary data stream with the file content,
+- POST `/api/process_file` - processes a multi-part file.
 
 ## Example use
 
@@ -78,7 +78,7 @@ Using curl to query the Tika server instance running on localhost:
 `curl -F file=@test.pdf http://localhost:8090/api/process_file | jq`
 
 Returned result:
-`
+```
 {
   "result": {
     "text": "Sample Type / Medical Specialty: Lab Medicine - Pathology",
@@ -94,7 +94,7 @@ Returned result:
     "success": true
   }
 }
-`
+```
 
 # Configuration
 
