@@ -21,6 +21,10 @@ import tika.processor.CompositeTikaProcessorConfig;
 import static org.junit.Assert.assertEquals;
 
 
+/**
+ * Implements general tests for the Service Controller
+ * (no documents processing)
+ */
 @SpringBootTest(classes = TikaServiceApplication.class)
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -34,6 +38,7 @@ public class ServiceControllerTests  {
     private ServiceInformation serviceinfo;
 
     final private String INFO_ENDPOINT_URL = "/api/info";
+
 
     @Test
     public void testGetApplicationInfo() throws Exception {

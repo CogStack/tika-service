@@ -9,12 +9,33 @@ import java.io.InputStream;
 import static org.junit.Assert.*;
 
 
+/**
+ * All the document processor tests are implemented in this abstract class in order to keep the
+ * rationale behind the tests and results in one single place.
+ */
 public abstract class DocumentProcessorTests {
 
     protected DocumentTestUtils utils = new DocumentTestUtils();
 
+    /**
+     * Helper methods used in tests that can be overloaded in child classes
+     */
     protected AbstractTikaProcessor getProcessor() { return null; }
 
+    protected TikaProcessingResult processDocument(final String docPath) throws Exception  {
+        AbstractTikaProcessor processor = getProcessor();
+        assertNotNull(processor);
+
+        InputStream stream = utils.getDocumentStream(docPath);
+        return processor.process(stream);
+    }
+
+
+    /**
+     * The actual tests start from here
+     *
+     *
+     */
 
     @Test
     public void testGenericExtractPattern1SourceTxt() throws Exception {
@@ -174,7 +195,7 @@ public abstract class DocumentProcessorTests {
     @Ignore
     @Test
     public void testExtractTiffWithOCR() throws Exception {
-        InputStream stream = utils.getDocumentZipStream("var/tiff_multipage_spp2.tiff.zip", "tiff_multipage_spp2.tiff");
+        InputStream stream = utils.getDocumentZipStream("invalid/tiff_multipage_spp2.tiff.zip", "tiff_multipage_spp2.tiff");
 
         AbstractTikaProcessor processor = getProcessor();
         TikaProcessingResult result = processor.process(stream);
@@ -209,16 +230,5 @@ public abstract class DocumentProcessorTests {
         // uses: org.apache.tika.parser.microsoft.OfficeParser
         //TODO: this one needs an internal fix or further investigation
         assertTrue(result.getSuccess());
-    }
-
-
-    // helper methods
-    //
-    protected TikaProcessingResult processDocument(final String docPath) throws Exception  {
-        AbstractTikaProcessor processor = getProcessor();
-        assertNotNull(processor);
-
-        InputStream stream = utils.getDocumentStream(docPath);
-        return processor.process(stream);
     }
 }

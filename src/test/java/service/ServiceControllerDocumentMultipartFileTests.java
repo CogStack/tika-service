@@ -24,6 +24,10 @@ import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
+/**
+ * Implements document processing tests for the Service Controller
+ * A document is passed as a multi-part file
+ */
 @SpringBootTest(classes = TikaServiceApplication.class)
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc

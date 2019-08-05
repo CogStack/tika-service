@@ -12,6 +12,9 @@ import tika.legacy.LegacyTikaProcessor;
 import tika.processor.AbstractTikaProcessor;
 
 
+/**
+ * Implements the tests using LegacyTikaProcessor as the documents processor
+ */
 @SpringBootTest(classes = LegacyTikaProcessor.class)
 @RunWith(SpringRunner.class)
 @DirtiesContext

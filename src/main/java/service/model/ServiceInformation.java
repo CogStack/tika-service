@@ -13,6 +13,9 @@ import tika.model.TikaPackageInformation;
 import tika.processor.CompositeTikaProcessorConfig;
 
 
+/**
+ * All the information about Tika Service configuration
+ */
 @Data
 @Configuration
 @ComponentScan({"tika.legacy", "tika.processor"})

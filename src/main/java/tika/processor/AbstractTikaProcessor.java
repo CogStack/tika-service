@@ -13,17 +13,36 @@ import tika.model.TikaBinaryDocument;
 import tika.model.TikaProcessingResult;
 
 
+/**
+ * An abstract class for a Tika Processor
+ */
 public abstract class AbstractTikaProcessor {
 
+    /**
+     * The metadata keys that should be extracted by the processor
+     */
     private static final String[] metaKeysSingleValue = {MetadataKeys.CONTENT_TYPE, MetadataKeys.CREATION_DATE,
             MetadataKeys.LAST_MODIFIED, MetadataKeys.OCR_APPLIED};
     private static final String[] metaKeysMultiValue = {MetadataKeys.PARSED_BY};
 
 
+    /**
+     * Processor lifecycle methods
+     */
     public void init() throws Exception {}
 
     public void reset() throws Exception {}
 
+
+    /**
+     * The main documents processing method
+     */
+    protected abstract TikaProcessingResult processStream(TikaInputStream stream);
+
+
+    /**
+     * Wrappers over the main document processing method
+     */
     public TikaProcessingResult process(final TikaBinaryDocument binaryDoc) {
         return processStream(TikaInputStream.get(binaryDoc.getContent()));
     }
@@ -32,11 +51,12 @@ public abstract class AbstractTikaProcessor {
         return processStream(TikaInputStream.get(stream));
     }
 
-    protected abstract TikaProcessingResult processStream(TikaInputStream stream);
 
 
-    // helper methods used to extract document metadata -- TODO: can be moved to utils
-    //
+    /**
+     * Helper methods
+     * TODO: can be moved to utils
+     */
     static public int getPageCount(final Metadata docMeta) {
         Map<String, Object> resultMeta = new HashMap<>();
         extractPageCount(docMeta, resultMeta);
