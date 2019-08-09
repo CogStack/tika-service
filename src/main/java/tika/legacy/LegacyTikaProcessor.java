@@ -1,6 +1,7 @@
 package tika.legacy;
 
 import java.io.ByteArrayOutputStream;
+import java.time.OffsetDateTime;
 import java.util.*;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
@@ -90,6 +91,7 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
                     .text(outStream.toString())
                     .metadata(resultMetadata)
                     .success(true)
+                    .processedTime(OffsetDateTime.now())
                     .build();
         }
         catch (Exception e) {

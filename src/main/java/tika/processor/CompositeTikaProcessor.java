@@ -2,6 +2,7 @@ package tika.processor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.time.OffsetDateTime;
 import java.util.*;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
@@ -171,6 +172,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     .text(outStream.toString())
                     .metadata(resultMeta)
                     .success(true)
+                    .processedTime(OffsetDateTime.now())
                     .build();
         }
         catch (Exception e) {
