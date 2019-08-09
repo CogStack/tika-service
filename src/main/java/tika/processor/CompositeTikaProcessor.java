@@ -172,7 +172,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     .text(outStream.toString())
                     .metadata(resultMeta)
                     .success(true)
-                    .processedTime(OffsetDateTime.now())
+                    .timestamp(OffsetDateTime.now())
                     .build();
         }
         catch (Exception e) {

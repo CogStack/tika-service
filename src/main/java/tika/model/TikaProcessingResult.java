@@ -30,6 +30,5 @@ public class TikaProcessingResult {
     String error;
 
     // when the document was processed
-    @JsonProperty("processed_time")
-    OffsetDateTime processedTime;
+    OffsetDateTime timestamp;
 }

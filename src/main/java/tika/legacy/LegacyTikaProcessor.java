@@ -91,7 +91,7 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
                     .text(outStream.toString())
                     .metadata(resultMetadata)
                     .success(true)
-                    .processedTime(OffsetDateTime.now())
+                    .timestamp(OffsetDateTime.now())
                     .build();
         }
         catch (Exception e) {
