@@ -1,9 +1,10 @@
 package tika.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 
@@ -27,4 +28,8 @@ public class TikaProcessingResult {
 
     // the error message in case processing failed
     String error;
+
+    // when the document was processed
+    @JsonProperty("processed_time")
+    OffsetDateTime processedTime;
 }
