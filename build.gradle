@@ -21,9 +21,15 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    
+    compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    
+    // json serialization
+	compile 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
 
 	// tika
 	compile group: 'org.apache.tika', name: 'tika', version: '1.21'

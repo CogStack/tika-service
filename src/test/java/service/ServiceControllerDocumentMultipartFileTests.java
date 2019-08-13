@@ -1,6 +1,7 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -59,6 +60,7 @@ public class ServiceControllerDocumentMultipartFileTests extends ServiceControll
 
         // parse content
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
         TikaProcessingResult tikaResult = mapper.readValue(result.getResponse().getContentAsString(),
                 ServiceResponseContent.class).getResult();
 
