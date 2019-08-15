@@ -1,0 +1,3 @@
+Release 0.1.0 -- 15 Aug 2019
+---------------
+* Initial stable version release

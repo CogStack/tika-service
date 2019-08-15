@@ -1,0 +1,17 @@
+This is an example of a clinical document
+
+The patient’s name is Bart Davidson.
+His carer’s Name Paul Wayne.
+
+His telephone number is 07754828992
+
+His Address is 61 Basildon Way, 
+East Croyhurst, 
+Angelton, 
+AL64 9HT
+
+His mother’s name is Pauline Smith.
+
+He is on 100mg Paracetamol, 20 milligrams clozapine
+
+
