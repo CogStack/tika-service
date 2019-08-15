@@ -6,7 +6,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'service'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
@@ -22,10 +22,10 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    
+
     compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-    
+
     // json serialization
 	compile 'com.fasterxml.jackson.module:jackson-module-parameter-names'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
