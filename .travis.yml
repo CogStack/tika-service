@@ -1,0 +1,49 @@
+dist: xenial
+
+language: java
+
+jdk:
+  - openjdk11
+
+env:
+  # limit the number of processing theads used by tesseract
+  - OMP_THREAD_LIMIT=1
+
+addons:
+  apt:
+    sources:
+    # tesseract-ocr >= 4.0 is not available in the standard Xenial / Trusty distro
+    - sourceline: 'ppa:alex-p/tesseract-ocr'
+    packages:
+      - tesseract-ocr
+      - tesseract-ocr-osd
+      - tesseract-ocr-eng
+      - imagemagick
+      - ghostscript
+      - libtesseract-dev
+      - libmagickcore-dev
+      - libmagickwand-dev
+      - libmagic-dev
+      - apache2-utils
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -fr $HOME/.gradle/caches/*/scripts/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+install:
+  - sudo cp ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
+
+before_script:
+  - convert --version
+#  - convert -list policy
+  - tesseract --version
+#  - ./gradlew downloadDependencies > /dev/null
+
+script:
+  - bash travis_gradle_build.sh
