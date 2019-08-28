@@ -1,0 +1,6 @@
+.gitignore
+
+.travis.yml
+travis_gradle_build.sh
+
+docker

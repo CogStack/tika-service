@@ -9,6 +9,10 @@ application:
 server:
   port: 8090
 
+  tomcat:
+    max-threads: 4
+
+
 spring:
   servlet:
     multipart.max-file-size: 100MB
