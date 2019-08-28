@@ -105,5 +105,9 @@ COPY --from=service-builder /devel/scripts/run.sh ./
 # copy external tools configuration files
 COPY ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
 
+# uncomment below to set the limit of Open MP parallel processing threads to 1
+#ENV OMP_THREAD_LIMIT 1
+
+
 # entry point
 CMD ["/bin/bash", "/app/run.sh"]
