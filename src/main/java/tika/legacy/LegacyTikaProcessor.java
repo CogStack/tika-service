@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
+import tika.utils.TikaUtils;
+
 import javax.annotation.PostConstruct;
 
 
@@ -86,7 +88,7 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
             defaultParser.parse(stream, handler, metadata, defaultParseContext);
 
             // parse the metadata and store the result
-            Map<String, Object> resultMetadata = extractMetadata(metadata);
+            Map<String, Object> resultMetadata = TikaUtils.extractMetadata(metadata);
             result = TikaProcessingResult.builder()
                     .text(outStream.toString())
                     .metadata(resultMetadata)
