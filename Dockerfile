@@ -3,6 +3,7 @@
 # BUILD STEPS
 #
 
+
 ################################
 #
 # JDK base
@@ -12,7 +13,7 @@ FROM adoptopenjdk/openjdk11:slim AS jdk-11-base
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.00~git2288-10f4998a-2
 ENV TESSERACT_RES_VERSION 4.00~git24-0e00fe6-1.2
-ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.7
+ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.8
 
 RUN apt-get update && \
 #	apt-get dist-upgrade -y && \
@@ -70,7 +71,7 @@ FROM adoptopenjdk/openjdk11:jre AS jre-11-base
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.00~git2288-10f4998a-2
 ENV TESSERACT_RES_VERSION 4.00~git24-0e00fe6-1.2
-ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.7
+ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.8
 
 RUN apt-get update && \
 #	apt-get dist-upgrade -y && \
