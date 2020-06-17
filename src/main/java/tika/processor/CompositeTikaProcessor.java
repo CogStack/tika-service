@@ -24,7 +24,6 @@ import tika.legacy.LegacyPdfProcessorConfig;
 import tika.legacy.LegacyPdfProcessorParser;
 import tika.model.TikaProcessingResult;
 import tika.utils.TikaUtils;
-
 import javax.annotation.PostConstruct;
 
 
@@ -141,6 +140,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     final boolean useOcrLegacyParser = compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()
                             && TikaUtils.getPageCount(metadata) == 1;
 
+
                     // TODO: Q: shall we use a clean metadata or re-use some of the previously parsed fields???
                     handler = new BodyContentHandler(outStream);
                     metadata = new Metadata();
@@ -170,6 +170,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
             // parse the metadata and store the result
             Map<String, Object> resultMeta = TikaUtils.extractMetadata(metadata);
+
             result = TikaProcessingResult.builder()
                     .text(outStream.toString())
                     .metadata(resultMeta)
