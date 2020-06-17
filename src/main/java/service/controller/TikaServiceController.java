@@ -17,6 +17,7 @@ import tika.legacy.LegacyTikaProcessor;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import tika.processor.CompositeTikaProcessor;
+import tika.utils.TikaUtils;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
@@ -172,7 +173,8 @@ public class TikaServiceController {
         HttpStatus status;
         if (result.getSuccess()) {
             if (serviceInfo.getServiceConfig().isFailOnNonDocumentTypes()
-                    & !AbstractTikaProcessor.isValidDocumentType(result.getMetadata())) {
+                    & !TikaUtils.isValidDocumentType(result.getMetadata())) {
+
                 // assume fail on non-document types
                 status = HttpStatus.BAD_REQUEST;
             }

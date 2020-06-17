@@ -1,13 +1,16 @@
 # application configuration
 #
 application:
-  version: 0.1.0
+  version: 0.2.0
 
 
-# general spring boot configuration
+# general spring boot and server configuration
 #
 server:
   port: 8090
+
+  tomcat:
+    max-threads: 4
 
 spring:
   servlet:
