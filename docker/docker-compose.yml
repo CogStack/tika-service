@@ -1,0 +1,12 @@
+version: '3.5'
+
+services:
+  tika-service:
+    #image: cogstacksystems/tika-service:latest
+    build: ..
+    environment:
+      - OMP_THREAD_LIMIT=1
+    volumes:
+    - ../src/main/resources/application.yaml:/app/config/application.yaml:ro
+    ports:
+    - "8090:8090"

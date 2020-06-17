@@ -114,7 +114,7 @@ public class LegacyPdfProcessorParser extends AbstractParser {
         PDFParser pdfParser = new PDFParser();
 
         //create temp handlers to investigate object
-        BodyContentHandler body = new BodyContentHandler();
+        BodyContentHandler body = new BodyContentHandler(-1);
         Metadata pdfMetadata = new Metadata();
 
         //needed to reset stream

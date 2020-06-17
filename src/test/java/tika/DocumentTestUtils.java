@@ -50,13 +50,15 @@ public class DocumentTestUtils {
     public void assertPageCount(final int expectedPageCount, TikaProcessingResult result) {
         Map<String, Object> metadata = result.getMetadata();
         assertTrue(metadata.containsKey(MetadataKeys.PAGE_COUNT));
-        assertEquals(Integer.parseInt(metadata.get(MetadataKeys.PAGE_COUNT).toString()), expectedPageCount);
+        assertEquals(metadata.get(MetadataKeys.PAGE_COUNT), expectedPageCount);
+
     }
 
     public void assertOcrApplied(final boolean expectedStatus, TikaProcessingResult result) {
         Map<String, Object> metadata = result.getMetadata();
         if (metadata.containsKey(MetadataKeys.OCR_APPLIED)) {
-            assertEquals(Boolean.parseBoolean(metadata.get(MetadataKeys.OCR_APPLIED).toString()), expectedStatus);
+            assertEquals(metadata.get(MetadataKeys.OCR_APPLIED), expectedStatus);
+
         }
         else {
             assertFalse(expectedStatus);
