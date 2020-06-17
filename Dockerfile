@@ -3,7 +3,6 @@
 # BUILD STEPS
 #
 
-
 ################################
 #
 # JDK base
@@ -50,9 +49,8 @@ COPY . /devel/
 # build service
 # TIP: uncomment the two lines below to both build the service
 #      and run the tests during the build
-COPY ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
-RUN ./gradlew build --no-daemon
-# ------
+#COPY ./extras/ImageMagick/policy.xml /etc/ImageMagick-6/policy.xml
+#RUN ./gradlew build --no-daemon
 
 RUN ./gradlew bootJar --no-daemon
 
