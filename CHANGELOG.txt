@@ -1,3 +1,10 @@
+Release 0.2.0 -- 2x Mar 2020
+---------------
+* Minor bug fixes and API refinement
+* Added threading control for Tomcat serving endpoint
+* Update Tika to 1.24 version
+* Update Tesseract to 4.1.1 version
+
 Release 0.1.0 -- 15 Aug 2019
 ---------------
 * Initial stable version release
