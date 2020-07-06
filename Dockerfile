@@ -10,7 +10,7 @@
 FROM adoptopenjdk/openjdk11:slim AS jdk-11-base
 
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
-ENV TESSERACT_VERSION 4.1.1-2
+ENV TESSERACT_VERSION 4.1.1+git4247-97079fa3-1
 ENV TESSERACT_RES_VERSION 1:4.0.0+git39-6572757-1
 ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.8
 
@@ -68,7 +68,7 @@ RUN ./gradlew bootJar --no-daemon
 FROM adoptopenjdk/openjdk11:jre AS jre-11-base
 
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
-ENV TESSERACT_VERSION 4.1.1-2
+ENV TESSERACT_VERSION 4.1.1+git4247-97079fa3-1
 ENV TESSERACT_RES_VERSION 1:4.0.0+git39-6572757-1
 ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.8
 
