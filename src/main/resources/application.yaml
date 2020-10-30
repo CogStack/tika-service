@@ -14,8 +14,8 @@ server:
 
 spring:
   servlet:
-    multipart.max-file-size: 100MB
-    multipart.max-request-size: 100MB
+    multipart.max-file-size: 2048MB
+    multipart.max-request-size: 2048MB
 
 
 # tika configuration
