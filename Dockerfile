@@ -12,12 +12,16 @@ FROM adoptopenjdk/openjdk11:slim AS jdk-11-base
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.1.1+git4247-97079fa3-1
 ENV TESSERACT_RES_VERSION 1:4.0.0+git39-6572757-1
-ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.8
+ENV IMAGEMAGICK_VERSION 8:6.9.10.23+dfsg-2.1+deb10u1
 
 # add tesseract key
 RUN apt-get update && \
+    apt-get install apt-transport-https && \
     apt-get install -y gnupg && curl https://notesalexp.org/debian/alexp_key.asc | apt-key add - && \
-    echo 'deb https://notesalexp.org/tesseract-ocr/bionic/ bionic main' >> /etc/apt/sources.list && \
+    apt-get install -y gnupg && curl https://ftp-master.debian.org/keys/release-10.asc | apt-key add - && \
+    echo 'deb https://deb.debian.org/debian/ buster main' >> /etc/apt/sources.list && \
+    echo 'deb-src http://deb.debian.org/debian/ buster main' >> /etc/apt/sources.list && \
+    echo 'deb https://notesalexp.org/debian/buster/ buster main' >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y software-properties-common && \
 	apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
@@ -70,11 +74,15 @@ FROM adoptopenjdk/openjdk11:jre AS jre-11-base
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.1.1+git4247-97079fa3-1
 ENV TESSERACT_RES_VERSION 1:4.0.0+git39-6572757-1
-ENV IMAGEMAGICK_VERSION 8:6.9.7.4+dfsg-16ubuntu6.8
+ENV IMAGEMAGICK_VERSION 8:6.9.10.23+dfsg-2.1+deb10u1
 
 RUN apt-get update && \
+    apt-get install apt-transport-https && \
     apt-get install -y gnupg && curl https://notesalexp.org/debian/alexp_key.asc | apt-key add - && \
-    echo 'deb https://notesalexp.org/tesseract-ocr/bionic/ bionic main' >> /etc/apt/sources.list && \
+    apt-get install -y gnupg && curl https://ftp-master.debian.org/keys/release-10.asc | apt-key add - && \
+    echo 'deb https://deb.debian.org/debian/ buster main' >> /etc/apt/sources.list && \
+    echo 'deb-src http://deb.debian.org/debian/ buster main' >> /etc/apt/sources.list && \
+    echo 'deb https://notesalexp.org/debian/buster/ buster main' >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y software-properties-common && \
 	apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
