@@ -60,6 +60,18 @@ To run Tika service container:
 
 The service will be listening on port `8090` on the host machine.
 
+## Important settings for TESSERACT OCR 
+When processing large documents (and in large amounts) it is important to benchmark the performance depending on the use case. 
+An important setting which is enabled by default is the Tesseract thread limit option which is suitable for deployments where only small-sized documents are to be processed, this is because threading in such cases can do more harm than good since the program will have to start up and manage threads for small jobs most of the time. 
+
+By default, this setting is found in the '/docker/docker_compose.yml' file, enabled as a global variable: 
+```
+  environment:
+    OMP_THREAD_LIMIT=1
+```
+
+For more information: https://github.com/tesseract-ocr/tesseract/blob/7c3ac569f9c320bdc4bacea0ec66c69e2cf06a32/doc/tesseract.1.asc#environment-variables
+
 
 # API
 
