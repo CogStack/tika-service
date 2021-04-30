@@ -1,4 +1,4 @@
-Release 0.2.0 -- 2x Mar 2020
+Release 0.2.0 -- 06 Jul 2020
 ---------------
 * Minor bug fixes and API refinement
 * Added threading control for Tomcat serving endpoint
