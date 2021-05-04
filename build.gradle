@@ -3,10 +3,11 @@ plugins {
 	id 'java'
 }
 
+apply plugin:'java'
 apply plugin: 'io.spring.dependency-management'
 
-group = 'service'
-version = '0.2.0-SNAPSHOT'
+group = 'tika-service'
+version = '0.2.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
@@ -27,24 +28,23 @@ configurations {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    compileOnly 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
-    // json serialization
-	compile 'com.fasterxml.jackson.module:jackson-module-parameter-names'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+	// json serialization
+	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
 
 	// tika
-	compile group: 'org.apache.tika', name: 'tika', version: '1.24.1'
-	compile group: 'org.apache.tika', name: 'tika-core', version: '1.24.1'
-	compile group: 'org.apache.tika', name: 'tika-parsers', version: '1.24.1'
+	implementation group: 'org.apache.tika', name: 'tika', version: '1.26'
+	implementation group: 'org.apache.tika', name: 'tika-core', version: '1.26'
+	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '1.26'
 
-    // tika-dependencies
-    compile group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
-
-    compile group: 'com.github.jai-imageio', name: 'jai-imageio-jpeg2000', version: '1.3.0'
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.32.3.2'
+	// tika-dependencies
+	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
+	implementation group: 'com.github.jai-imageio', name: 'jai-imageio-jpeg2000', version: '1.4.0'
+	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.34.0'
 }

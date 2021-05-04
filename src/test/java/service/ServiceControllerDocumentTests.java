@@ -30,14 +30,12 @@ public abstract class ServiceControllerDocumentTests extends DocumentProcessorTe
     @Autowired
     TikaServiceConfig serviceConfig;
 
-
     protected abstract TikaProcessingResult sendProcessingRequest(final String docPath, HttpStatus expectedStatus) throws Exception;
 
     @Override
     protected TikaProcessingResult processDocument(final String docPath) throws Exception {
         return sendProcessingRequest(docPath, HttpStatus.OK);
     }
-
 
     /**
      * The actual tests start from here
@@ -55,7 +53,6 @@ public abstract class ServiceControllerDocumentTests extends DocumentProcessorTe
         assertFalse(result.getSuccess());
         assertTrue(result.getError().contains("document is encrypted"));
     }
-
 
     @Test
     public void testExtractEmptyPdfFile() throws Exception {

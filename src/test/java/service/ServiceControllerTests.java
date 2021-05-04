@@ -39,7 +39,6 @@ public class ServiceControllerTests  {
 
     final private String INFO_ENDPOINT_URL = "/api/info";
 
-
     @Test
     public void testGetApplicationInfo() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
