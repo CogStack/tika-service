@@ -5,7 +5,8 @@ set -eEu
 set -o pipefail
 set -v
 
-export WORKDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WORKDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export WORKDIR
 export PING_SLEEP=30s
 export BUILD_OUTPUT=$WORKDIR/build.out
 export TEST_PROC_LOG_OUTPUT=$WORKDIR/test-proc.out
@@ -20,7 +21,6 @@ touch "$BUILD_OUTPUT"
 touch "$TEST_PROC_LOG_OUTPUT"
 touch "$TEST_API_LOG_OUTPUT"
 
-
 # Helper functions
 print_log_separator() {
   echo "----------------------------------------------------------------"
@@ -34,16 +34,16 @@ print_log_separator() {
 dump_output() {
   if [ "$2" -eq "-1" ]; then
     echo "Printing all the output: $1"
-    cat $1 
+    cat "$1"
   else
     echo "Tailing the last $2 lines of build output: $1"
-    tail -$2 $1
+    tail -$2 "$1"
   fi
 }
 
 print_logs() {
   print_log_separator
-  dump_output $BUILD_OUTPUT $DUMP_LINES_BUILD
+  dump_output "$BUILD_OUTPUT" $DUMP_LINES_BUILD
 
   print_log_separator
   dump_output "$TEST_PROC_LOG_OUTPUT" $DUMP_LINES_TEST_PROC
@@ -53,19 +53,25 @@ print_logs() {
 }
 
 run_build() {
-  #./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
-  ./gradlew assemble --full-stacktrace 2>&1 >> "$BUILD_OUTPUT"
+  {
+     #./gradlew build --full-stacktrace --debug 2>&1 | tee >(grep TestEventLogger | grep -P -n "[[:ascii:]]" >> $TEST_LOG_OUTPUT) | grep  -P -n "[[:ascii:]]" >> $BUILD_OUTPUT
+    ./gradlew assemble --full-stacktrace 2>&1
+  } >> "$BUILD_OUTPUT"
 }
 
 run_tests() {
-  # enable debug output here to spot the errors
-  { ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests 2>&1 | grep "TestEventLogger" } >> "$TEST_PROC_LOG_OUTPUT"
-
-  ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests 2>&1 | grep "TestEventLogger" >> "$TEST_PROC_LOG_OUTPUT"
-  # disable debug here, too much verbose
-  ./gradlew test --full-stacktrace --tests=ServiceControllerTests 2>&1 >> "$TEST_PROC_LOG_OUTPUT"
-  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentMultipartFileTests 2>&1 >> "$TEST_API_LOG_OUTPUT"
-  ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentStreamTests 2>&1 >> "$TEST_API_LOG_OUTPUT"
+  {
+    # enable debug output here to spot the errors
+    ./gradlew test --full-stacktrace --debug --tests=tika.LegacyTikaProcessorTests 2>&1 | grep "TestEventLogger"
+    ./gradlew test --full-stacktrace --debug --tests=tika.CompositeTikaProcessorTests 2>&1 | grep "TestEventLogger"
+    # disable debug output for service
+    ./gradlew test --full-stacktrace --tests=ServiceControllerTests 2>&1
+  } >> "$TEST_PROC_LOG_OUTPUT"
+  {
+    # disable debug output for docs
+    ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentMultipartFileTests 2>&1
+    ./gradlew test --full-stacktrace --tests=ServiceControllerDocumentStreamTests 2>&1
+  } >> "$TEST_API_LOG_OUTPUT"
 }
 
 error_handler() {
