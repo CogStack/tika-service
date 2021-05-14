@@ -1,22 +1,22 @@
 # application configuration
 #
 application:
-  version: 0.2.0
-
+  version: 0.2.1
 
 # general spring boot and server configuration
 #
 server:
   port: 8090
-
   tomcat:
-    max-threads: 4
+    threads:
+      max: 8
 
 spring:
   servlet:
-    multipart.max-file-size: 2048MB
-    multipart.max-request-size: 2048MB
-
+    multipart.max-file-size: 16384MB
+    multipart.max-request-size: 16384MB
+    multipart.file-size-threshold: 64MB
+    multipart.enabled: true
 
 # tika configuration
 #
@@ -24,27 +24,39 @@ tika:
   parsers:
     tesseract-ocr:
       language: eng
-      timeout: 300
+      timeout: 720
       enable-image-processing: false
       apply-rotation: false
 
     pdf-ocr-parser:
       ocr-only-strategy: true
-      min-doc-text-length: 100
-      min-doc-byte-size: 10000
+      min-doc-text-length: 1
+      min-doc-byte-size: 1
       use-legacy-ocr-parser-for-single-page-doc: false
 
     legacy-pdf-parser:
       image-magick:
-        timeout: 300
+        timeout: 720
       tesseract-ocr:
-        timeout: 300
+        timeout: 720
       min-doc-text-length: 100
-
+  bulk:
+    num-consumers: 16
 
 # documents processing configuration
 #
 processing:
-  use-legacy-tika-processor-as-default: true
+  use-legacy-tika-processor-as-default: false
   fail-on-empty-files: false
   fail-on-non-document-types: true
+  
+logging:
+  level:
+    root: INFO
+    tika.processor: INFO
+    org.springframework.web: INFO
+    service.controller: INFO
+    org.hibernate: INFO
+  file:
+    path: "./"
+    name: "app.log"

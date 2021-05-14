@@ -1,29 +1,28 @@
 # Introduction
 This project implements Apache Tika running as a web service using Spring Boot. It exposes a REST API so that a client can send a document in binary format and receive back the extracted text. The supported document formats are the ones as in Tika.
 
-Some of the key motivation behind developing own wrapper over Tika instead of using the already availabke [Tika server](https://cwiki.apache.org/confluence/display/tika/TikaJAXRS) is a better control over used document parsers (such as PDFParser, Tesseract OCR and the legacy one taken from [CogStack-Pipeline](https://github.com/CogStack/CogStack-Pipeline)) and control over returned results with HTTP return codes.
+Some of the key motivation behind developing own wrapper over Tika instead of using the already available [Tika server](https://cwiki.apache.org/confluence/display/tika/TikaJAXRS) is a better control over used document parsers (such as PDFParser, Tesseract OCR and the legacy one taken from [CogStack-Pipeline](https://github.com/CogStack/CogStack-Pipeline)) and control over returned results with HTTP return codes.
 
 
 # Building
 To build the application, run in the main directory:
 
-`./gradlew build`
+`./gradlew build --console=plain`
 
 The build artifacts will be placed in `./build` directory.
 
 
 During the build, the tests will be run, where the failed tests can also signify missing third-party dependencies (see below). However, to skip running the tests and just build the application, one can run:
 
-`./gradlew bootJar`.
+`./gradlew bootJar --console=plain`.
 
 
 ## Tests
 To run the available tests, run:
 
-`./gradlew test`
+`./gradlew test --console=plain`.
 
 Please note that failed tests may signify missing third-party dependencies.
-
 
 ## Third-party dependencies
 In the minimal setup, for proper text extraction Apache Tika requires the following applications to be present on the system:
@@ -31,16 +30,14 @@ In the minimal setup, for proper text extraction Apache Tika requires the follow
 - [ImageMagick](https://imagemagick.org),
 - [Ghostscript](https://www.ghostscript.com/) (required by ImageMagick for documents conversion).
 
-ImageMagick also requires its configuration file `policy.xml` to be overriden by the provided `extras/ImageMagick/policy.xml` (in order to increase the the available resources for file processing and to override [security policy](https://stackoverflow.com/questions/52703123/override-default-imagemagick-policy-xml) related with Ghostscript).
+ImageMagick also requires its configuration file `policy.xml` to be overriden by the provided `extras/ImageMagick/policy.xml` (in order to increase the available resources for file processing and to override [security policy](https://stackoverflow.com/questions/52703123/override-default-imagemagick-policy-xml) related with Ghostscript).
 
 Moreover, in order to enable additional image processing capabilities of Tesseract OCR, few other dependencies need to be present in the system, such as Python environment. Please see the provided `Dockerfile` for the full list.
-
 
 # Running the application
 The application can be either run as a standalone Java application or inside a Docker container. The application configuration can be changed in the `application.yaml` file. The default version of configuration file is embeded in the jar file, but can be specified manually (see below).
 
 Please note that the recommended way is to use the provided Docker image since a number of dependencies need to be satisfied on a local machine.
-
 
 ## Running as a standalone Java application
 Assuming that the build went correctly, to run the Tika service on a local machine:
@@ -48,7 +45,6 @@ Assuming that the build went correctly, to run the Tika service on a local machi
 `java -jar build/jar/service-*.jar`
 
 The running service will be listening on port `8090` (by default) on the host machine. 
-
 
 ## Using the Docker image
 The latest stable Docker image is available in the Docker Hub under `cogstacksystems/tika-service:latest` tag. Alternatively, the latest development version is available under `cogstacksystems/tika-service:dev-latest` tag. The image can be also build locally using the provided `Dockerfile`.
@@ -127,6 +123,32 @@ Returned result:
 }
 ```
 
+## Bulk processing
+
+For this feature to work you must set the following `use-legacy-tika-processor-as-default: false` in application.yaml.
+
+`curl -F file=@test1.pdf -F file=@test2.pdf http://localhost:8090/api/process_bulk`
+
+Returned result:
+```
+{
+  "result": {
+    "text": "Sample Type / Medical Specialty: Lab Medicine - Pathology",
+    "metadata": {
+      "X-Parsed-By": [
+        "org.apache.tika.parser.CompositeParser",
+        "org.apache.tika.parser.DefaultParser",
+        "org.apache.tika.parser.microsoft.ooxml.OOXMLParser"
+      ],
+      "X-OCR-Applied": "false",
+      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    "success": true,
+    "timestamp": "2019-08-13T15:14:58.022+01:00"
+  }
+}
+```
+
 # Configuration
 
 ## Configuration file
@@ -134,7 +156,6 @@ All the available service and document processors parameteres are stored in a si
 
 Although the initial configuration file is bundled with the application jar file, a modified one can be provided as a parameter when running the Java application. For example, when running the Tika service in the Docker container, the script `scripts/run.sh` runs the Tika service with custom configuration file `application.yaml` located in `/app/config/` directory: 
 `java -Dspring.config.location=/app/config/ -jar /app/service-*.jar`
-
 
 ## Available properties
 The configuration file is stored in yaml format with the following available properties.
@@ -144,13 +165,11 @@ The configuration file is stored in yaml format with the following available pro
 - `server.port` - the port number on which the service will be run (default: `8090`),
 - `spring.servlet.multipart.max-file-size` and `spring.servlet.multipart.max-request-size` - specifies the max file size when processing file requests (default: `100MB`).
 
-
 ### Tika service configuration
 The following keys reside under `tika.processing` node:
 - `use-legacy-tika-processor-as-default` - whether to use the legacy Tika PDF parser (as used in CogStack Pipeline) for backward compatibility (default: `true`),
 - `fail-on-empty-files` - whether to fail the request and report an error when client provided an empty document (default: `false`),
 - `fail-on-non-document-types` - whether to fail the request and report an erorr when client provided a not supported and/or non-document content (default: `true`).
-
 
 ### Tika parsers configuration
 The following keys reside under `tika.parsers` node.
