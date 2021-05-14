@@ -1,9 +1,8 @@
 package tika.processor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.time.OffsetDateTime;
-import java.util.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.tika.batch.*;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
@@ -15,16 +14,25 @@ import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import service.controller.TikaServiceController;
 import tika.legacy.ImageMagickConfig;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.legacy.LegacyPdfProcessorParser;
+import tika.model.TikaFileResource;
 import tika.model.TikaProcessingResult;
 import tika.utils.TikaUtils;
+
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 
 /**
@@ -78,9 +86,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private LegacyPdfProcessorParser pdfSinglePageOcrParser;
     private ParseContext pdfSinglePageOcrParseContext;
 
-
-    private Logger log = LoggerFactory.getLogger(CompositeTikaProcessor.class);
-
+    private final Logger logger = LogManager.getLogger(TikaServiceController.class);
 
     @PostConstruct
     @Override
@@ -108,10 +114,10 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     }
 
     protected TikaProcessingResult processStream(TikaInputStream stream) {
-        final int MIN_TEXT_BUFFER_SIZE = 1024;
 
         TikaProcessingResult result;
         try {
+            final int MIN_TEXT_BUFFER_SIZE = 1;
             ByteArrayOutputStream outStream = new ByteArrayOutputStream(MIN_TEXT_BUFFER_SIZE);
             BodyContentHandler handler = new BodyContentHandler(outStream);
             Metadata metadata = new Metadata();
@@ -132,7 +138,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 if (outStream.size() < compositeTikaProcessorConfig.getPdfMinDocTextLength()
                         && stream.getPosition() > compositeTikaProcessorConfig.getPdfMinDocByteSize()) {
 
-                    // since we are perfoming a second pass over the document, we need to reset cursor position
+                    // since we are performing a second pass over the document, we need to reset cursor position
                     // in both input and output streams
                     stream.reset();
                     outStream.reset();
@@ -140,20 +146,17 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     final boolean useOcrLegacyParser = compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()
                             && TikaUtils.getPageCount(metadata) == 1;
 
-
                     // TODO: Q: shall we use a clean metadata or re-use some of the previously parsed fields???
                     handler = new BodyContentHandler(outStream);
                     metadata = new Metadata();
 
                     if (useOcrLegacyParser) {
                         pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
-
                         // since we use the parser manually, update the metadata with the name of the parser class used
                         metadata.add("X-Parsed-By", LegacyPdfProcessorParser.class.getName());
                     }
                     else {
                         pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
-
                         // since we use the parser manually, update the metadata with the name of the parser class used
                         metadata.add("X-Parsed-By", PDFParser.class.getName());
                     }
@@ -179,7 +182,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     .build();
         }
         catch (Exception e) {
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
 
             result = TikaProcessingResult.builder()
                     .error("Exception caught while processing the document: " + e.getMessage())
@@ -190,6 +193,87 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         return result;
     }
 
+    protected List<TikaProcessingResult> processBatch(MultipartFile[] multipartFiles) {
+
+        List <TikaProcessingResult> tikaProcessingResultList = new ArrayList<>();
+        List<TikaFileResource> tikaFileResourceList = new ArrayList<>();
+
+        Parser parser = new AutoDetectParser();
+        BodyContentHandler handler;
+        Metadata metadata;
+        ParseContext context = new ParseContext();
+        try {
+
+            logger.info("Converting multi-part files to resources files....");
+
+            for(MultipartFile file: multipartFiles) {
+                 metadata = new Metadata();
+                 handler = new BodyContentHandler(-1);
+                 parser.parse(file.getInputStream(), handler, metadata, context);
+                 tikaFileResourceList.add(new TikaFileResource(file.getOriginalFilename(), metadata, file.getInputStream()));
+             }
+            logger.info("Converted files: " + tikaFileResourceList.size());
+            logger.info("Conversion finished....");
+
+            ArrayBlockingQueue<FileResource> tikaFileResourceArrayBlockingQueue = new ArrayBlockingQueue<>(tikaFileResourceList.size(),  true, tikaFileResourceList);
+            List<FileResourceConsumer> fileResourceConsumerList = new ArrayList<>();
+
+            fileResourceConsumerList.add(new FileResourceConsumer(tikaFileResourceArrayBlockingQueue) {
+                @Override
+                public boolean processFileResource(FileResource fileResource) {
+                    TikaProcessingResult result;
+                    try {
+                        result = processStream(TikaInputStream.get(fileResource.openInputStream().readAllBytes()));
+                        result.setResourceId(fileResource.getResourceId());
+                        logger.info("Processing file: " + fileResource.getResourceId());
+                        if(result.getSuccess())
+                        {
+                            tikaProcessingResultList.add(result);
+                            return true;
+                        }
+                        else {
+                            logger.error("OCR-ing failed" + result.getError());
+                        }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error("OCR-ing failed" + e.getMessage());
+                    }
+
+                    return false;
+                }
+            });
+
+            logger.info("Parsing completed.");
+
+            FileResourceCrawler fileResourceCrawler = new TikaFileResourceCrawler(tikaFileResourceArrayBlockingQueue, compositeTikaProcessorConfig.getBatchNumConsumers());
+            //fileResourceCrawler.setMaxConsecWaitInMillis(36000);
+            ConsumersManager tikaConsumersManager = new TikaConsumerManager(fileResourceConsumerList);
+            //tikaConsumersManager.setConsumersManagerMaxMillis(36000);
+
+            StatusReporter statusReporter = new StatusReporter(fileResourceCrawler, tikaConsumersManager);
+            Interrupter interrupter = new Interrupter(0);
+
+            BatchProcess batchProcess = new BatchProcess(fileResourceCrawler, tikaConsumersManager, statusReporter, interrupter);
+            //batchProcess.setTimeoutThresholdMillis(3600);
+            //batchProcess.setPauseOnEarlyTerminationMillis(4200);
+
+            logger.info(tikaConsumersManager.getConsumers().size());
+            //BatchProcessDriverCLI batchProcessDriverCLI = new BatchProcessDriverCLI(["", ""]);
+
+            var parallelFileProcessingResult = batchProcess.call();
+
+            logger.info("Consumed:" + parallelFileProcessingResult.getConsumed());
+            logger.info("Batch processing terminated with message: " + parallelFileProcessingResult.getCauseForTermination());
+            logger.info("Successfully finished processing.");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
+
+        return tikaProcessingResultList;
+    }
 
     private boolean isDocumentOfPdfType(InputStream stream) throws Exception {
         Metadata metadata = new Metadata();
@@ -197,7 +281,6 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         return mediaType.equals(MediaType.application("pdf"));
     }
-
 
     private void initializeTesseractConfig() {
         tessConfig = new TesseractOCRConfig();

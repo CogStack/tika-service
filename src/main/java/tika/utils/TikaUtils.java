@@ -3,8 +3,8 @@ package tika.utils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import tika.model.MetadataKeys;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class TikaUtils {
         extractPageCount(docMeta, resultMeta);
 
         if (resultMeta.containsKey(MetadataKeys.PAGE_COUNT)) {
-            return (Integer)resultMeta.get(MetadataKeys.PAGE_COUNT);
+            return (Integer) resultMeta.get(MetadataKeys.PAGE_COUNT);
         }
         return -1;
     }
@@ -89,8 +89,8 @@ public class TikaUtils {
                 String pgValue = docMeta.get(pgKey);
                 resultMeta.put(MetadataKeys.PAGE_COUNT, Integer.parseInt(pgValue));
             } catch (Exception e) {
-                Logger log = LoggerFactory.getLogger(TikaUtils.class);
-                log.warn("Cannot parse metadata 'Page-Count' value using key name: " + pgKey);
+                Logger logger = LogManager.getLogger(TikaUtils.class);
+                logger.warn("Cannot parse metadata 'Page-Count' value using key name: " + pgKey);
             }
         }
     }

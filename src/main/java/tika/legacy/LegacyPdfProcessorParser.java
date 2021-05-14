@@ -32,6 +32,8 @@ package tika.legacy;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
@@ -42,10 +44,9 @@ import org.apache.tika.parser.external.ExternalParser;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -58,17 +59,15 @@ public class LegacyPdfProcessorParser extends AbstractParser {
     private static final ImageMagickConfig DEFAULT_IMAGEMAGICK_CONFIG = new ImageMagickConfig();
 
     private static final Set<MediaType> SUPPORTED_TYPES = Collections.unmodifiableSet(
-            new HashSet<>(Arrays.asList(new MediaType[]{
-                    MediaType.application("pdf")
-            })));
-    private static final Logger LOG = LoggerFactory.getLogger(LegacyPdfProcessorParser.class);
+            new HashSet<>(Collections.singletonList(MediaType.application("pdf"))));
 
+    private static final Logger logger = LogManager.getLogger(LegacyPdfProcessorParser.class);
 
     @Override
     public Set<MediaType> getSupportedTypes(ParseContext context) {
         // If ImageMagick is installed, offer our supported image types
-        ImageMagickConfig imconfig = context.get(ImageMagickConfig.class, DEFAULT_IMAGEMAGICK_CONFIG);
-        if (hasImageMagick(imconfig)) {
+        ImageMagickConfig imageMagickConfig = context.get(ImageMagickConfig.class, DEFAULT_IMAGEMAGICK_CONFIG);
+        if (hasImageMagick(imageMagickConfig)) {
             return SUPPORTED_TYPES;
         }
 
@@ -159,10 +158,10 @@ public class LegacyPdfProcessorParser extends AbstractParser {
                 //metadata.set("X-OCR-Applied", "true");
                 metadata.add("X-Parsed-By", TesseractOCRParser.class.getName());
 
-                LOG.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
+                logger.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
             }
         } catch (Exception e) {
-            LOG.warn("Error while running OCR over the document");
+            logger.warn("Error while running OCR over the document");
             throw e;
         }
         finally {

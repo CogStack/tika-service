@@ -1,9 +1,12 @@
 package tika.processor;
 
-import java.io.InputStream;
 import org.apache.tika.io.TikaInputStream;
+import org.springframework.web.multipart.MultipartFile;
 import tika.model.TikaBinaryDocument;
 import tika.model.TikaProcessingResult;
+
+import java.io.InputStream;
+import java.util.List;
 
 
 /**
@@ -18,21 +21,26 @@ public abstract class AbstractTikaProcessor {
 
     public void reset() throws Exception {}
 
-
     /**
      * The main documents processing method
      */
-    protected abstract TikaProcessingResult processStream(TikaInputStream stream);
+    protected abstract TikaProcessingResult processStream(TikaInputStream tikaInputStream);
 
+    protected abstract List<TikaProcessingResult> processBatch(MultipartFile[] multipartFiles);
 
     /**
      * Wrappers over the main document processing method
      */
-    public TikaProcessingResult process(final TikaBinaryDocument binaryDoc) {
-        return processStream(TikaInputStream.get(binaryDoc.getContent()));
+    public TikaProcessingResult process(final TikaBinaryDocument tikaBinaryDocument) {
+        return processStream(TikaInputStream.get(tikaBinaryDocument.getContent()));
     }
 
     public TikaProcessingResult process(InputStream stream) {
         return processStream(TikaInputStream.get(stream));
     }
+
+    public List<TikaProcessingResult> process(MultipartFile[] multipartFiles) {
+        return processBatch(multipartFiles);
+    }
+
 }

@@ -1,8 +1,5 @@
 package tika.legacy;
 
-import java.io.ByteArrayOutputStream;
-import java.time.OffsetDateTime;
-import java.util.*;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
@@ -14,10 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import tika.utils.TikaUtils;
+
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayOutputStream;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -41,7 +45,6 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
     private ParseContext defaultParseContext;
 
     private Logger log = LoggerFactory.getLogger(LegacyTikaProcessor.class);
-
 
     /**
      * Initializes the processor using provided (autowired) configuration
@@ -106,5 +109,11 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
         }
 
         return result;
+    }
+
+    @Override
+    protected List<TikaProcessingResult> processBatch(MultipartFile[] multipartFiles) {
+        List <TikaProcessingResult> tikaProcessingResultList = new ArrayList<>();
+        return tikaProcessingResultList;
     }
 }
