@@ -132,20 +132,38 @@ For this feature to work you must set the following `use-legacy-tika-processor-a
 Returned result:
 ```
 {
-  "result": {
-    "text": "Sample Type / Medical Specialty: Lab Medicine - Pathology",
-    "metadata": {
-      "X-Parsed-By": [
-        "org.apache.tika.parser.CompositeParser",
-        "org.apache.tika.parser.DefaultParser",
-        "org.apache.tika.parser.microsoft.ooxml.OOXMLParser"
-      ],
-      "X-OCR-Applied": "false",
-      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    },
-    "success": true,
-    "timestamp": "2019-08-13T15:14:58.022+01:00"
-  }
+   "results":[
+      {
+         "resourceId":"sample.pdf",
+         "text":"\n A Simple PDF File \n This is a small demonstration .pdf file - \n\n just for use in the Virtual Mechanics tutorials. More text. And more \n text. And more text. And more text. And more text. \n\n And more text. And more text. And more text. And more text. And more \n text. And more text. Boring, zzzzz. And more text. And more text. And \n more text. And more text. And more text. And more text. And more text. \n And more text. And more text. \n\n And more text. And more text. And more text. And more text. And more \n text. And more text. And more text. Even more. Continued on page 2 ...\n\n\n\n Simple PDF File 2 \n ...continued from page 1. Yet more text. And more text. And more text. \n And more text. And more text. And more text. And more text. And more \n text. Oh, how boring typing this stuff. But not as boring as watching \n paint dry. And more text. And more text. And more text. And more text. \n Boring.  More, a little more text. The end, and just as well. \n\n\n",
+         "metadata":{
+            "X-Parsed-By":[
+               "org.apache.tika.parser.pdf.PDFParser"
+            ],
+            "X-OCR-Applied":false,
+            "Creation-Date":"2006-03-01T07:28:26Z",
+            "Content-Type":"application/pdf",
+            "Page-Count":2
+         },
+         "success":true,
+         "timestamp":"2021-05-14T11:51:47.867+01:00"
+      },
+      {
+         "resourceId":"sample_1.pdf",
+         "text":"\n A Simple PDF File \n This is a small demonstration .pdf file - \n\n just for use in the Virtual Mechanics tutorials. More text. And more \n text. And more text. And more text. And more text. \n\n And more text. And more text. And more text. And more text. And more \n text. And more text. Boring, zzzzz. And more text. And more text. And \n more text. And more text. And more text. And more text. And more text. \n And more text. And more text. \n\n And more text. And more text. And more text. And more text. And more \n text. And more text. And more text. Even more. Continued on page 2 ...\n\n\n\n Simple PDF File 2 \n ...continued from page 1. Yet more text. And more text. And more text. \n And more text. And more text. And more text. And more text. And more \n text. Oh, how boring typing this stuff. But not as boring as watching \n paint dry. And more text. And more text. And more text. And more text. \n Boring.  More, a little more text. The end, and just as well. \n\n\n",
+         "metadata":{
+            "X-Parsed-By":[
+               "org.apache.tika.parser.pdf.PDFParser"
+            ],
+            "X-OCR-Applied":false,
+            "Creation-Date":"2006-03-01T07:28:26Z",
+            "Content-Type":"application/pdf",
+            "Page-Count":2
+         },
+         "success":true,
+         "timestamp":"2021-05-14T11:51:47.871+01:00"
+      }
+   ]
 }
 ```
 
