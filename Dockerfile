@@ -26,6 +26,7 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y imagemagick tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat && \
 	#apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
 	#apt-get install -y imagemagick=$IMAGEMAGICK_VERSION --fix-missing && \
+	apt-get install -y libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
 	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
 	apt-get clean autoclean && \
     apt-get autoremove --purge -y && \

@@ -1,7 +1,6 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +17,7 @@ import service.model.ServiceInformation;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.processor.CompositeTikaProcessorConfig;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -35,15 +34,14 @@ public class ServiceControllerTests  {
     private MockMvc mockMvc;
 
     @Autowired
-    private ServiceInformation serviceinfo;
+    private ServiceInformation serviceInformation;
 
-    final private String INFO_ENDPOINT_URL = "/api/info";
-
-    @Test
+    @org.junit.Test
     public void testGetApplicationInfo() throws Exception {
+        String INFO_ENDPOINT_URL = "/api/info";
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
                 .get(INFO_ENDPOINT_URL)
-                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
         // check response status
@@ -56,6 +54,6 @@ public class ServiceControllerTests  {
                 ServiceInformation.class);
 
         // check example content
-        assertEquals(response.getServiceConfig().getAppVersion(), serviceinfo.getServiceConfig().getAppVersion());
+        assertEquals(response.getServiceConfig().getAppVersion(), serviceInformation.getServiceConfig().getAppVersion());
     }
 }

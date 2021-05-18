@@ -19,6 +19,8 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TikaProcessingResult {
 
+    String resourceId;
+
     // extracted text from the document
     String text;
 

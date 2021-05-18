@@ -36,7 +36,7 @@ public class CompositeTikaProcessorConfig {
     @Value("${tika.parsers.tesseract-ocr.language:eng}")
     private String ocrLanguage;
 
-    // whether to apply OCR only on the documents or also extract the embeded text (if present)
+    // whether to apply OCR only on the documents or also extract the embedded text (if present)
     // warn: note that applying 'OCR_AND_TEXT_EXTRACTION' the content can be duplicated
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.parsers.pdf-ocr-parser.ocr-only-strategy:true}")
@@ -60,4 +60,9 @@ public class CompositeTikaProcessorConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.parsers.use-legacy-ocr-parser-for-single-page-doc:false}")
     private boolean useLegacyOcrParserForSinglePageDocuments;
+
+    // number of consumer for file batch processing
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.bulk.num-consumers:8}")
+    private int batchNumConsumers;
 }

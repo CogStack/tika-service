@@ -2,10 +2,11 @@ package service.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import common.JsonPropertyAccessView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import tika.processor.CompositeTikaProcessor;
 import tika.utils.TikaUtils;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
@@ -28,13 +30,12 @@ import java.io.ByteArrayInputStream;
  */
 @RestController
 @ComponentScan({"tika.legacy", "tika.processor"})
-public class TikaServiceController {
+public class TikaServiceController implements ErrorController {
 
     private final String apiPathPrefix = "/**/api";
-    //private final String apiVersion = "v1";
     private final String apiFullPath = apiPathPrefix;
 
-    private Logger log = LoggerFactory.getLogger(TikaServiceController.class);
+    private final Logger logger = LogManager.getLogger(TikaServiceController.class);
 
     /**
      * Tika document processors
@@ -53,7 +54,6 @@ public class TikaServiceController {
     @Autowired
     ServiceInformation serviceInfo;
 
-
     private AbstractTikaProcessor tikaProcessor;
 
     @PostConstruct
@@ -67,7 +67,6 @@ public class TikaServiceController {
         }
     }
 
-
     /**
      * The endpoint returning service information with configuration
      */
@@ -78,9 +77,8 @@ public class TikaServiceController {
         return serviceInfo;
     }
 
-
     /**
-     * The endpoint used for processing documents (e.g. sent as [ocet] stream)
+     * The endpoint used for processing documents (e.g. sent as [octet] stream)
      */
     @PostMapping(value = apiFullPath + "/process", produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request) {
@@ -88,26 +86,51 @@ public class TikaServiceController {
             byte[] streamContent = request.getInputStream().readAllBytes();
             if (streamContent.length == 0) {
                 final String message = "Empty content";
-                log.info(message);
+                logger.info(message);
 
                 return createEmptyDocumentResponseEntity(message);
             }
 
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
-            ByteArrayInputStream bufs = new ByteArrayInputStream(streamContent);
-            TikaProcessingResult result = processStream(bufs);
+            ByteArrayInputStream byteBuffer = new ByteArrayInputStream(streamContent);
+            TikaProcessingResult result = processStream(byteBuffer);
 
-            return createProcessedDocumentResponseEntiy(result);
+            return createProcessedDocumentResponseEntity(result);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
-            log.error(message);
+            logger.error(message);
 
             return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @PostMapping(name="process_bulk", value = apiFullPath + "/process_bulk", consumes = "multipart/form-data", produces = "application/json")
+    public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile[] multipartFiles) {
+        if(multipartFiles.length == 0)
+        {
+            final String message = "Empty content, no files were sent.";
+            logger.info(message);
+            return createEmptyDocumentResponseEntity(message);
+        }
+
+        try {
+            logger.info("Bulk processing number of files : " + multipartFiles.length);
+            logger.info("Running processor: " + tikaProcessor.getClass().toString());
+
+            var results = tikaProcessor.process(multipartFiles);
+
+            ServiceResponseContent serviceResponseContent = new ServiceResponseContent();
+            serviceResponseContent.setResults(results);
+            return new ResponseEntity<ServiceResponseContent>(serviceResponseContent, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            final String message = "Error processing: " + e.getMessage();
+            logger.error(message);
+            return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     /**
      * The endpoint used for processing documents sent as multi-part files
@@ -117,7 +140,7 @@ public class TikaServiceController {
         // check whether we need to perform any processing
         if (file.isEmpty()) {
             final String message = "Empty content";
-            log.info(message);
+            logger.info(message);
 
             return createEmptyDocumentResponseEntity(message);
         }
@@ -126,19 +149,18 @@ public class TikaServiceController {
         try {
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
-            ByteArrayInputStream bufs = new ByteArrayInputStream(file.getBytes());
+            ByteArrayInputStream byteBuffer = new ByteArrayInputStream(file.getBytes());
 
-            TikaProcessingResult result = processStream(bufs);
-            return createProcessedDocumentResponseEntiy(result);
+            TikaProcessingResult result = processStream(byteBuffer);
+            return createProcessedDocumentResponseEntity(result);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
-            log.error(message);
+            logger.error(message);
 
             return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     private ServiceResponseContent createErrorResponse(String message) {
         ServiceResponseContent response = new ServiceResponseContent();
@@ -149,12 +171,10 @@ public class TikaServiceController {
         return response;
     }
 
-
     private TikaProcessingResult processStream(ByteArrayInputStream stream) {
-        log.info("Running processor: " + tikaProcessor.getClass().toString());
+        logger.info("Running processor: " + tikaProcessor.getClass().toString());
         return tikaProcessor.process(stream);
     }
-
 
     private ResponseEntity<ServiceResponseContent> createEmptyDocumentResponseEntity(String errorMessage) {
         HttpStatus status;
@@ -168,13 +188,12 @@ public class TikaServiceController {
         return new ResponseEntity<>(createErrorResponse(errorMessage), status);
     }
 
-    private ResponseEntity<ServiceResponseContent> createProcessedDocumentResponseEntiy(TikaProcessingResult result) {
+    private ResponseEntity<ServiceResponseContent> createProcessedDocumentResponseEntity(TikaProcessingResult result) {
         // remember to actually check the processing status
         HttpStatus status;
         if (result.getSuccess()) {
             if (serviceInfo.getServiceConfig().isFailOnNonDocumentTypes()
                     & !TikaUtils.isValidDocumentType(result.getMetadata())) {
-
                 // assume fail on non-document types
                 status = HttpStatus.BAD_REQUEST;
             }
@@ -190,5 +209,15 @@ public class TikaServiceController {
         ServiceResponseContent response = new ServiceResponseContent();
         response.setResult(result);
         return new ResponseEntity<>(response, status);
+    }
+
+    @RequestMapping("/error")
+    public String handleError() {
+        return "Error, the page could not be found.";
+    }
+
+    @Override
+    public String getErrorPath() {
+        return null;
     }
 }
