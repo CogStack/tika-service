@@ -10,7 +10,9 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
+import org.apache.tika.parser.html.HtmlParser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
+import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
@@ -69,7 +71,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private TikaConfig tikaConfig;
     private TesseractOCRConfig tessConfig;
 
-    // the default, generic parser for handling all document types (expect PDF)
+    // the default, generic parser for handling all document types (except PDF)
     private AutoDetectParser defaultParser;
     private ParseContext defaultParseContext;
 
@@ -129,15 +131,12 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
             // try to detect whether the document is PDF
             if (isDocumentOfPdfType(stream)) {
-
                 // firstly try the default parser
                 pdfTextParser.parse(stream, handler, metadata, pdfTextParseContext);
 
-                // check if there have been enough characters read / extracted and the we read enough bytes from the stream
+                // check if there have been enough characters read / extracted and that we read enough bytes from the stream
                 // (images embedded in the documents will occupy quite more space than just raw text)
-                if (outStream.size() < compositeTikaProcessorConfig.getPdfMinDocTextLength()
-                        && stream.getPosition() > compositeTikaProcessorConfig.getPdfMinDocByteSize()) {
-
+                if (outStream.size() >= compositeTikaProcessorConfig.getPdfMinDocTextLength() && stream.getPosition() > compositeTikaProcessorConfig.getPdfMinDocByteSize()) {
                     // since we are performing a second pass over the document, we need to reset cursor position
                     // in both input and output streams
                     stream.reset();
@@ -166,10 +165,20 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     metadata.add("X-Parsed-By", PDFParser.class.getName());
                 }
             }
+            else if (isDocumentOfHTMLType(stream)) {
+                HtmlParser htmlParser = new HtmlParser();
+                defaultParseContext.set(HtmlParser.class, htmlParser);
+                htmlParser.parse(stream, handler, metadata, defaultParseContext);
+                metadata.add("X-Parsed-By", HtmlParser.class.getName());
+            }
             else {
                 // otherwise, run default documents parser
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
+                metadata.add("X-Parsed-By", AutoDetectParser.class.getName());
             }
+
+            if (compositeTikaProcessorConfig.isOcrEnableImageProcessing())
+                metadata.add("X-Parsed-By", TesseractOCRParser.class.getName());
 
             // parse the metadata and store the result
             Map<String, Object> resultMeta = TikaUtils.extractMetadata(metadata);
@@ -196,27 +205,22 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     protected List<TikaProcessingResult> processBatch(MultipartFile[] multipartFiles) {
 
         List <TikaProcessingResult> tikaProcessingResultList = new ArrayList<>();
-        List<TikaFileResource> tikaFileResourceList = new ArrayList<>();
 
-        Parser parser = new AutoDetectParser();
-        BodyContentHandler handler;
-        Metadata metadata;
-        ParseContext context = new ParseContext();
         try {
+            List<TikaFileResource> tikaFileResourceList = new ArrayList<>();
 
             logger.info("Converting multi-part files to resources files....");
 
             for(MultipartFile file: multipartFiles) {
-                 metadata = new Metadata();
-                 handler = new BodyContentHandler(-1);
-                 parser.parse(file.getInputStream(), handler, metadata, context);
-                 tikaFileResourceList.add(new TikaFileResource(file.getOriginalFilename(), metadata, file.getInputStream()));
-             }
-            logger.info("Converted files: " + tikaFileResourceList.size());
+                var inputStream = file.getInputStream().readAllBytes();
+                tikaFileResourceList.add(new TikaFileResource(file.getOriginalFilename(), new Metadata(), TikaInputStream.get(inputStream)));
+            }
             logger.info("Conversion finished....");
 
             ArrayBlockingQueue<FileResource> tikaFileResourceArrayBlockingQueue = new ArrayBlockingQueue<>(tikaFileResourceList.size(),  true, tikaFileResourceList);
             List<FileResourceConsumer> fileResourceConsumerList = new ArrayList<>();
+
+            // TODO: the process currently runs ona single thread, issues with the file queue persist when attempting to create multiple file resource consumers.
 
             fileResourceConsumerList.add(new FileResourceConsumer(tikaFileResourceArrayBlockingQueue) {
                 @Override
@@ -244,22 +248,15 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 }
             });
 
-            logger.info("Parsing completed.");
-
             FileResourceCrawler fileResourceCrawler = new TikaFileResourceCrawler(tikaFileResourceArrayBlockingQueue, compositeTikaProcessorConfig.getBatchNumConsumers());
-            //fileResourceCrawler.setMaxConsecWaitInMillis(36000);
             ConsumersManager tikaConsumersManager = new TikaConsumerManager(fileResourceConsumerList);
-            //tikaConsumersManager.setConsumersManagerMaxMillis(36000);
-
             StatusReporter statusReporter = new StatusReporter(fileResourceCrawler, tikaConsumersManager);
-            Interrupter interrupter = new Interrupter(0);
 
-            BatchProcess batchProcess = new BatchProcess(fileResourceCrawler, tikaConsumersManager, statusReporter, interrupter);
-            //batchProcess.setTimeoutThresholdMillis(3600);
-            //batchProcess.setPauseOnEarlyTerminationMillis(4200);
+            // TODO: Using an interrupter with the batch process causes sys exit issues on containerized environments, needs investigation.
+            // TODO: i.e Interrupter interrupter = new Interrupter(0); fails inside a VM but runs perfectly when directly run as jar
 
+            BatchProcess batchProcess = new BatchProcess(fileResourceCrawler, tikaConsumersManager, statusReporter, null);
             logger.info(tikaConsumersManager.getConsumers().size());
-            //BatchProcessDriverCLI batchProcessDriverCLI = new BatchProcessDriverCLI(["", ""]);
 
             var parallelFileProcessingResult = batchProcess.call();
 
@@ -278,24 +275,37 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private boolean isDocumentOfPdfType(InputStream stream) throws Exception {
         Metadata metadata = new Metadata();
         MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
-
         return mediaType.equals(MediaType.application("pdf"));
     }
 
-    private void initializeTesseractConfig() {
-        tessConfig = new TesseractOCRConfig();
-
-        tessConfig.setTimeout(compositeTikaProcessorConfig.getOcrTimeout());
-        tessConfig.setApplyRotation(compositeTikaProcessorConfig.isOcrApplyRotation());
-        if (compositeTikaProcessorConfig.isOcrEnableImageProcessing()) {
-            tessConfig.setEnableImageProcessing(1);
-        }
-        else {
-            tessConfig.setEnableImageProcessing(0);
-        }
-        tessConfig.setLanguage(compositeTikaProcessorConfig.getOcrLanguage());
+    private boolean isDocumentOfImageType(InputStream stream) throws Exception {
+        Metadata metadata = new Metadata();
+        MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
+        return mediaType.getType().contains("image");
     }
 
+    private boolean isDocumentOfHTMLType(InputStream stream) throws Exception {
+        Metadata metadata = new Metadata();
+        MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
+        return mediaType.getSubtype().contains("html");
+    }
+
+    private void initializeTesseractConfig() {
+
+        tessConfig = new TesseractOCRConfig();
+        tessConfig.setTimeoutSeconds(compositeTikaProcessorConfig.getOcrTimeout());
+        tessConfig.setApplyRotation(compositeTikaProcessorConfig.isOcrApplyRotation());
+        tessConfig.setSkipOcr(false);
+
+        if (compositeTikaProcessorConfig.isOcrEnableImageProcessing()) {
+            tessConfig.setEnableImagePreprocessing(true);
+        }
+        else {
+            tessConfig.setEnableImagePreprocessing(false);
+        }
+
+        tessConfig.setLanguage(compositeTikaProcessorConfig.getOcrLanguage());
+    }
 
     private void initializeDefaultParser() {
         defaultParser = new AutoDetectParser(tikaConfig);
@@ -303,9 +313,9 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         defaultParseContext = new ParseContext();
         defaultParseContext.set(TikaConfig.class, tikaConfig);
         defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
+        defaultParseContext.set(AutoDetectParser.class, defaultParser);
         defaultParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
-
 
     private void initializePdfTextOnlyParser() {
         PDFParserConfig pdfTextOnlyConfig = new PDFParserConfig();
@@ -317,19 +327,20 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         pdfTextParseContext = new ParseContext();
         pdfTextParseContext.set(TikaConfig.class, tikaConfig);
         pdfTextParseContext.set(PDFParserConfig.class, pdfTextOnlyConfig);
-        //pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
-
 
     private void initializePdfOcrParser() {
         PDFParserConfig pdfOcrConfig = new PDFParserConfig();
         pdfOcrConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
+
         if (compositeTikaProcessorConfig.isPdfOcrOnlyStrategy()) {
             pdfOcrConfig.setExtractInlineImages(false);
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_ONLY);
         }
         else {
-            pdfOcrConfig.setExtractInlineImages(true);
+            pdfOcrConfig.setExtractUniqueInlineImagesOnly(true); // do not extract multiple inline images
+            //pdfOcrConfig.setExtractInlineImages(true);
             // warn: note that applying 'OCR_AND_TEXT_EXTRACTION' the content can be duplicated
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_AND_TEXT_EXTRACTION);
         }
@@ -339,7 +350,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         pdfOcrParseContext.set(TikaConfig.class, tikaConfig);
         pdfOcrParseContext.set(PDFParserConfig.class, pdfOcrConfig);
         pdfOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
-        //pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
     private void initializePdfLegacyOcrParser() {
@@ -348,15 +359,12 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         pdfSinglePageOcrParseContext = new ParseContext();
         pdfSinglePageOcrParseContext.set(TikaConfig.class, tikaConfig);
         pdfSinglePageOcrParseContext.set(LegacyPdfProcessorConfig.class, legacyPdfProcessorConfig);
-
-        TesseractOCRConfig tessConfig = new TesseractOCRConfig();
-        tessConfig.setTimeout(legacyPdfProcessorConfig.getOcrTimeout());
         pdfSinglePageOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
 
         ImageMagickConfig imgConfig = new ImageMagickConfig();
         imgConfig.setTimeout(legacyPdfProcessorConfig.getConversionTimeout());
-        pdfSinglePageOcrParseContext.set(ImageMagickConfig.class, imgConfig);
 
-        //pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        pdfSinglePageOcrParseContext.set(ImageMagickConfig.class, imgConfig);
+        pdfSinglePageOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 }

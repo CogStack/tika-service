@@ -4,14 +4,16 @@ plugins {
 }
 
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'application'
 
 group = 'tika-service'
-version = '0.2.1-SNAPSHOT'
+version = '0.3.0'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
 wrapper {
-	gradleVersion = '7.0'
+	gradleVersion = '7.1'
 	distributionUrl = distributionUrl.replace("bin", "all")
 }
 
@@ -38,29 +40,30 @@ dependencies {
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
 
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.3'
+	implementation 'org.springframework.boot:spring-boot-starter-batch:2.5.3'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.3'
 	testImplementation 'junit:junit:4.13.2'
 
 	compileOnly 'org.projectlombok:lombok:1.18.20'
-	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+	annotationProcessor 'org.projectlombok:lombok:1.18.20'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.3'
 
 	// json serialization
-	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.4'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4'
 
 	// tika
-	implementation group: 'org.apache.tika', name: 'tika', version: '1.26'
-	implementation group: 'org.apache.tika', name: 'tika-core', version: '1.26'
-	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '1.26'
-	implementation group: 'org.apache.tika', name: 'tika-batch', version: '1.26'
+	implementation group: 'org.apache.tika', name: 'tika', version: '2.0.0'
+	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.0.0'
+	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.0.0'
+	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.0.0'
+	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.0.0'
 
 	// tika-dependencies
 	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
 	implementation group: 'com.github.jai-imageio', name: 'jai-imageio-jpeg2000', version: '1.4.0'
-	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.34.0'
+	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.1'
 }

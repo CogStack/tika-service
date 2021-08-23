@@ -57,7 +57,7 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
         defaultParseContext.set(LegacyPdfProcessorConfig.class, config);
 
         TesseractOCRConfig tessConfig = new TesseractOCRConfig();
-        tessConfig.setTimeout(config.getOcrTimeout());
+//        tessConfig.setTimeout(config.getOcrTimeout());
         defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
 
         ImageMagickConfig imgConfig = new ImageMagickConfig();

@@ -1,7 +1,7 @@
 # application configuration
 #
 application:
-  version: 0.2.1
+  version: 0.3.0
 
 # general spring boot and server configuration
 #
@@ -13,9 +13,9 @@ server:
 
 spring:
   servlet:
-    multipart.max-file-size: 16384MB
-    multipart.max-request-size: 16384MB
-    multipart.file-size-threshold: 64MB
+    multipart.max-file-size: 32768MB
+    multipart.max-request-size: 32768MB
+    multipart.file-size-threshold: 128MB
     multipart.enabled: true
 
 # tika configuration
@@ -25,21 +25,22 @@ tika:
     tesseract-ocr:
       language: eng
       timeout: 720
-      enable-image-processing: false
+      enable-image-processing: true
       apply-rotation: false
 
     pdf-ocr-parser:
-      ocr-only-strategy: true
+      ocr-only-strategy: false
       min-doc-text-length: 1
-      min-doc-byte-size: 1
-      use-legacy-ocr-parser-for-single-page-doc: false
+      min-doc-byte-size: 10
+      enable-image-processing: false
+      apply-rotation: false
 
     legacy-pdf-parser:
       image-magick:
         timeout: 720
       tesseract-ocr:
         timeout: 720
-      min-doc-text-length: 100
+      min-doc-text-length: 1
   bulk:
     num-consumers: 16
 
@@ -48,8 +49,8 @@ tika:
 processing:
   use-legacy-tika-processor-as-default: false
   fail-on-empty-files: false
-  fail-on-non-document-types: true
-  
+  fail-on-non-document-types: false
+
 logging:
   level:
     root: INFO

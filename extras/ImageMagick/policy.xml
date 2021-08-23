@@ -51,9 +51,9 @@
 <policymap>
   <!-- <policy domain="resource" name="temporary-path" value="/tmp"/> -->
   <!-- Maximum size of the memory used for processing the image -->
-  <policy domain="resource" name="memory" value="512MiB"/>
+  <policy domain="resource" name="memory" value="32GiB"/>
   <!-- Maximum size of the image in swap -->
-  <policy domain="resource" name="map" value="2GiB"/>
+  <policy domain="resource" name="map" value="16GiB"/>
   <policy domain="resource" name="width" value="32KP"/>
   <policy domain="resource" name="height" value="32KP"/>
   <!-- Maximum size of the image to be processed in memory before swapping -->

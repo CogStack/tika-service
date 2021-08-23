@@ -4,6 +4,7 @@ import tika.model.MetadataKeys;
 import tika.model.TikaProcessingResult;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -19,9 +20,8 @@ public class DocumentTestUtils {
     public InputStream getDocumentStream(final String docName) throws Exception {
         final String fullPath = "tika/docs/" + docName;
         InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath);
-        assertNotNull(stream);
-        ByteArrayInputStream bas = new ByteArrayInputStream(stream.readAllBytes());
-        return bas;
+        assertNotNull(stream);  
+        return new ByteArrayInputStream(stream.readAllBytes());
     }
 
     public InputStream getDocumentZipStream(final String archiveName, final String zipEntry) throws Exception {
@@ -37,7 +37,6 @@ public class DocumentTestUtils {
         return new String(getDocumentStream(path).readAllBytes());
     }
 
-
     public void assertContentMatches(final String expected, final String actual) {
         // note that this check is a very naive method of content comparison, as we only
         // strip all the special characters and compare the content in lowercase
@@ -51,24 +50,21 @@ public class DocumentTestUtils {
         Map<String, Object> metadata = result.getMetadata();
         assertTrue(metadata.containsKey(MetadataKeys.PAGE_COUNT));
         assertEquals(metadata.get(MetadataKeys.PAGE_COUNT), expectedPageCount);
-
     }
 
     public void assertOcrApplied(final boolean expectedStatus, TikaProcessingResult result) {
         Map<String, Object> metadata = result.getMetadata();
         if (metadata.containsKey(MetadataKeys.OCR_APPLIED)) {
             assertEquals(metadata.get(MetadataKeys.OCR_APPLIED), expectedStatus);
-
         }
         else {
             assertFalse(expectedStatus);
         }
     }
 
-
-    public void testContentMatch(final TikaProcessingResult result, final String docPathPrefix) throws Exception {
+    public void testContentMatch(final TikaProcessingResult result, final String docPathPrefix, final String docExt) throws Exception {
         // read truth document
-        final String sourceText = getDocumentText(docPathPrefix + ".txt");
+        final String sourceText = getDocumentText(docPathPrefix + docExt);
 
         // test status and content
         assertTrue(result.getText().length() > 0);

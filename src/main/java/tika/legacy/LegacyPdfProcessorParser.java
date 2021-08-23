@@ -31,11 +31,11 @@
 package tika.legacy;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.exception.TikaException;
-import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AbstractParser;
@@ -108,7 +108,7 @@ public class LegacyPdfProcessorParser extends AbstractParser {
         // If ImageMagick is not on the path with the current config, do not try to run OCR
         // getSupportedTypes shouldn't have listed us as handling it, so this should only
         //  occur if someone directly calls this parser, not via DefaultParser or similar
-//        TemporaryResources tmp = new TemporaryResources();
+        //TemporaryResources tmp = new TemporaryResources();
         //TikaInputStream pdfStream = TikaInputStream.get(stream);
         PDFParser pdfParser = new PDFParser();
 
@@ -155,7 +155,7 @@ public class LegacyPdfProcessorParser extends AbstractParser {
 
                 tesseract.parse(FileUtils.openInputStream(tiffFileOfPDF), handler, metadata, context);
 
-                //metadata.set("X-OCR-Applied", "true");
+                metadata.set("X-OCR-Applied", "true");
                 metadata.add("X-Parsed-By", TesseractOCRParser.class.getName());
 
                 logger.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
@@ -209,20 +209,31 @@ public class LegacyPdfProcessorParser extends AbstractParser {
         try {
             waitTask.get(config.getTimeout(), TimeUnit.SECONDS);
             return output;
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             waitThread.interrupt();
             process.destroy();
-            Thread.currentThread().interrupt();
-            throw new TikaException("ImageMagick-OCR-PDFParser: interrupted", e);
 
-        } catch (ExecutionException e) {
-            // should not be thrown
+            if (output.exists())
+            {
+                IOUtils.closeQuietly(out);
+                output.delete();
+            }
 
-        } catch (TimeoutException e) {
-            waitThread.interrupt();
-            process.destroy();
-            throw new TikaException("ImageMagick-OCR-PDFParser: timeout", e);
+            if (e instanceof InterruptedException)
+            {
+                Thread.currentThread().interrupt();
+                throw new TikaException("ImageMagick-OCR-PDFParser: interrupted", e);
+            }
+            else if (e instanceof  ExecutionException)
+            {
+                throw new TikaException("ImageMagick-OCR-PDFParser: execution exception ", e);
+            }
+            else if (e instanceof TimeoutException)
+            {
+                throw new TikaException("ImageMagick-OCR-PDFParser: timeout", e);
+            }
         }
+
         return null;
     }
 

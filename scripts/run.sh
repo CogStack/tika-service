@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-java -Dspring.config.location=/app/config/ -jar /app/tika-service-*.jar
+java -Dspring.config.location=/app/config/ -XX:+UseContainerSupport -jar /app/tika-service-*.jar

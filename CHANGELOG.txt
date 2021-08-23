@@ -1,3 +1,8 @@
+Release 0.3.0 -- 23 Aug 2021
+---------------
+* Updated tika from version 1.27 to 2.0.0
+* Fixed issues with image OCR-ing from PDF files.
+
 Release 0.2.0 -- 06 Jul 2020
 ---------------
 * Minor bug fixes and API refinement

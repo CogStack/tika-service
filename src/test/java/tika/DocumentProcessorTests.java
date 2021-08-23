@@ -61,7 +61,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix);
+        utils.testContentMatch(result, docPathPrefix, docExt);
 
         // test metadata
         utils.assertPageCount(1, result);
@@ -76,7 +76,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix);
+        utils.testContentMatch(result, docPathPrefix, docExt);
 
         // test metadata
         utils.assertPageCount(1, result);
@@ -91,7 +91,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix);
+        utils.testContentMatch(result, docPathPrefix, docExt);
 
         // test metadata
         utils.assertPageCount(1, result);
@@ -106,7 +106,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix);
+        utils.testContentMatch(result, docPathPrefix, docExt);
 
         // test metadata
         // rtf does not contain page count
@@ -121,7 +121,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix);
+        utils.testContentMatch(result, docPathPrefix, docExt);
 
         // test metadata
         // png does not contain page count
@@ -136,7 +136,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix);
+        utils.testContentMatch(result, docPathPrefix, docExt);
 
         // test metadata
         utils.assertPageCount(1, result);
