@@ -40,27 +40,29 @@ dependencies {
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
 
-	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.3'
-	implementation 'org.springframework.boot:spring-boot-starter-batch:2.5.3'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
+	implementation 'org.springframework.boot:spring-boot-starter-batch:2.5.6'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.3'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
 	testImplementation 'junit:junit:4.13.2'
 
-	compileOnly 'org.projectlombok:lombok:1.18.20'
-	annotationProcessor 'org.projectlombok:lombok:1.18.20'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.3'
+	compileOnly 'org.projectlombok:lombok:1.18.22'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.6'
 
 	// json serialization
-	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.4'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.4'
+	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.13.0'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.0'
 
 	// tika
-	implementation group: 'org.apache.tika', name: 'tika', version: '2.0.0'
-	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.0.0'
-	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.0.0'
-	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.0.0'
-	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.0.0'
+	implementation group: 'org.apache.tika', name: 'tika', version: '2.1.0'
+	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.1.0'
+	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.1.0'
+	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.1.0'
+	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.1.0'
+	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.1.0'
+	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.1.0'
 
 	// tika-dependencies
 	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
