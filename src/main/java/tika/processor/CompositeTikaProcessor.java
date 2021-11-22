@@ -177,9 +177,6 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 metadata.add("X-Parsed-By", AutoDetectParser.class.getName());
             }
 
-            if (compositeTikaProcessorConfig.isOcrEnableImageProcessing())
-                metadata.add("X-Parsed-By", TesseractOCRParser.class.getName());
-
             // parse the metadata and store the result
             Map<String, Object> resultMeta = TikaUtils.extractMetadata(metadata);
 
