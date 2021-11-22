@@ -13,6 +13,8 @@ The build artifacts will be placed in `./build` directory.
 
 During the build, the tests will be run, where the failed tests can also signify missing third-party dependencies (see below). However, to skip running the tests and just build the application, one can run:
 
+`./gradlew build -x test`
+
 ## Tests
 
 To run the available tests, run:
