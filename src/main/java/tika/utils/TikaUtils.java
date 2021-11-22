@@ -96,10 +96,15 @@ public class TikaUtils {
     }
 
     static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
-        if (docMeta.get("X-Parsed-By") != null
-                && (Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.getName())
+        if (docMeta.get(MetadataKeys.PARSED_BY) != null
+                && (Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY)).contains(TesseractOCRParser.class.getName())
                 // note that some parsers are also adding class prefix to the name: 'class org...
-                || Arrays.asList(docMeta.getValues("X-Parsed-By")).contains(TesseractOCRParser.class.toString()))) {
+                || Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY)).contains(TesseractOCRParser.class.toString()))
+            || docMeta.get(MetadataKeys.PARSED_BY_NEW) != null
+                && (Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY_NEW)).contains(TesseractOCRParser.class.getName())
+                // note that some parsers are also adding class prefix to the name: 'class org...
+                || Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY_NEW)).contains(TesseractOCRParser.class.toString()))
+            || Arrays.stream(docMeta.getValues("Content-Type")).anyMatch(ct -> ct.startsWith("image/"))) {
             resultMeta.put(MetadataKeys.OCR_APPLIED, true);
         }
         else {

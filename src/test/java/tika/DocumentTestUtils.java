@@ -34,7 +34,10 @@ public class DocumentTestUtils {
     }
 
     public String getDocumentText(final String path) throws Exception {
-        return new String(getDocumentStream(path).readAllBytes());
+        final String fullPath = "tika/texts/" + path;
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath);
+        assertNotNull(stream);
+        return new String(stream.readAllBytes());
     }
 
     public void assertContentMatches(final String expected, final String actual) {

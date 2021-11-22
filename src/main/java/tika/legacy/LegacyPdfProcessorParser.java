@@ -46,6 +46,7 @@ import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+import tika.model.MetadataKeys;
 
 import java.io.*;
 import java.util.*;
@@ -155,8 +156,8 @@ public class LegacyPdfProcessorParser extends AbstractParser {
 
                 tesseract.parse(FileUtils.openInputStream(tiffFileOfPDF), handler, metadata, context);
 
-                metadata.set("X-OCR-Applied", "true");
-                metadata.add("X-Parsed-By", TesseractOCRParser.class.getName());
+                metadata.set(MetadataKeys.OCR_APPLIED, "true");
+                metadata.add(MetadataKeys.PARSED_BY, TesseractOCRParser.class.getName());
 
                 logger.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
             }

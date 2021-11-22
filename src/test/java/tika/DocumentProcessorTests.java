@@ -61,7 +61,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix, docExt);
+        utils.testContentMatch(result, docPathPrefix, ".txt");
 
         // test metadata
         utils.assertPageCount(1, result);
@@ -76,7 +76,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix, docExt);
+        utils.testContentMatch(result, docPathPrefix, ".txt");
 
         // test metadata
         utils.assertPageCount(1, result);
@@ -91,11 +91,11 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix, docExt);
+        utils.testContentMatch(result, docPathPrefix, ".txt");
 
         // test metadata
         utils.assertPageCount(1, result);
-        utils.assertOcrApplied(false, result);
+        utils.assertOcrApplied(true, result);
     }
 
     @Test
@@ -106,7 +106,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix, docExt);
+        utils.testContentMatch(result, docPathPrefix, ".txt");
 
         // test metadata
         // rtf does not contain page count
@@ -121,7 +121,7 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix, docExt);
+        utils.testContentMatch(result, docPathPrefix, ".txt");
 
         // test metadata
         // png does not contain page count
@@ -136,15 +136,15 @@ public abstract class DocumentProcessorTests {
         TikaProcessingResult result = processDocument(docPathPrefix + docExt);
         assertTrue(result.getSuccess());
 
-        utils.testContentMatch(result, docPathPrefix, docExt);
+        utils.testContentMatch(result, docPathPrefix, ".txt");
 
         // test metadata
         utils.assertPageCount(1, result);
-        utils.assertOcrApplied(false, result); // this pdf contains text-only
+        utils.assertOcrApplied(true, result); // Although this pdf contains text-only, enable-image-processing has been set to true
     }
 
     @Test
-    public void testExtractPdfEx1WithoutOcr() throws Exception {
+    public void testExtractPdfEx1WithOcr() throws Exception {
         final String docPath = "pdf/ex1.pdf";
 
         TikaProcessingResult result = processDocument(docPath);
@@ -155,7 +155,7 @@ public abstract class DocumentProcessorTests {
 
         // test metadata
         utils.assertPageCount(10, result);
-        utils.assertOcrApplied(false, result); // this pdf contains text-only
+        utils.assertOcrApplied(true, result); // Although this pdf contains text-only, enable-image-processing has been set to true
     }
 
     @Test

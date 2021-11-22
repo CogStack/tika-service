@@ -54,6 +54,23 @@ public abstract class ServiceControllerDocumentTests extends DocumentProcessorTe
         assertTrue(result.getError().contains("document is encrypted"));
     }
 
+    @Override
+    @Test
+    public void testGenericExtractPattern1SourceTxt() throws Exception {
+        final String docPathPrefix = "generic/pat_id_1";
+        final String docExt = ".txt";
+
+        TikaProcessingResult result = processDocument(docPathPrefix + docExt);
+        assertTrue(result.getSuccess());
+
+        // test parsing status
+        String parsedString = result.getText();
+        assertEquals(316, parsedString.length());
+
+        // test metadata
+        utils.assertOcrApplied(false, result);
+    }
+
     @Test
     public void testExtractEmptyPdfFile() throws Exception {
         final String docPath = "invalid/pdf_empty.pdf";

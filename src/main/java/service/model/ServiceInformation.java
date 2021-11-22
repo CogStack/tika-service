@@ -22,17 +22,14 @@ public class ServiceInformation {
 
     @JsonProperty("legacy_processor_config")
     @JsonView(JsonPropertyAccessView.Public.class)
-    final
     LegacyPdfProcessorConfig legacyProcessorConfig;
 
     @JsonProperty("composite_processor_config")
     @JsonView(JsonPropertyAccessView.Public.class)
-    final
     CompositeTikaProcessorConfig compositeProcessorConfig;
 
     @JsonProperty("service_config")
     @JsonView(JsonPropertyAccessView.Public.class)
-    final
     TikaServiceConfig serviceConfig;
 
     @JsonProperty("tika_info")

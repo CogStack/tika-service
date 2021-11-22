@@ -11,5 +11,6 @@ public class MetadataKeys {
     public final static String LAST_MODIFIED = "Last-Modified";
     public final static String OCR_APPLIED = "X-OCR-Applied";
     public final static String PARSED_BY = "X-Parsed-By";
+    public final static String PARSED_BY_NEW = "X-TIKA:Parsed-By";
     public final static String PAGE_COUNT = "Page-Count";
 }

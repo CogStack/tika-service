@@ -12,7 +12,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.html.HtmlParser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
-import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
 import org.apache.tika.sax.BodyContentHandler;
@@ -23,6 +22,7 @@ import service.controller.TikaServiceController;
 import tika.legacy.ImageMagickConfig;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.legacy.LegacyPdfProcessorParser;
+import tika.model.MetadataKeys;
 import tika.model.TikaFileResource;
 import tika.model.TikaProcessingResult;
 import tika.utils.TikaUtils;
@@ -152,29 +152,29 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     if (useOcrLegacyParser) {
                         pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
                         // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add("X-Parsed-By", LegacyPdfProcessorParser.class.getName());
+                        metadata.add(MetadataKeys.PARSED_BY, LegacyPdfProcessorParser.class.getName());
                     }
                     else {
                         pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
                         // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add("X-Parsed-By", PDFParser.class.getName());
+                        metadata.add(MetadataKeys.PARSED_BY, PDFParser.class.getName());
                     }
                 }
                 else {
                     // since we use the parser manually, update the metadata with the name of the parser class used
-                    metadata.add("X-Parsed-By", PDFParser.class.getName());
+                    metadata.add(MetadataKeys.PARSED_BY, PDFParser.class.getName());
                 }
             }
             else if (isDocumentOfHTMLType(stream)) {
                 HtmlParser htmlParser = new HtmlParser();
                 defaultParseContext.set(HtmlParser.class, htmlParser);
                 htmlParser.parse(stream, handler, metadata, defaultParseContext);
-                metadata.add("X-Parsed-By", HtmlParser.class.getName());
+                metadata.add(MetadataKeys.PARSED_BY, HtmlParser.class.getName());
             }
             else {
                 // otherwise, run default documents parser
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
-                metadata.add("X-Parsed-By", AutoDetectParser.class.getName());
+                metadata.add(MetadataKeys.PARSED_BY, AutoDetectParser.class.getName());
             }
 
             // parse the metadata and store the result

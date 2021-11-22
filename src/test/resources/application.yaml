@@ -32,6 +32,7 @@ tika:
       ocr-only-strategy: false
       min-doc-text-length: 1
       min-doc-byte-size: 10
+      apply-rotation: false
       use-legacy-ocr-parser-for-single-page-doc: false
 
     legacy-pdf-parser:
