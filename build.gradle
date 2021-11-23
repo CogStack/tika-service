@@ -50,6 +50,8 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.6'
 
+	implementation 'org.apache.commons:commons-text:1.9'
+
 	// json serialization
 	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.13.0'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'

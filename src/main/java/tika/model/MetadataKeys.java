@@ -13,4 +13,5 @@ public class MetadataKeys {
     public final static String PARSED_BY = "X-Parsed-By";
     public final static String PARSED_BY_NEW = "X-TIKA:Parsed-By";
     public final static String PAGE_COUNT = "Page-Count";
+    public final static String IMAGE_PROCESSING_ENABLED = "Image-Processing-Enabled";
 }

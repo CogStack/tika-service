@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
+
 
 /**
  * The "legacy" Tika processor, using parser from CogStack-Pipeline
@@ -86,6 +88,7 @@ public class LegacyTikaProcessor extends AbstractTikaProcessor {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream(64 * 1024);
             BodyContentHandler handler = new BodyContentHandler(outStream);
             Metadata metadata = new Metadata();
+            metadata.add(IMAGE_PROCESSING_ENABLED, "true");
 
             defaultParser.parse(stream, handler, metadata, defaultParseContext);
 

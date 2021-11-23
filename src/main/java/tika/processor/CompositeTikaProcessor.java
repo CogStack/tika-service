@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
+
 
 /**
  * A default, composite Tika processor.
@@ -123,6 +125,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             ByteArrayOutputStream outStream = new ByteArrayOutputStream(MIN_TEXT_BUFFER_SIZE);
             BodyContentHandler handler = new BodyContentHandler(outStream);
             Metadata metadata = new Metadata();
+            metadata.add(IMAGE_PROCESSING_ENABLED, String.valueOf(tessConfig.isEnableImagePreprocessing()));
 
             // mark the stream for multi-pass processing
             if (stream.markSupported()) {
@@ -148,6 +151,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     // TODO: Q: shall we use a clean metadata or re-use some of the previously parsed fields???
                     handler = new BodyContentHandler(outStream);
                     metadata = new Metadata();
+                    metadata.add(IMAGE_PROCESSING_ENABLED, String.valueOf(tessConfig.isEnableImagePreprocessing()));
 
                     if (useOcrLegacyParser) {
                         pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);

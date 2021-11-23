@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
+
 
 /**
  * A set of Tika utilities helpful for parsing and handling documents
@@ -96,15 +98,8 @@ public class TikaUtils {
     }
 
     static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
-        if (docMeta.get(MetadataKeys.PARSED_BY) != null
-                && (Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY)).contains(TesseractOCRParser.class.getName())
-                // note that some parsers are also adding class prefix to the name: 'class org...
-                || Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY)).contains(TesseractOCRParser.class.toString()))
-            || docMeta.get(MetadataKeys.PARSED_BY_NEW) != null
-                && (Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY_NEW)).contains(TesseractOCRParser.class.getName())
-                // note that some parsers are also adding class prefix to the name: 'class org...
-                || Arrays.asList(docMeta.getValues(MetadataKeys.PARSED_BY_NEW)).contains(TesseractOCRParser.class.toString()))
-            || Arrays.stream(docMeta.getValues("Content-Type")).anyMatch(ct -> ct.startsWith("image/"))) {
+        if (docMeta.get(IMAGE_PROCESSING_ENABLED) != null && docMeta.get(IMAGE_PROCESSING_ENABLED).equals("true") &&
+            !Arrays.stream(docMeta.getValues("Content-Type")).anyMatch(ct -> ct.startsWith("text/"))) {
             resultMeta.put(MetadataKeys.OCR_APPLIED, true);
         }
         else {

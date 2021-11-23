@@ -4,19 +4,21 @@ import tika.model.MetadataKeys;
 import tika.model.TikaProcessingResult;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
-
 
 /**
  * Helper utilities used in tests
  */
 public class DocumentTestUtils {
+
+    public static final double SIMILARITY_THRESHOLD = 0.95;
+
     public InputStream getDocumentStream(final String docName) throws Exception {
         final String fullPath = "tika/docs/" + docName;
         InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath);
@@ -33,8 +35,8 @@ public class DocumentTestUtils {
         return stream;
     }
 
-    public String getDocumentText(final String path) throws Exception {
-        final String fullPath = "tika/texts/" + path;
+    public String getDocumentText() throws Exception {
+        final String fullPath = "tika/docs/generic/pat_id_1.txt";
         InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath);
         assertNotNull(stream);
         return new String(stream.readAllBytes());
@@ -46,7 +48,7 @@ public class DocumentTestUtils {
         final String regexPattern = "[^\\dA-Za-z]";
         final String s1parsed = expected.replaceAll(regexPattern, "");
         final String s2parsed = actual.replaceAll(regexPattern, "");
-        assertEquals(s1parsed, s2parsed);
+        assertTrue(getSimilarityScore(s1parsed, s2parsed) > SIMILARITY_THRESHOLD);
     }
 
     public void assertPageCount(final int expectedPageCount, TikaProcessingResult result) {
@@ -65,12 +67,17 @@ public class DocumentTestUtils {
         }
     }
 
-    public void testContentMatch(final TikaProcessingResult result, final String docPathPrefix, final String docExt) throws Exception {
+    public void testContentMatch(final TikaProcessingResult result) throws Exception {
         // read truth document
-        final String sourceText = getDocumentText(docPathPrefix + docExt);
+        final String sourceText = getDocumentText();
 
         // test status and content
         assertTrue(result.getText().length() > 0);
         assertContentMatches(sourceText, result.getText());
+    }
+
+    private double getSimilarityScore(final String s1, final String s2) {
+        final int led = new LevenshteinDistance().apply(s1, s2);
+        return 1 - ((double) led) / (Math.max(s1.length(), s2.length()));
     }
 }
