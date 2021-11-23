@@ -181,6 +181,14 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 metadata.add(MetadataKeys.PARSED_BY, AutoDetectParser.class.getName());
             }
 
+            // in Tika 2.0 (or earlier?), X-ParsedBy has been changed to X-TIKA-Parsed-By
+            final String[] parsers = metadata.getValues(MetadataKeys.X_TIKA_PARSED_BY);
+            if (parsers != null) {
+                for (final String parser : parsers) {
+                    metadata.add(MetadataKeys.PARSED_BY, parser);
+                }
+            }
+
             // parse the metadata and store the result
             Map<String, Object> resultMeta = TikaUtils.extractMetadata(metadata);
 
@@ -292,19 +300,11 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     }
 
     private void initializeTesseractConfig() {
-
         tessConfig = new TesseractOCRConfig();
         tessConfig.setTimeoutSeconds(compositeTikaProcessorConfig.getOcrTimeout());
         tessConfig.setApplyRotation(compositeTikaProcessorConfig.isOcrApplyRotation());
         tessConfig.setSkipOcr(false);
-
-        if (compositeTikaProcessorConfig.isOcrEnableImageProcessing()) {
-            tessConfig.setEnableImagePreprocessing(true);
-        }
-        else {
-            tessConfig.setEnableImagePreprocessing(false);
-        }
-
+        tessConfig.setEnableImagePreprocessing(compositeTikaProcessorConfig.isOcrEnableImageProcessing());
         tessConfig.setLanguage(compositeTikaProcessorConfig.getOcrLanguage());
     }
 

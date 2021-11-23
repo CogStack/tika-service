@@ -98,7 +98,8 @@ public class TikaUtils {
     }
 
     static private void extractOcrApplied(final Metadata docMeta, Map<String, Object> resultMeta) {
-        if (docMeta.get(IMAGE_PROCESSING_ENABLED) != null && docMeta.get(IMAGE_PROCESSING_ENABLED).equals("true") &&
+        if ("true".equals(docMeta.get(IMAGE_PROCESSING_ENABLED)) &&
+            // hacky...but raw text content should not require OCR regardless
             !Arrays.stream(docMeta.getValues("Content-Type")).anyMatch(ct -> ct.startsWith("text/"))) {
             resultMeta.put(MetadataKeys.OCR_APPLIED, true);
         }
