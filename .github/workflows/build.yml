@@ -13,14 +13,14 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Install xmllint
+      - name: Install dependencies
         run: |
-             sudo apt-get update && apt-get upgrade -y && \
-             sudo apt-get install -y curl software-properties-common \
-             imagemagick ghostscript tesseract-ocr tesseract-ocr-eng \
-             tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu \
-             libtomcat9-java libtomcat9-embed-java \
-             python3-pip && pip3 install numpy matplotlib scikit-image
+          sudo apt-get update && sudo apt-get upgrade -y && \
+          sudo apt-get install -y curl software-properties-common \
+          imagemagick ghostscript tesseract-ocr tesseract-ocr-eng \
+          tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu \
+          libtomcat9-java libtomcat9-embed-java \
+          python3-pip && pip3 install numpy matplotlib scikit-image
 
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
