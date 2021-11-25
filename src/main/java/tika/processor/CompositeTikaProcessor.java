@@ -156,37 +156,29 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     if (useOcrLegacyParser) {
                         pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
                         // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add(MetadataKeys.PARSED_BY, LegacyPdfProcessorParser.class.getName());
+                        metadata.add(MetadataKeys.X_TIKA_PARSED_BY, LegacyPdfProcessorParser.class.getName());
                     }
                     else {
                         pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
                         // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add(MetadataKeys.PARSED_BY, PDFParser.class.getName());
+                        metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
                     }
                 }
                 else {
                     // since we use the parser manually, update the metadata with the name of the parser class used
-                    metadata.add(MetadataKeys.PARSED_BY, PDFParser.class.getName());
+                    metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
                 }
             }
             else if (isDocumentOfHTMLType(stream)) {
                 HtmlParser htmlParser = new HtmlParser();
                 defaultParseContext.set(HtmlParser.class, htmlParser);
                 htmlParser.parse(stream, handler, metadata, defaultParseContext);
-                metadata.add(MetadataKeys.PARSED_BY, HtmlParser.class.getName());
+                metadata.add(MetadataKeys.X_TIKA_PARSED_BY, HtmlParser.class.getName());
             }
             else {
                 // otherwise, run default documents parser
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
-                metadata.add(MetadataKeys.PARSED_BY, AutoDetectParser.class.getName());
-            }
-
-            // in Tika 2.0 (or earlier?), X-ParsedBy has been changed to X-TIKA-Parsed-By
-            final String[] parsers = metadata.getValues(MetadataKeys.X_TIKA_PARSED_BY);
-            if (parsers != null) {
-                for (final String parser : parsers) {
-                    metadata.add(MetadataKeys.PARSED_BY, parser);
-                }
+                metadata.add(MetadataKeys.X_TIKA_PARSED_BY, AutoDetectParser.class.getName());
             }
 
             // parse the metadata and store the result

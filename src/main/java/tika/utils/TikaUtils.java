@@ -24,7 +24,7 @@ public class TikaUtils {
      */
     private static final String[] metaKeysSingleValue = {MetadataKeys.CONTENT_TYPE, MetadataKeys.CREATION_DATE,
             MetadataKeys.LAST_MODIFIED, MetadataKeys.OCR_APPLIED};
-    private static final String[] metaKeysMultiValue = {MetadataKeys.PARSED_BY};
+    private static final String[] metaKeysMultiValue = {MetadataKeys.X_TIKA_PARSED_BY};
 
 
     /**

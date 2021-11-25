@@ -157,7 +157,7 @@ public class LegacyPdfProcessorParser extends AbstractParser {
                 tesseract.parse(FileUtils.openInputStream(tiffFileOfPDF), handler, metadata, context);
 
                 metadata.set(MetadataKeys.OCR_APPLIED, "true");
-                metadata.add(MetadataKeys.PARSED_BY, TesseractOCRParser.class.getName());
+                metadata.add(MetadataKeys.X_TIKA_PARSED_BY, TesseractOCRParser.class.getName());
 
                 logger.debug("Document parsing -- OCR processing time: {} ms", System.currentTimeMillis() - tessStartTime);
             }
