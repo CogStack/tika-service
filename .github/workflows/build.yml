@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Tesseract
         run: |
-          sudo apt-get install -y automake pkg-config libsdl-pango-dev libicu-dev libcairo2-dev bc && \
+          sudo apt-get install -y libleptonica-dev automake pkg-config libsdl-pango-dev libicu-dev libcairo2-dev bc && \
           curl -O -L https://github.com/tesseract-ocr/tesseract/archive/4.1.1.zip && \
           unzip 4.1.1.zip && \
           cd tesseract-4.1.1 && \
