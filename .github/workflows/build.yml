@@ -20,6 +20,7 @@ jobs:
           repo: deb http://deb.debian.org/debian testing main contrib non-free
           repo-name: debian-testing
           keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
+          install : imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu
 
       - name: Add Debian-src repo apt list
         uses: myci-actions/add-deb-repo@10
@@ -32,8 +33,6 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get upgrade -y && sudo apt dist-upgrade -y && \
           sudo apt-get install -y curl apt-transport-https apt-utils software-properties-common \
-          openjdk-11-jdk imagemagick ghostscript tesseract-ocr tesseract-ocr-eng \
-          tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu \
           libtomcat9-java libtomcat9-embed-java libtcnative-1 python3-pip
 
       - name: Install python packages
