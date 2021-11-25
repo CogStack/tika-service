@@ -15,7 +15,7 @@ jobs:
           distribution: 'adopt'
 
       - name : Add Debian repo apt list
-      - uses: myci-actions/add-deb-repo@10
+        uses: myci-actions/add-deb-repo@10
 
       - name: Install dependencies
         run: |
