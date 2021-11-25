@@ -14,31 +14,27 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-#      - name : Add Debian repo apt list
-#        uses: myci-actions/add-deb-repo@10
-#        with:
-#          repo: deb http://deb.debian.org/debian testing main contrib non-free
-#          repo-name: debian-testing
-#          keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
-#          install : imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu
-#
-#      - name: Add Debian-src repo apt list
-#        uses: myci-actions/add-deb-repo@10
-#        with:
-#          repo: deb-src http://deb.debian.org/debian testing main contrib non-free
-#          repo-name: debian-testing
-#          keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
+      - name : Add Debian repo apt list
+        uses: myci-actions/add-deb-repo@10
+        with:
+          repo: deb http://deb.debian.org/debian testing main contrib non-free
+          repo-name: debian-testing
+          keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
+          install : imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu
+
+      - name: Add Debian-src repo apt list
+        uses: myci-actions/add-deb-repo@10
+        with:
+          repo: deb-src http://deb.debian.org/debian testing main contrib non-free
+          repo-name: debian-testing
+          keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
 
       - name: Install dependencies
-          run: |
-            sudo echo 'deb http://deb.debian.org/debian testing main contrib non-free' >> /etc/apt/sources.list && \
-            sudo echo 'deb-src http://deb.debian.org/debian testing main contrib non-free' >> /etc/apt/sources.list && \
-            sudo echo 'deb http://security.debian.org testing-security main contrib non-free' >> /etc/apt/sources.list && \
-            sudo echo 'deb-src http://security.debian.org testing-security main contrib non-free' >> /etc/apt/sources.list && \
-            sudo apt-get update && sudo apt-get upgrade -y && \
-            sudo apt-get install -y curl apt-transport-https apt-utils software-properties-common \
-            openjdk-11-jdk imagemagick ghostscript \
-            libtomcat9-java libtomcat9-embed-java libtcnative-1 python3-pip
+        run: |
+          sudo apt-get update && sudo apt-get upgrade -y && \
+          sudo apt-get install -y curl software-properties-common \
+          imagemagick ghostscript \
+          libtomcat9-java libtomcat9-embed-java python3-pip
 
       - name: Build Tesseract
         run: |
