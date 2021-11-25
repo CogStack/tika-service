@@ -16,6 +16,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo echo 'deb http://deb.debian.org/debian testing main contrib non-free' >> /etc/apt/sources.list && \
+          sudo echo 'deb-src http://deb.debian.org/debian testing main contrib non-free' >> /etc/apt/sources.list && \
+          sudo echo 'deb http://security.debian.org testing-security main contrib non-free' >> /etc/apt/sources.list && \
+          sudo echo 'deb-src http://security.debian.org testing-security main contrib non-free' >> /etc/apt/sources.list && \
           sudo apt-get update && sudo apt-get upgrade -y && \
           sudo apt-get install -y curl apt-transport-https apt-utils software-properties-common \
           openjdk-11-jdk imagemagick ghostscript tesseract-ocr tesseract-ocr-eng \
