@@ -14,8 +14,8 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      -name : Add Debian repo apt list
-        - uses: myci-actions/add-deb-repo@10
+      - name : Add Debian repo apt list
+      - uses: myci-actions/add-deb-repo@10
 
       - name: Install dependencies
         run: |
