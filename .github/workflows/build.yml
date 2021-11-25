@@ -25,6 +25,16 @@ jobs:
           imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu \
           libtomcat9-java libtomcat9-embed-java libtcnative-1 python3-pip
 
+      - name: Build Tesseract
+        run: |
+          sudo apt-get install -y automake pkg-config libsdl-pango-dev libicu-dev libcairo2-dev bc && \
+          curl -O -L https://github.com/tesseract-ocr/tesseract/archive/4.1.1.zip && \
+          unzip 4.1.1.zip && \
+          cd tesseract-4.1.1 && \
+          ./autogen.sh && ./configure && make && sudo make install && sudo ldconfig && make training && sudo make training-install && \
+          cd .. && \
+          tesseract --version
+
       - name: Install python packages
         run: sudo -H pip3 install numpy matplotlib scikit-image
 
