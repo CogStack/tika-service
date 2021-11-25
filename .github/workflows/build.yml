@@ -19,14 +19,14 @@ jobs:
         with:
           repo: deb http://deb.debian.org/debian testing main contrib non-free
           repo-name: debian-testing
-          key-server: keyring.debian.org
+          keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
 
       - name: Add Debian-src repo apt list
         uses: myci-actions/add-deb-repo@10
         with:
           repo: deb-src http://deb.debian.org/debian testing main contrib non-free
           repo-name: debian-testing
-          key-server: keyring.debian.org
+          keys-asc: https://ftp-master.debian.org/keys/archive-key-11.asc
 
       - name: Install dependencies
         run: |
