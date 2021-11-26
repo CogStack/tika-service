@@ -23,7 +23,9 @@ jobs:
           sudo apt-get update && sudo apt-get upgrade -y && sudo apt dist-upgrade -y && \
           sudo apt-get install -y curl apt-transport-https apt-utils software-properties-common \
           imagemagick ghostscript \
-          libtomcat9-java libtomcat9-embed-java libtcnative-1 python3-pip git-lfs
+          libtomcat9-java libtomcat9-embed-java libtcnative-1 python3-pip git-lfs \
+          libtesseract-dev \
+          tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu
 
       - name: Build Tesseract
         run: |
