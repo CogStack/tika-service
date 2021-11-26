@@ -38,7 +38,7 @@ jobs:
           curl -O -L https://github.com/tesseract-ocr/tessdata_best/raw/main/eng.traineddata
           curl -O -L https://github.com/tesseract-ocr/tessdata_best/raw/main/osd.traineddata
           export TESSDATA_PREFIX=$PWD
-          echo "::set-env name=TESSDATA_PREFIX::$TESSDATA_PREFIX"
+          echo "TESSDATA_PREFIX=$(echo $TESSDATA_PREFIX)" >> $GITHUB_ENV
           cd ../..
           tesseract --version
 
