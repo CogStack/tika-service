@@ -35,4 +35,4 @@ jobs:
       - name: Build with Gradle
         run: |
           git lfs pull
-          ./gradlew build --info
+          ./gradlew build
