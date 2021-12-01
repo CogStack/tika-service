@@ -16,10 +16,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-add-repository "deb http://archive.ubuntu.com/ubuntu fossa main restricted " && \
-          sudo apt-add-repository "deb-src http://archive.ubuntu.com/ubuntu fossa main restricted multiverse universe" && \
-          sudo apt-add-repository "deb http://archive.ubuntu.com/ubuntu fossa-updates main" && \
-          sudo apt-add-repository "deb-src http://archive.ubuntu.com/ubuntu fossa-updates main multiverse universe" && \
+          sudo apt-add-repository main && sudo apt-add-repository universe && sudo apt-add-repository multiverse && sudo apt-add-repository restricted && \
           sudo apt-get update && sudo apt-get upgrade -y && sudo apt dist-upgrade -y && \
           sudo apt-get install -y curl apt-transport-https apt-utils software-properties-common \
           imagemagick ghostscript \

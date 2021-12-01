@@ -1,6 +1,3 @@
 .gitignore
-
-.travis.yml
-travis_gradle_build.sh
-
+.github
 docker
