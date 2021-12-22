@@ -7,7 +7,7 @@
 #
 # JDK base
 #
-FROM openjdk:11-slim AS jdk-base-builder
+FROM openjdk:17.0.1-slim-bullseye AS jdk-base-builder
 
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.1.1-2.1
@@ -18,10 +18,6 @@ ENV IMAGEMAGICK_VERSION 8:6.9.11.60+dfsg-1
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y apt-transport-https apt-utils && \
     apt-get install -y curl software-properties-common && \
-    echo 'deb http://deb.debian.org/debian testing main contrib non-free' >> /etc/apt/sources.list && \
-    echo 'deb-src http://deb.debian.org/debian testing main contrib non-free' >> /etc/apt/sources.list && \
-    echo 'deb http://security.debian.org testing-security main contrib non-free' >> /etc/apt/sources.list && \
-    echo 'deb-src http://security.debian.org testing-security main contrib non-free' >> /etc/apt/sources.list && \
     apt-get update && apt-get upgrade -y && \
     apt-get install -y imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
 	#apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \

@@ -9,7 +9,7 @@ server:
   port: 8090
   tomcat:
     threads:
-      max: 8
+      max: 16
 
 spring:
   servlet:
@@ -24,7 +24,7 @@ tika:
   parsers:
     tesseract-ocr:
       language: eng
-      timeout: 720
+      timeout: 1200
       enable-image-processing: true
       apply-rotation: false
 
@@ -37,9 +37,9 @@ tika:
 
     legacy-pdf-parser:
       image-magick:
-        timeout: 720
+        timeout: 1200
       tesseract-ocr:
-        timeout: 720
+        timeout: 1200
       min-doc-text-length: 1
   bulk:
     num-consumers: 16

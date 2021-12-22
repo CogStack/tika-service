@@ -32,7 +32,7 @@ import java.io.ByteArrayInputStream;
 @ComponentScan({"tika.legacy", "tika.processor"})
 public class TikaServiceController implements ErrorController {
 
-    private final String apiPathPrefix = "/**/api";
+    private final String apiPathPrefix = "/api";
     private final String apiFullPath = apiPathPrefix;
 
     private final Logger logger = LogManager.getLogger(TikaServiceController.class);
@@ -216,7 +216,6 @@ public class TikaServiceController implements ErrorController {
         return "Error, the page could not be found.";
     }
 
-    @Override
     public String getErrorPath() {
         return null;
     }

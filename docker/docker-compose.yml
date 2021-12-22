@@ -7,13 +7,20 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+      args:
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTPS_PROXY
+        - no_proxy=$no_proxy
     restart: always
     environment:
       # limit the number of processing threads used by tesseract OCR,
       # this should be used with care as processing for smaller documents (i.e < 10mb) is faster when limiting threads as
       # the thread IPC and management does not interfere when using a single thread
       # leave it to 1 if documents are small ( < 10mb) otherwise change to 0
-      - "OMP_THREAD_LIMIT=0"
+      - OMP_THREAD_LIMIT=1
+      - OMP_NUM_THREADS=8
+      - OMP_DYNAMIC=TRUE
+      - OMP_NESTED=TRUE
     volumes:
     - ../src/main/resources/application.yaml:/app/config/application.yaml:ro
     #ports:
