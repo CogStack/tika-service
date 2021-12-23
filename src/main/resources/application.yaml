@@ -9,7 +9,7 @@ server:
   port: 8090
   tomcat:
     threads:
-      max: 16
+      max: 8
 
 spring:
   servlet:
@@ -27,12 +27,18 @@ tika:
       timeout: 1200
       enable-image-processing: true
       apply-rotation: false
+      resize: 100
+      density: 300
+      depth: 4
+      filter: "triangle"
 
     pdf-ocr-parser:
       ocr-only-strategy: false
-      min-doc-text-length: 1
-      min-doc-byte-size: 10
+      min-doc-text-length: 10
+      min-doc-byte-size: 100
       apply-rotation: false
+      ocr-detect-angles: false
+      ocr-dpi: 100
       use-legacy-ocr-parser-for-single-page-doc: false
 
     legacy-pdf-parser:
@@ -40,7 +46,7 @@ tika:
         timeout: 1200
       tesseract-ocr:
         timeout: 1200
-      min-doc-text-length: 1
+      min-doc-text-length: 0
   bulk:
     num-consumers: 16
 
@@ -53,10 +59,10 @@ processing:
 
 logging:
   level:
-    root: INFO
-    tika.processor: INFO
-    org.springframework.web: INFO
-    service.controller: INFO
+    root: DEBUG
+    tika.processor: DEBUG
+    org.springframework.web: DEBUG
+    service.controller: DEBUG
     org.hibernate: INFO
   file:
     path: "./"

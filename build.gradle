@@ -45,7 +45,8 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.1'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
-
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
 
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
@@ -68,8 +69,8 @@ dependencies {
 	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.2.0'
 
 	// tika-dependencies
-	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.25'
-	implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.25'
+	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '3.0.0-RC1'
+	implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '3.0.0-RC1'
 	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
 	implementation group: 'com.github.jai-imageio', name: 'jai-imageio-jpeg2000', version: '1.4.0'
 	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'

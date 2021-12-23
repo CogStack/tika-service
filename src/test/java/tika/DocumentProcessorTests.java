@@ -1,12 +1,12 @@
 package tika;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import tika.model.TikaProcessingResult;
 import tika.processor.AbstractTikaProcessor;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -192,7 +192,7 @@ public abstract class DocumentProcessorTests {
 
 
     // TODO: need to double-check how to handle invalid TIFFs or image files
-    @Ignore
+    @Disabled
     @Test
     public void testExtractTiffWithOCR() throws Exception {
         InputStream stream = utils.getDocumentZipStream("invalid/tiff_multipage_spp2.tiff.zip", "tiff_multipage_spp2.tiff");
@@ -218,7 +218,7 @@ public abstract class DocumentProcessorTests {
 
 
     //TODO: need to create a proper docx encrypted file
-    @Ignore
+    @Disabled
     @Test
     public void testExtractWordEncrypted() throws Exception {
         InputStream stream = utils.getDocumentStream("word_enc_noerror.docx");

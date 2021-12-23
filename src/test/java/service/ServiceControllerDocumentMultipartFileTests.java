@@ -2,7 +2,6 @@ package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +19,7 @@ import tika.model.TikaProcessingResult;
 import tika.processor.CompositeTikaProcessorConfig;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -29,15 +28,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * A document is passed as a multi-part file
  */
 @SpringBootTest(classes = TikaServiceApplication.class)
-@RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {TikaServiceConfig.class, LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
 public class ServiceControllerDocumentMultipartFileTests extends ServiceControllerDocumentTests  {
 
 	@Autowired
 	private MockMvc mockMvc;
-
-	final private String PROCESS_FILE_ENDPOINT_URL = "/api/process_file";
 
     @Override
     protected TikaProcessingResult sendProcessingRequest(final String docPath, HttpStatus expectedStatus) throws Exception  {
@@ -48,6 +44,7 @@ public class ServiceControllerDocumentMultipartFileTests extends ServiceControll
         InputStream stream = utils.getDocumentStream(docPath);
         MockMultipartFile multipartFile = new MockMultipartFile("file", docPath, "multipart/form-data", stream);
 
+        String PROCESS_FILE_ENDPOINT_URL = "/api/process_file";
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.multipart(PROCESS_FILE_ENDPOINT_URL)
                 .file(multipartFile))
                 //.param("some-random", "4"))
@@ -61,9 +58,8 @@ public class ServiceControllerDocumentMultipartFileTests extends ServiceControll
         // parse content
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        TikaProcessingResult tikaResult = mapper.readValue(result.getResponse().getContentAsString(),
-                ServiceResponseContent.class).getResult();
 
-        return tikaResult;
+        return mapper.readValue(result.getResponse().getContentAsString(),
+                ServiceResponseContent.class).getResult();
     }
 }
