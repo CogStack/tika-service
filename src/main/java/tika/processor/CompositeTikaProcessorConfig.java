@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class CompositeTikaProcessorConfig {
-    // resize the image to lower or higher scale, min value 100, max value 900
+    // resize the image to lower or higher scale, min value 100, max value 900 (default value)
     // lower values will make image processing to faster, at the cost of text extract quality (how
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${tika.parsers.tesseract-ocr.resize:200}")
+    @Value("${tika.parsers.tesseract-ocr.resize:900}")
     private int ocrResize;
 
     @JsonView(JsonPropertyAccessView.Public.class)
@@ -27,8 +27,9 @@ public class CompositeTikaProcessorConfig {
     @Value("${tika.parsers.tesseract-ocr.filter:triangle}")
     private String ocrFilter;
 
+    // recursion depth before passing to the next parser, default is 16, has to be a power of 2.
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${tika.parsers.tesseract-ocr.depth:4}")
+    @Value("${tika.parsers.tesseract-ocr.depth:16}")
     private int ocrDepth;
 
     // the timeout value (s) when performing OCR over documents

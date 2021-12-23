@@ -205,18 +205,27 @@ The keys under `tesseract-ocr` define the default behavior of the Tika Tesseract
 - `enable-image-processing` - whether to use additional pre-processing of the images using ImageMagick (default: `true`), disable this option of if the files that will be processed do not contain any images.
 - `apply-rotation` - whether to apply de-rotating of the images (default: `false`),
 Please note that enabling `enable-image-processing` and/or `apply-rotation` although might improve the quality of the extracted text can significantly slower the extraction process.
+- `depth` - recursion depth before passing to the next parser, default is 16, has to be a power of 2
+- `filter` - smoothing filter applied to the images, 'triangle' is fastest
+- `resize` - image resizing, impacts performance a lot at the cost of extracted content quality (high values=better,slow, default: `100`)
+- `density` - DPI at which the images detected are represented, lower values provide faster processing, but possible quality loss (default:`150`)
 
 The keys under `pdf-ocr-parser` define the default behavior of the PDF parser that uses Tesseract OCR to extract the text:
 - `ocr-only-strategy` - whether to use only OCR or to apply additional text extraction from the content (default: `true`),
 - `min-doc-text-length` - if the available text in the document (before applying OCR) is higher than this value then skip OCR (default: `100`),
 - `min-doc-byte-size` - the minimum size of the image data (in bytes) that should have the content to be extracted, otherwise is skipped (default: `10000`),
 - `use-legacy-ocr-parser-for-single-page-doc` - in case of single-page PDF documents, whether to use the legacy parser (default: `false`).
+- `ocr-detect-angles` - used in conjunction with apply rotation, so if apply-rotation is not used this should be false (default: `false`)
+- `ocr-dpi` - a bit ambiguous as this is also provided in the tesseract-ocr-parser, DPI used to render the image (default: `150`)  
+
+Please check the `application.yaml` file for range limits on these settings.
 
 The keys under `legacy-pdf-parser` define the behavior of the Tika PDF parser used in CogStack Pipeline (the 'legacy' parser), that is used for backward compatibility:
-- `image-magick.timeout` - the max timeout value (in ms) when performing document conversion using ImageMagick (default: `300`),
-- `tesseract-ocr.timeout` - the max timeout value (in ms) when performing text extraction using Tesseract OCR (default: `300`),
+- `image-magick.timeout` - the max timeout value (in ms) when performing document conversion using ImageMagick (default: `1200`),
+- `tesseract-ocr.timeout` - the max timeout value (in ms) when performing text extraction using Tesseract OCR (default: `1200`),
 
-- `min-doc-text-length` - if the available text in the document (before applying OCR) is higher than this value then skip OCR (default: `100`).
+- `min-doc-text-length` - if the available text in the document (before applying OCR) is higher than this value then skip OCR (default: `10`).
+if you have documents containing only embedded images this should probably be set to `1` (if nothing is processed, because if the document contains no text and just images it might be skipped)
 
 # Supported file types and limitations
 

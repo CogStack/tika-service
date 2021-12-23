@@ -27,11 +27,11 @@ tika:
       timeout: 1200
       enable-image-processing: true
       apply-rotation: false
-      # resize valid range:100-900
+      # resize valid range:100-900, DEFAULT is 900
       resize: 100
       # density valid range:150-1200
-      density: 300
-      depth: 4
+      density: 150
+      depth: 16
       filter: "triangle"
 
     pdf-ocr-parser:
@@ -40,7 +40,7 @@ tika:
       min-doc-byte-size: 100
       apply-rotation: false
       ocr-detect-angles: false
-      # dpi valid range: 0->inf
+      # dpi valid range: 0->inf, default from Tika is 300
       ocr-dpi: 100
       use-legacy-ocr-parser-for-single-page-doc: false
 
