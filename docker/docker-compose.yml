@@ -21,6 +21,9 @@ services:
       #- OMP_NUM_THREADS=8
       - OMP_DYNAMIC=TRUE
       - OMP_NESTED=TRUE
+
+      # This option might be necessary on some systems if there's a java related error thrown
+      #- JAVA_OPTIONS=-XX:MaxRAMFraction=1
     volumes:
     - ../src/main/resources/application.yaml:/app/config/application.yaml:ro
     #ports:
