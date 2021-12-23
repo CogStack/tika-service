@@ -5,12 +5,12 @@ import tika.model.TikaProcessingResult;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Helper utilities used in tests
@@ -29,7 +29,7 @@ public class DocumentTestUtils {
     public InputStream getDocumentZipStream(final String archiveName, final String zipEntry) throws Exception {
         final String fullPath = "tika/docs/" + archiveName;
         final ZipEntry entry = new ZipEntry(zipEntry);
-        ZipFile zf = new ZipFile(getClass().getClassLoader().getResource(fullPath).getPath());
+        ZipFile zf = new ZipFile(Objects.requireNonNull(getClass().getClassLoader().getResource(fullPath)).getPath());
         InputStream stream = zf.getInputStream(entry);
         assertNotNull(stream);
         return stream;

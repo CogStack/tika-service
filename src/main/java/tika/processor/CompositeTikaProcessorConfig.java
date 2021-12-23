@@ -13,6 +13,23 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class CompositeTikaProcessorConfig {
+    // resize the image to lower or higher scale, min value 100, max value 900
+    // lower values will make image processing to faster, at the cost of text extract quality (how
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.tesseract-ocr.resize:200}")
+    private int ocrResize;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.tesseract-ocr.density:300}")
+    private int ocrDensity;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.tesseract-ocr.filter:triangle}")
+    private String ocrFilter;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.tesseract-ocr.depth:4}")
+    private int ocrDepth;
 
     // the timeout value (s) when performing OCR over documents
     @JsonView(JsonPropertyAccessView.Public.class)
@@ -24,6 +41,7 @@ public class CompositeTikaProcessorConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.parsers.tesseract-ocr.enable-image-processing:false}")
     private boolean ocrEnableImageProcessing;
+
 
     // apply de-rotation of documents before processing
     // can be quite computationally expensive (runs as an external python script)
@@ -41,6 +59,16 @@ public class CompositeTikaProcessorConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.parsers.pdf-ocr-parser.ocr-only-strategy:true}")
     private boolean pdfOcrOnlyStrategy;
+
+    // disabling should speed things up
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.pdf-ocr-parser.ocr-detect-angles:false}")
+    private boolean pdfOcrDetectAngles;
+
+    // DPI at which to process images, lower values will make it go faster at the cost of text extract quality
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.pdf-ocr-parser.ocr-dpi:300}")
+    private int pdfOcrDPI;
 
     // apply OCR only when trying to extract text from previously parsed document (w/o OCR)
     // that extracted characters were less than N

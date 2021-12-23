@@ -295,6 +295,10 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         tessConfig = new TesseractOCRConfig();
         tessConfig.setTimeoutSeconds(compositeTikaProcessorConfig.getOcrTimeout());
         tessConfig.setApplyRotation(compositeTikaProcessorConfig.isOcrApplyRotation());
+        tessConfig.setResize(compositeTikaProcessorConfig.getOcrResize());
+        tessConfig.setFilter(compositeTikaProcessorConfig.getOcrFilter());
+        tessConfig.setDensity(compositeTikaProcessorConfig.getOcrDensity());
+        tessConfig.setDepth(compositeTikaProcessorConfig.getOcrDepth());
         tessConfig.setSkipOcr(false);
         tessConfig.setEnableImagePreprocessing(compositeTikaProcessorConfig.isOcrEnableImageProcessing());
         tessConfig.setLanguage(compositeTikaProcessorConfig.getOcrLanguage());
@@ -326,6 +330,9 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private void initializePdfOcrParser() {
         PDFParserConfig pdfOcrConfig = new PDFParserConfig();
         pdfOcrConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
+
+        pdfOcrConfig.setOcrDPI(compositeTikaProcessorConfig.getPdfOcrDPI());
+        pdfOcrConfig.setDetectAngles(compositeTikaProcessorConfig.isPdfOcrDetectAngles());
 
         if (compositeTikaProcessorConfig.isPdfOcrOnlyStrategy()) {
             pdfOcrConfig.setExtractInlineImages(false);

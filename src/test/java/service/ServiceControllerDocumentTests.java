@@ -1,20 +1,18 @@
 package service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import service.controller.TikaServiceConfig;
 import tika.DocumentProcessorTests;
 import tika.legacy.LegacyPdfProcessorConfig;
 import tika.model.TikaProcessingResult;
 import tika.processor.CompositeTikaProcessorConfig;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 
 /**
@@ -22,7 +20,6 @@ import static org.junit.Assert.*;
  * present in DocumentProcessorTests
  */
 @SpringBootTest(classes = TikaServiceApplication.class)
-@RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {TikaServiceConfig.class, LegacyPdfProcessorConfig.class, CompositeTikaProcessorConfig.class})
 public abstract class ServiceControllerDocumentTests extends DocumentProcessorTests  {
@@ -42,8 +39,8 @@ public abstract class ServiceControllerDocumentTests extends DocumentProcessorTe
      *
      *
      */
-
     @Override
+    @Test
     public void testExtractPdfEx1Encrypted() throws Exception {
         final String docPath = "pdf/ex1_enc.pdf";
 
