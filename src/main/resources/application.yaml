@@ -27,7 +27,9 @@ tika:
       timeout: 1200
       enable-image-processing: true
       apply-rotation: false
+      # resize valid range:100-900
       resize: 100
+      # density valid range:150-1200
       density: 300
       depth: 4
       filter: "triangle"
@@ -38,6 +40,7 @@ tika:
       min-doc-byte-size: 100
       apply-rotation: false
       ocr-detect-angles: false
+      # dpi valid range: 0->inf
       ocr-dpi: 100
       use-legacy-ocr-parser-for-single-page-doc: false
 
@@ -59,10 +62,10 @@ processing:
 
 logging:
   level:
-    root: DEBUG
-    tika.processor: DEBUG
-    org.springframework.web: DEBUG
-    service.controller: DEBUG
+    root: INFO
+    tika.processor: INFO
+    org.springframework.web: INFO
+    service.controller: INFO
     org.hibernate: INFO
   file:
     path: "./"
