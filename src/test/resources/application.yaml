@@ -24,23 +24,32 @@ tika:
   parsers:
     tesseract-ocr:
       language: eng
-      timeout: 720
+      timeout: 1200
       enable-image-processing: true
       apply-rotation: false
+      # resize valid range:100-900, DEFAULT is 900
+      resize: 100
+      # density valid range:150-1200
+      density: 150
+      depth: 16
+      filter: "triangle"
 
     pdf-ocr-parser:
       ocr-only-strategy: false
-      min-doc-text-length: 1
-      min-doc-byte-size: 10
+      min-doc-text-length: 10
+      min-doc-byte-size: 100
       apply-rotation: false
+      ocr-detect-angles: false
+      # dpi valid range: 0->inf, default from Tika is 300
+      ocr-dpi: 100
       use-legacy-ocr-parser-for-single-page-doc: false
 
     legacy-pdf-parser:
       image-magick:
-        timeout: 720
+        timeout: 1200
       tesseract-ocr:
-        timeout: 720
-      min-doc-text-length: 1
+        timeout: 1200
+      min-doc-text-length: 0
   bulk:
     num-consumers: 16
 

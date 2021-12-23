@@ -2,7 +2,6 @@ package tika.utils;
 
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tika.model.MetadataKeys;
