@@ -10,6 +10,7 @@ public class TikaFileResource implements FileResource {
     private final String resourceId;
     private final Metadata metadata;
     private final InputStream content;
+    private TikaProcessingResult tikaProcessingResult;
 
     public TikaFileResource(String resourceId, Metadata metadata, InputStream fileContent) {
         this.resourceId = resourceId;
@@ -30,5 +31,14 @@ public class TikaFileResource implements FileResource {
     @Override
     public InputStream openInputStream() {
         return content;
+    }
+
+    public TikaProcessingResult getTikaProcessingResult()
+    {
+        return tikaProcessingResult;
+    }
+
+    public void setTikaProcessingResult(TikaProcessingResult tikaProcessingResult) {
+        this.tikaProcessingResult = tikaProcessingResult;
     }
 }

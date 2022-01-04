@@ -5,9 +5,8 @@ import org.apache.tika.mime.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tika.model.MetadataKeys;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
 
@@ -25,6 +24,18 @@ public class TikaUtils {
             MetadataKeys.LAST_MODIFIED, MetadataKeys.OCR_APPLIED};
     private static final String[] metaKeysMultiValue = {MetadataKeys.X_TIKA_PARSED_BY};
 
+    public static <T> List<List<T>> getBatchesFromList(List<T> collection, int batchSize){
+        int i = 0;
+        List<List<T>> batches = new ArrayList<List<T>>();
+        while(i < collection.size()){
+            int nextInc = Math.min(collection.size()-i,batchSize);
+            List<T> batch = collection.subList(i,i+nextInc);
+            batches.add(batch);
+            i = i + nextInc;
+        }
+
+        return batches;
+    }
 
     /**
      * Returns the number of pages if such information exists in metadata

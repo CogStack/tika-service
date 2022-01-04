@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.batch.*;
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
@@ -24,6 +25,7 @@ import tika.legacy.LegacyPdfProcessorConfig;
 import tika.legacy.LegacyPdfProcessorParser;
 import tika.model.MetadataKeys;
 import tika.model.TikaFileResource;
+import tika.model.TikaFileResourceConsumer;
 import tika.model.TikaProcessingResult;
 import tika.utils.TikaUtils;
 
@@ -37,7 +39,6 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
-
 
 /**
  * A default, composite Tika processor.
@@ -89,6 +90,10 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     // (used to strip-off clutter from LibreOffice-generated PDFs just with images)
     private LegacyPdfProcessorParser pdfSinglePageOcrParser;
     private ParseContext pdfSinglePageOcrParseContext;
+
+    private TikaFileResourceCrawler tikaFileResourceCrawler;
+    private TikaConsumerManager tikaConsumersManager;
+    private StatusReporter statusReporter;
 
     private final Logger logger = LogManager.getLogger(TikaServiceController.class);
 
@@ -153,15 +158,17 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     metadata = new Metadata();
                     metadata.add(IMAGE_PROCESSING_ENABLED, String.valueOf(tessConfig.isEnableImagePreprocessing()));
 
-                    if (useOcrLegacyParser) {
-                        pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
-                        // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add(MetadataKeys.X_TIKA_PARSED_BY, LegacyPdfProcessorParser.class.getName());
-                    }
-                    else {
-                        pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
-                        // since we use the parser manually, update the metadata with the name of the parser class used
-                        metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
+                    if (stream.getLength() >= 1) {
+                        if (useOcrLegacyParser) {
+                            pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
+                            // since we use the parser manually, update the metadata with the name of the parser class used
+                            metadata.add(MetadataKeys.X_TIKA_PARSED_BY, LegacyPdfProcessorParser.class.getName());
+                        }
+                        else {
+                            pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
+                            // since we use the parser manually, update the metadata with the name of the parser class used
+                            metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
+                        }
                     }
                 }
                 else {
@@ -207,6 +214,8 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         List <TikaProcessingResult> tikaProcessingResultList = new ArrayList<>();
 
+        int timeoutMilisToSec = compositeTikaProcessorConfig.getOcrTimeout() * 60;
+
         try {
             List<TikaFileResource> tikaFileResourceList = new ArrayList<>();
 
@@ -218,48 +227,39 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             }
             logger.info("Conversion finished....");
 
-            ArrayBlockingQueue<FileResource> tikaFileResourceArrayBlockingQueue = new ArrayBlockingQueue<>(tikaFileResourceList.size(),  true, tikaFileResourceList);
+            int numberOfBatches = compositeTikaProcessorConfig.getBatchNumConsumers() > tikaFileResourceList.size() ? 2 : compositeTikaProcessorConfig.getBatchNumConsumers();
+            var queueBatches = TikaUtils.getBatchesFromList(tikaFileResourceList, numberOfBatches);
+
+            ArrayBlockingQueue<FileResource> fileResourceArrayBlockingQueue = new ArrayBlockingQueue<>(tikaFileResourceList.size(), false, tikaFileResourceList);
             List<FileResourceConsumer> fileResourceConsumerList = new ArrayList<>();
 
-            // TODO: the process currently runs ona single thread, issues with the file queue persist when attempting to create multiple file resource consumers.
+            for(List<TikaFileResource> fileResourceList: queueBatches) {
+                var tmpQueue = new ArrayBlockingQueue<FileResource>(fileResourceList.size(), false, fileResourceList);
+                fileResourceConsumerList.add(new TikaResourceConsumer(tmpQueue));
+            }
 
-            fileResourceConsumerList.add(new FileResourceConsumer(tikaFileResourceArrayBlockingQueue) {
-                @Override
-                public boolean processFileResource(FileResource fileResource) {
-                    TikaProcessingResult result;
-                    try {
-                        result = processStream(TikaInputStream.get(fileResource.openInputStream().readAllBytes()));
-                        result.setResourceId(fileResource.getResourceId());
-                        logger.info("Processing file: " + fileResource.getResourceId());
-                        if(result.getSuccess())
-                        {
-                            tikaProcessingResultList.add(result);
-                            return true;
-                        }
-                        else {
-                            logger.error("OCR-ing failed" + result.getError());
-                        }
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                        logger.error("OCR-ing failed" + e.getMessage());
-                    }
+            tikaFileResourceCrawler = new TikaFileResourceCrawler(fileResourceArrayBlockingQueue, fileResourceConsumerList.size());
+            tikaFileResourceCrawler.setMaxConsecWaitInMillis(1000);
 
-                    return false;
-                }
-            });
+            tikaConsumersManager = new TikaConsumerManager(fileResourceConsumerList);
+            // does not let consumers hang over the specified maximum time
+            tikaConsumersManager.setConsumersManagerMaxMillis(timeoutMilisToSec);
 
-            FileResourceCrawler fileResourceCrawler = new TikaFileResourceCrawler(tikaFileResourceArrayBlockingQueue, compositeTikaProcessorConfig.getBatchNumConsumers());
-            ConsumersManager tikaConsumersManager = new TikaConsumerManager(fileResourceConsumerList);
-            StatusReporter statusReporter = new StatusReporter(fileResourceCrawler, tikaConsumersManager);
+            statusReporter = new StatusReporter(tikaFileResourceCrawler, tikaConsumersManager);
+            statusReporter.setSleepMillis(1000);
+            statusReporter.setStaleThresholdMillis(1000);
 
-            // TODO: Using an interrupter with the batch process causes sys exit issues on containerized environments, needs investigation.
-            // TODO: i.e Interrupter interrupter = new Interrupter(0); fails inside a VM but runs perfectly when directly run as jar
-
-            BatchProcess batchProcess = new BatchProcess(fileResourceCrawler, tikaConsumersManager, statusReporter, null);
-            logger.info(tikaConsumersManager.getConsumers().size());
+            BatchProcess batchProcess = new BatchProcess(tikaFileResourceCrawler, tikaConsumersManager, statusReporter, null);
+            batchProcess.setTimeoutCheckPulseMillis(100);
+            batchProcess.setPauseOnEarlyTerminationMillis(100);
+            batchProcess.setTimeoutThresholdMillis(timeoutMilisToSec);
+            batchProcess.setMaxAliveTimeSeconds(compositeTikaProcessorConfig.getOcrTimeout());
 
             var parallelFileProcessingResult = batchProcess.call();
+
+            for (TikaFileResource tikaFileResource : tikaFileResourceList) {
+                tikaProcessingResultList.add(tikaFileResource.getTikaProcessingResult());
+            }
 
             logger.info("Consumed:" + parallelFileProcessingResult.getConsumed());
             logger.info("Batch processing terminated with message: " + parallelFileProcessingResult.getCauseForTermination());
@@ -271,6 +271,61 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         }
 
         return tikaProcessingResultList;
+    }
+
+    private class TikaResourceConsumer extends TikaFileResourceConsumer {
+
+        private int fileQueueSize = 0;
+        private int inactiveConsumers = 0;
+
+        public TikaResourceConsumer(ArrayBlockingQueue<FileResource> fileQueue) {
+            super(fileQueue);
+            fileQueueSize = fileQueue.size();
+        }
+
+        @Override
+        public boolean processFileResource(FileResource fileResource) {
+            inactiveConsumers = 0;
+            try {
+                TikaProcessingResult result;
+                result = processStream(TikaInputStream.get(fileResource.openInputStream().readAllBytes()));
+                logger.info("Processing file: " + fileResource.getResourceId());
+                if(result.getSuccess()) {
+                    ((TikaFileResource) fileResource).setTikaProcessingResult(result);
+                }
+                else {
+                    logger.warn("OCR-ing failed" + result.getError());
+                }
+
+                if(this.getNumResourcesConsumed() + 1 >= fileQueueSize) {
+                    this.pleaseShutdown();
+                    this.flushAndClose(null);
+                    inactiveConsumers = inactiveConsumers + 1;
+                }
+
+                var consumers = tikaConsumersManager.getConsumers();
+
+                for(FileResourceConsumer consumer : consumers) {
+                    if(!consumer.isStillActive()) {
+                        inactiveConsumers = inactiveConsumers + 1;
+                        consumer.pleaseShutdown();
+                    }
+                }
+
+                if(inactiveConsumers >= consumers.size()) {
+                    tikaFileResourceCrawler.shutDownNoPoison();
+                    tikaConsumersManager.shutdown();
+                    statusReporter.setIsShuttingDown(true);
+                }
+
+                return true;
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                logger.error("OCR-ing failed" + e.getMessage());
+            }
+            return false;
+        }
     }
 
     private boolean isDocumentOfPdfType(InputStream stream) throws Exception {

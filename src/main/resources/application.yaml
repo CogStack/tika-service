@@ -51,7 +51,7 @@ tika:
         timeout: 1200
       min-doc-text-length: 0
   bulk:
-    num-consumers: 16
+    num-consumers: 8
 
 # documents processing configuration
 #
