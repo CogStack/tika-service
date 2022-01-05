@@ -1,3 +1,10 @@
+Release 0.3.1 -- 04 Jan 2022
+
+* Updated Tika to 2.2.1
+* Various application configuration changes (see README.md) that allows more granular control over how images are processed (DPI, resizing, etc.)
+* Batch processing improvements.
+* Log4J vulnerability mitigations.
+
 Release 0.3.0 -- 23 Aug 2021
 ---------------
 * Updated tika from version 1.27 to 2.0.0
