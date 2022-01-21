@@ -27,8 +27,8 @@ tika:
       timeout: 1200
       enable-image-processing: true
       apply-rotation: false
-      # resize valid range:100-900, DEFAULT is 900
-      resize: 100
+      # resize valid range:100-900, DEFAULT is 900, IMPORTANT: must be set in increments of 100
+      resize: 200
       # density valid range:150-1200
       density: 150
       depth: 16

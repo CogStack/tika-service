@@ -207,7 +207,7 @@ The keys under `tesseract-ocr` define the default behavior of the Tika Tesseract
 Please note that enabling `enable-image-processing` and/or `apply-rotation` although might improve the quality of the extracted text can significantly slower the extraction process.
 - `depth` - recursion depth before passing to the next parser, default is 16, has to be a power of 2
 - `filter` - smoothing filter applied to the images, 'triangle' is fastest
-- `resize` - image resizing, impacts performance a lot at the cost of extracted content quality (high values=better,slow, default: `100`)
+- `resize` - image resizing, impacts performance a lot at the cost of extracted content quality (high values=better,slow, default: `100`), must be set in increments of 100 otherwise it will error
 - `density` - DPI at which the images detected are represented, lower values provide faster processing, but possible quality loss (default:`150`)
 
 The keys under `pdf-ocr-parser` define the default behavior of the PDF parser that uses Tesseract OCR to extract the text:
