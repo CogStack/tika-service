@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.6.1'
+	id 'org.springframework.boot' version '2.6.2'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -8,12 +8,12 @@ apply plugin: 'java'
 apply plugin: 'application'
 
 group = 'tika-service'
-version = '0.3.0'
+version = '0.3.1'
 sourceCompatibility = '17'
 targetCompatibility = '17'
 
 wrapper {
-	gradleVersion = '7.3.2'
+	gradleVersion = '7.3.3'
 	distributionUrl = distributionUrl.replace("bin", "all")
 }
 
@@ -40,17 +40,17 @@ dependencies {
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.0'
 
-	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.1'
-	implementation 'org.springframework.boot:spring-boot-starter-batch:2.6.1'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.2'
+	implementation 'org.springframework.boot:spring-boot-starter-batch:2.6.2'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.1'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
 
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.6.1'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.6.2'
 
 	implementation 'org.apache.commons:commons-text:1.9'
 
