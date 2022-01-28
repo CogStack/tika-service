@@ -1,7 +1,7 @@
 # application configuration
 #
 application:
-  version: 0.3.0
+  version: 0.3.1
 
 # general spring boot and server configuration
 #
@@ -9,7 +9,7 @@ server:
   port: 8090
   tomcat:
     threads:
-      max: 8
+      max: 16
 
 spring:
   servlet:
@@ -28,11 +28,11 @@ tika:
       enable-image-processing: true
       apply-rotation: false
       # resize valid range:100-900, DEFAULT is 900, IMPORTANT: must be set in increments of 100
-      resize: 200
-      # density valid range:150-1200
-      density: 150
-      depth: 16
-      filter: "triangle"
+      resize: 100
+      # density valid range:150-1200, DEFAULT IS 300
+      density: 200
+      depth: 4
+      filter: "point"
 
     pdf-ocr-parser:
       ocr-only-strategy: false
@@ -41,7 +41,7 @@ tika:
       apply-rotation: false
       ocr-detect-angles: false
       # dpi valid range: 0->inf, default from Tika is 300
-      ocr-dpi: 100
+      ocr-dpi: 200
       use-legacy-ocr-parser-for-single-page-doc: false
 
     legacy-pdf-parser:
