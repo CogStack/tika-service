@@ -18,12 +18,16 @@ ENV IMAGEMAGICK_VERSION 8:6.9.11.60+dfsg-1
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y apt-transport-https apt-utils && \
     apt-get install -y curl software-properties-common && \
+    apt-add-repository non-free && \
+    apt-add-repository contrib && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
+    apt-get install -y --no-install-recommends libreoffice-core libreoffice-writer && \
+	apt-get install -y libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
+	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
+    apt-get install -y fonts-deva gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond ttf-mscorefonts-installer && \
+    apt-get install -y --fix-missing imagemagick ghostscript tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
 	#apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
 	#apt-get install -y imagemagick=$IMAGEMAGICK_VERSION --fix-missing && \
-	apt-get install -y libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
-	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
 	apt-get clean autoclean && \
     apt-get autoremove --purge -y && \
     rm -rf /var/lib/apt/lists/*

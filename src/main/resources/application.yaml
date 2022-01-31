@@ -15,7 +15,7 @@ spring:
   servlet:
     multipart.max-file-size: 32768MB
     multipart.max-request-size: 32768MB
-    multipart.file-size-threshold: 128MB
+    multipart.file-size-threshold: 16384MB
     multipart.enabled: true
 
 # tika configuration
@@ -62,11 +62,11 @@ processing:
 
 logging:
   level:
-    root: INFO
-    tika.processor: INFO
-    org.springframework.web: INFO
-    service.controller: INFO
-    org.hibernate: INFO
+    root: ERROR
+    tika.processor: ERROR
+    org.springframework.web: ERROR
+    service.controller: ERROR
+    org.hibernate: ERROR
   file:
     path: "./"
     name: "app.log"

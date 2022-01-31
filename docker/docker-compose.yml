@@ -26,7 +26,7 @@ services:
       - JAVA_OPTIONS=-XX:MaxRAMFraction=2 -XX:MinRAMFraction=4
     volumes:
     - ../src/main/resources/application.yaml:/app/config/application.yaml:ro
-    ports:
-    - "8090:8090"
+    #ports:
+    #- "8090:8090"
     # comment network_mode if you wish to use another port and uncomment the ports section
-    #network_mode: host
+    network_mode: host
