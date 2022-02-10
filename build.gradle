@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.6.2'
+	id 'org.springframework.boot' version '2.6.3'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -37,20 +37,20 @@ repositories {
 }
 
 dependencies {
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.0'
-	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.0'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
 
-	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.2'
-	implementation 'org.springframework.boot:spring-boot-starter-batch:2.6.2'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.6.3'
+	implementation 'org.springframework.boot:spring-boot-starter-batch:2.6.3'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.3'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
 
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.6.2'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.6.3'
 
 	implementation 'org.apache.commons:commons-text:1.9'
 
@@ -60,17 +60,17 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.1'
 
 	// tika
-	implementation group: 'org.apache.tika', name: 'tika', version: '2.2.1'
-	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.2.1'
-	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.2.1'
-	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.2.1'
-	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.2.1'
-	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.2.1'
-	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.2.1'
+	implementation group: 'org.apache.tika', name: 'tika', version: '2.3.0'
+	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.3.0'
+	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.3.0'
+	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.3.0'
+	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.3.0'
+	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.3.0'
+	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.3.0'
 
 	// tika-dependencies
-	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '3.0.0-RC1'
-	implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '3.0.0-RC1'
+	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.25'
+	implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.25'
 	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
 	implementation group: 'com.github.jai-imageio', name: 'jai-imageio-jpeg2000', version: '1.4.0'
 	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
