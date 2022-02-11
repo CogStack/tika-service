@@ -151,26 +151,6 @@ public class TikaServiceController implements ErrorController {
         try {
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
-            /*
-
-            TemporaryResources temporaryResources = new TemporaryResources();
-            InputStream initialStream = file.getInputStream();
-            Path tmpFilePath = temporaryResources.createTempFile();
-            logger.info("Storing tmp file at :" + tmpFilePath.toString());
-            File tmpFile = new File(tmpFilePath.toString());
-
-            TikaInputStream tikaInputStream = TikaInputStream.get(initialStream, temporaryResources);
-            TikaProcessingResult result = tikaProcessor.process(tikaInputStream);
-
-            if (tmpFile.exists()) {
-                Files.delete(tmpFile.toPath());
-            }
-            tikaInputStream.close();
-
-             */
-
-            // we are buffering the stream using ByteArrayInputStream in order to enable
-            // re-reading the binary document content
             ByteArrayInputStream byteBuffer = new ByteArrayInputStream(file.getBytes());
             TikaProcessingResult result = processStream(byteBuffer);
             return createProcessedDocumentResponseEntity(result);
