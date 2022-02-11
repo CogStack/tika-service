@@ -31,12 +31,12 @@ tika:
       resize: 100
       # density valid range:150-1200, DEFAULT IS 300
       density: 200
-      depth: 4
-      filter: "point"
+      depth: 16
+      filter: "triangle"
 
     pdf-ocr-parser:
       ocr-only-strategy: false
-      min-doc-text-length: 10
+      min-doc-text-length: 1
       min-doc-byte-size: 100
       apply-rotation: false
       ocr-detect-angles: false
@@ -49,7 +49,7 @@ tika:
         timeout: 1200
       tesseract-ocr:
         timeout: 1200
-      min-doc-text-length: 0
+      min-doc-text-length: 10
   bulk:
     num-consumers: 8
 
@@ -62,11 +62,11 @@ processing:
 
 logging:
   level:
-    root: ERROR
-    tika.processor: ERROR
-    org.springframework.web: ERROR
-    service.controller: ERROR
-    org.hibernate: ERROR
+    root: DEBUG
+    tika.processor: DEBUG
+    org.springframework.web: DEBUG
+    service.controller: DEBUG
+    org.hibernate: DEBUG
   file:
     path: "./"
     name: "app.log"

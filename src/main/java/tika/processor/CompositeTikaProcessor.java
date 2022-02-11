@@ -197,6 +197,8 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     .success(true)
                     .timestamp(OffsetDateTime.now())
                     .build();
+
+            outStream.close();
         }
         catch (Exception e) {
             logger.error(e.getMessage());
@@ -222,19 +224,19 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             logger.info("Converting multi-part files to resources files....");
 
             for(MultipartFile file: multipartFiles) {
-                var inputStream = file.getInputStream().readAllBytes();
-                tikaFileResourceList.add(new TikaFileResource(file.getOriginalFilename(), new Metadata(), TikaInputStream.get(inputStream)));
+                TikaFileResource tikaFileResource = new TikaFileResource(file.getOriginalFilename(), new Metadata(), TikaInputStream.get(file.getBytes()));
+                tikaFileResourceList.add(tikaFileResource);
             }
             logger.info("Conversion finished....");
 
-            int numberOfBatches = compositeTikaProcessorConfig.getBatchNumConsumers() > tikaFileResourceList.size() ? 2 : compositeTikaProcessorConfig.getBatchNumConsumers();
+            int numberOfBatches = compositeTikaProcessorConfig.getBatchNumConsumers() > tikaFileResourceList.size() ? 1 : compositeTikaProcessorConfig.getBatchNumConsumers();
             var queueBatches = TikaUtils.getBatchesFromList(tikaFileResourceList, numberOfBatches);
 
-            ArrayBlockingQueue<FileResource> fileResourceArrayBlockingQueue = new ArrayBlockingQueue<>(tikaFileResourceList.size(), false, tikaFileResourceList);
+            ArrayBlockingQueue<FileResource> fileResourceArrayBlockingQueue = new ArrayBlockingQueue<>(tikaFileResourceList.size(), true, tikaFileResourceList);
             List<FileResourceConsumer> fileResourceConsumerList = new ArrayList<>();
 
             for(List<TikaFileResource> fileResourceList: queueBatches) {
-                var tmpQueue = new ArrayBlockingQueue<FileResource>(fileResourceList.size(), false, fileResourceList);
+                var tmpQueue = new ArrayBlockingQueue<FileResource>(fileResourceList.size(), true, fileResourceList);
                 fileResourceConsumerList.add(new TikaResourceConsumer(tmpQueue));
             }
 
@@ -259,6 +261,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
             for (TikaFileResource tikaFileResource : tikaFileResourceList) {
                 tikaProcessingResultList.add(tikaFileResource.getTikaProcessingResult());
+                tikaFileResource.close();
             }
 
             logger.info("Consumed:" + parallelFileProcessingResult.getConsumed());
@@ -276,7 +279,6 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private class TikaResourceConsumer extends TikaFileResourceConsumer {
 
         private int fileQueueSize = 0;
-        private int inactiveConsumers = 0;
 
         public TikaResourceConsumer(ArrayBlockingQueue<FileResource> fileQueue) {
             super(fileQueue);
@@ -285,10 +287,10 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         @Override
         public boolean processFileResource(FileResource fileResource) {
-            inactiveConsumers = 0;
+            int inactiveConsumers = 0;
             try {
                 TikaProcessingResult result;
-                result = processStream(TikaInputStream.get(fileResource.openInputStream().readAllBytes()));
+                result = processStream(TikaInputStream.get(fileResource.openInputStream()));
                 logger.info("Processing file: " + fileResource.getResourceId());
                 if(result.getSuccess()) {
                     ((TikaFileResource) fileResource).setTikaProcessingResult(result);
@@ -299,7 +301,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
                 if(this.getNumResourcesConsumed() + 1 >= fileQueueSize) {
                     this.pleaseShutdown();
-                    this.flushAndClose(null);
+                    this.flushAndClose((TikaFileResource) fileResource);
                     inactiveConsumers = inactiveConsumers + 1;
                 }
 
@@ -312,7 +314,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     }
                 }
 
-                if(inactiveConsumers >= consumers.size()) {
+                if(inactiveConsumers > consumers.size()) {
                     tikaFileResourceCrawler.shutDownNoPoison();
                     tikaConsumersManager.shutdown();
                     statusReporter.setIsShuttingDown(true);

@@ -3,9 +3,11 @@ package tika.model;
 import org.apache.tika.batch.FileResource;
 import org.apache.tika.metadata.Metadata;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 
-public class TikaFileResource implements FileResource {
+public class TikaFileResource implements FileResource, Closeable {
 
     private final String resourceId;
     private final Metadata metadata;
@@ -40,5 +42,10 @@ public class TikaFileResource implements FileResource {
 
     public void setTikaProcessingResult(TikaProcessingResult tikaProcessingResult) {
         this.tikaProcessingResult = tikaProcessingResult;
+    }
+
+    @Override
+    public void close() throws IOException {
+        content.close();
     }
 }

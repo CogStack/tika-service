@@ -6,73 +6,113 @@
       "description": "Description for tika.parsers.tesseract-ocr.language."
     },
     {
-      "name": "tika.bulk.num-consumers",
-      "type": "java.lang.String",
-      "description": "Description for tika.bulk.num-consumers."
-    },
-    {
-      "name": "processing.use-legacy-tika-processor-as-default",
-      "type": "java.lang.String",
-      "description": "Description for processing.use-legacy-tika-processor-as-default."
-    },
-    {
-      "name": "processing.fail-on-empty-files",
-      "type": "java.lang.String",
-      "description": "Description for processing.fail-on-empty-files."
-    },
-    {
-      "name": "processing.fail-on-non-document-types",
-      "type": "java.lang.String",
-      "description": "Description for processing.fail-on-non-document-types."
-    },
-    {
-      "name": "tika.parsers.legacy-pdf-parser.min-doc-text-length",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.legacy-pdf-parser.min-doc-text-length."
-    },
-    {
-      "name": "tika.parsers.legacy-pdf-parser.tesseract-ocr.timeout",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.legacy-pdf-parser.tesseract-ocr.timeout."
-    },
-    {
-      "name": "tika.parsers.legacy-pdf-parser.image-magick.timeout",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.legacy-pdf-parser.image-magick.timeout."
-    },
-    {
-      "name": "tika.parsers.pdf-ocr-parser.use-legacy-ocr-parser-for-single-page-doc",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.pdf-ocr-parser.use-legacy-ocr-parser-for-single-page-doc."
-    },
-    {
-      "name": "tika.parsers.pdf-ocr-parser.min-doc-byte-size",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.pdf-ocr-parser.min-doc-byte-size."
-    },
-    {
-      "name": "tika.parsers.pdf-ocr-parser.min-doc-text-length",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.pdf-ocr-parser.min-doc-text-length."
-    },
-    {
-      "name": "tika.parsers.pdf-ocr-parser.ocr-only-strategy",
-      "type": "java.lang.String",
-      "description": "Description for tika.parsers.pdf-ocr-parser.ocr-only-strategy."
+      "name": "tika.parsers.tesseract-ocr.timeout",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.tesseract-ocr.timeout."
     },
     {
       "name": "tika.parsers.tesseract-ocr.enable-image-processing",
-      "type": "java.lang.String",
+      "type": "java.lang.Boolean",
       "description": "Description for tika.parsers.tesseract-ocr.enable-image-processing."
     },
     {
       "name": "tika.parsers.tesseract-ocr.apply-rotation",
-      "type": "java.lang.String",
+      "type": "java.lang.Boolean",
       "description": "Description for tika.parsers.tesseract-ocr.apply-rotation."
     },
     {
-      "name": "tika.parsers.tesseract-ocr.timeout",
+      "name": "tika.parsers.tesseract-ocr.resize",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.tesseract-ocr.resize."
+    },
+    {
+      "name": "tika.parsers.tesseract-ocr.density",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.tesseract-ocr.density."
+    },
+    {
+      "name": "tika.parsers.tesseract-ocr.depth",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.tesseract-ocr.depth."
+    },
+    {
+      "name": "tika.parsers.tesseract-ocr.filter",
       "type": "java.lang.String",
-      "description": "Description for tika.parsers.tesseract-ocr.timeout."
+      "description": "Description for tika.parsers.tesseract-ocr.filter."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.ocr-only-strategy",
+      "type": "java.lang.Boolean",
+      "description": "Description for tika.parsers.pdf-ocr-parser.ocr-only-strategy."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.min-doc-text-length",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.pdf-ocr-parser.min-doc-text-length."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.min-doc-byte-size",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.pdf-ocr-parser.min-doc-byte-size."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.apply-rotation",
+      "type": "java.lang.Boolean",
+      "description": "Description for tika.parsers.pdf-ocr-parser.apply-rotation."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.ocr-detect-angles",
+      "type": "java.lang.Boolean",
+      "description": "Description for tika.parsers.pdf-ocr-parser.ocr-detect-angles."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.ocr-dpi",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.pdf-ocr-parser.ocr-dpi."
+    },
+    {
+      "name": "tika.parsers.pdf-ocr-parser.use-legacy-ocr-parser-for-single-page-doc",
+      "type": "java.lang.Boolean",
+      "description": "Description for tika.parsers.pdf-ocr-parser.use-legacy-ocr-parser-for-single-page-doc."
+    },
+    {
+      "name": "tika.parsers.legacy-pdf-parser.image-magick.timeout",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.legacy-pdf-parser.image-magick.timeout."
+    },
+    {
+      "name": "tika.parsers.legacy-pdf-parser.tesseract-ocr.timeout",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.legacy-pdf-parser.tesseract-ocr.timeout."
+    },
+    {
+      "name": "tika.parsers.legacy-pdf-parser.min-doc-text-length",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.parsers.legacy-pdf-parser.min-doc-text-length."
+    },
+    {
+      "name": "tika.bulk.num-consumers",
+      "type": "java.lang.Integer",
+      "description": "Description for tika.bulk.num-consumers."
+    },
+    {
+      "name": "application.version",
+      "type": "java.lang.String",
+      "description": "Description for application.version."
+    },
+    {
+      "name": "processing.use-legacy-tika-processor-as-default",
+      "type": "java.lang.Boolean",
+      "description": "Description for processing.use-legacy-tika-processor-as-default."
+    },
+    {
+      "name": "processing.fail-on-non-document-types",
+      "type": "java.lang.Boolean",
+      "description": "Description for processing.fail-on-non-document-types."
+    },
+    {
+      "name": "processing.fail-on-empty-files",
+      "type": "java.lang.Boolean",
+      "description": "Description for processing.fail-on-empty-files."
     }
   ] }

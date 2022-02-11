@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import common.JsonPropertyAccessView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.io.TemporaryResources;
+import org.apache.tika.io.TikaInputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -22,7 +24,9 @@ import tika.utils.TikaUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 /**
@@ -95,7 +99,6 @@ public class TikaServiceController implements ErrorController {
             // re-reading the binary document content
             ByteArrayInputStream byteBuffer = new ByteArrayInputStream(streamContent);
             TikaProcessingResult result = processStream(byteBuffer);
-
             return createProcessedDocumentResponseEntity(result);
         }
         catch (Exception e) {
@@ -133,7 +136,7 @@ public class TikaServiceController implements ErrorController {
     }
 
     /**
-     * The endpoint used for processing documents sent as multi-part files
+     * The endpoint used for processing documents sent as multipart files
      */
     @PostMapping(value = apiFullPath + "/process_file", consumes = { "multipart/form-data" }, produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(@RequestParam("file") MultipartFile file) {
@@ -141,7 +144,6 @@ public class TikaServiceController implements ErrorController {
         if (file.isEmpty()) {
             final String message = "Empty content";
             logger.info(message);
-
             return createEmptyDocumentResponseEntity(message);
         }
 
@@ -149,8 +151,27 @@ public class TikaServiceController implements ErrorController {
         try {
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
-            ByteArrayInputStream byteBuffer = new ByteArrayInputStream(file.getBytes());
+            /*
 
+            TemporaryResources temporaryResources = new TemporaryResources();
+            InputStream initialStream = file.getInputStream();
+            Path tmpFilePath = temporaryResources.createTempFile();
+            logger.info("Storing tmp file at :" + tmpFilePath.toString());
+            File tmpFile = new File(tmpFilePath.toString());
+
+            TikaInputStream tikaInputStream = TikaInputStream.get(initialStream, temporaryResources);
+            TikaProcessingResult result = tikaProcessor.process(tikaInputStream);
+
+            if (tmpFile.exists()) {
+                Files.delete(tmpFile.toPath());
+            }
+            tikaInputStream.close();
+
+             */
+
+            // we are buffering the stream using ByteArrayInputStream in order to enable
+            // re-reading the binary document content
+            ByteArrayInputStream byteBuffer = new ByteArrayInputStream(file.getBytes());
             TikaProcessingResult result = processStream(byteBuffer);
             return createProcessedDocumentResponseEntity(result);
         }
@@ -171,9 +192,23 @@ public class TikaServiceController implements ErrorController {
         return response;
     }
 
-    private TikaProcessingResult processStream(ByteArrayInputStream stream) {
+    private TikaProcessingResult processStream(ByteArrayInputStream stream) throws IOException {
+        TemporaryResources temporaryResources = new TemporaryResources();
+        Path tmpFilePath = temporaryResources.createTempFile();
+        logger.info("Storing tmp file at :" + tmpFilePath.toString());
+        File tmpFile = new File(tmpFilePath.toString());
+
+        TikaInputStream tikaInputStream = TikaInputStream.get(stream, temporaryResources);
+        TikaProcessingResult result = tikaProcessor.process(tikaInputStream);
+
+        if (tmpFile.exists()) {
+            Files.delete(tmpFile.toPath());
+        }
+        tikaInputStream.close();
+
         logger.info("Running processor: " + tikaProcessor.getClass().toString());
-        return tikaProcessor.process(stream);
+
+        return result;
     }
 
     private ResponseEntity<ServiceResponseContent> createEmptyDocumentResponseEntity(String errorMessage) {

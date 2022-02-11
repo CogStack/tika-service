@@ -39,6 +39,10 @@ public abstract class AbstractTikaProcessor {
         return processStream(TikaInputStream.get(stream));
     }
 
+    public TikaProcessingResult process(TikaInputStream tikaInputStream) {
+        return processStream(tikaInputStream);
+    }
+
     public List<TikaProcessingResult> process(MultipartFile[] multipartFiles) {
         return processBatch(multipartFiles);
     }
