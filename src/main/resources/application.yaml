@@ -30,7 +30,7 @@ tika:
       # resize valid range:100-900, DEFAULT is 900, IMPORTANT: must be set in increments of 100
       resize: 100
       # density valid range:150-1200, DEFAULT IS 300
-      density: 200
+      density: 300
       depth: 16
       filter: "triangle"
 
