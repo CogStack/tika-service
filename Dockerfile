@@ -25,11 +25,11 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get update && apt-get upgrade -y
 
 # Nvidia cuda
-RUN wget https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda-repo-debian11-11-6-local_11.6.2-510.47.03-1_amd64.deb
-RUN dpkg -i ./cuda-repo-debian11-11-6-local_11.6.2-510.47.03-1_amd64.deb
-RUN apt-key add /var/cuda-repo-debian11-11-6-local/7fa2af80.pub
-RUN apt-get update --fix-missing && apt-get upgrade -y
-RUN apt-get -y install cuda
+#RUN wget https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda-repo-debian11-11-6-local_11.6.2-510.47.03-1_amd64.deb
+#RUN dpkg -i ./cuda-repo-debian11-11-6-local_11.6.2-510.47.03-1_amd64.deb
+#RUN apt-key add /var/cuda-repo-debian11-11-6-local/7fa2af80.pub
+#RUN apt-get update --fix-missing && apt-get upgrade -y
+#RUN apt-get -y install cuda
 
 # OpenCL
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential dkms nvidia-driver nvidia-egl-icd pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd nvidia-opencl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
