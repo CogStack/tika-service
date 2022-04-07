@@ -88,6 +88,7 @@ public class TikaServiceController implements ErrorController {
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request) {
         try {
             byte[] streamContent = request.getInputStream().readAllBytes();
+
             if (streamContent.length == 0) {
                 final String message = "Empty content";
                 logger.info(message);

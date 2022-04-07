@@ -1,10 +1,10 @@
 package tika.processor;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.batch.*;
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.extractor.DocumentSelector;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
@@ -15,6 +15,8 @@ import org.apache.tika.parser.html.HtmlParser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
+import org.apache.tika.parser.txt.CharsetDetector;
+import org.apache.tika.parser.txt.CharsetMatch;
 import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,7 @@ import tika.utils.TikaUtils;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,6 +180,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 }
             }
             else if (isDocumentOfHTMLType(stream)) {
+                stream.reset();
                 HtmlParser htmlParser = new HtmlParser();
                 defaultParseContext.set(HtmlParser.class, htmlParser);
                 htmlParser.parse(stream, handler, metadata, defaultParseContext);
@@ -192,7 +196,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             Map<String, Object> resultMeta = TikaUtils.extractMetadata(metadata);
 
             result = TikaProcessingResult.builder()
-                    .text(outStream.toString())
+                    .text(outStream.toString(StandardCharsets.UTF_8))
                     .metadata(resultMeta)
                     .success(true)
                     .timestamp(OffsetDateTime.now())
@@ -345,7 +349,36 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private boolean isDocumentOfHTMLType(InputStream stream) throws Exception {
         Metadata metadata = new Metadata();
         MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
-        return mediaType.getSubtype().contains("html");
+
+        boolean isHTML = mediaType.getSubtype().contains("html");
+
+        // hack to deal with docs that have no type assigned
+        if (!isHTML)
+        {
+            byte[] streamBytes = IOUtils.toByteArray(stream);
+            stream.reset();
+
+            String result = "";
+
+            // detect charset (pick the one with the highest confidence)
+            try {
+                CharsetDetector charsetDetector = new CharsetDetector();
+                charsetDetector.setText(stream);
+                CharsetMatch charsetMatch = charsetDetector.detect();
+
+                result = new String(streamBytes, charsetMatch.getName());
+            }
+            catch (Exception e){
+                e.printStackTrace();
+                logger.error("Failed to check for HTML type in text" + e.getMessage());
+            }
+
+            if (result.contains("<html>") && result.contains("</html>")) {
+                isHTML = true;
+            }
+        }
+
+        return isHTML;
     }
 
     private void initializeTesseractConfig() {
