@@ -23,7 +23,15 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-add-repository non-free && \
     apt-add-repository contrib && \
     apt-get update && apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential nvidia-driver nvidia-egl-icd pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd nvidia-opencl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential linux-headers-$(uname -r) dkms nvidia-driver nvidia-egl-icd pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd nvidia-opencl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
+
+# Nvidia cuda
+RUN add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/debian10/x86_64/ /"
+RUN add-apt-repository contrib
+RUN apt-get update && apt-get upgrade -y
+RUN sudo apt-get -y install cuda
+
+# Other requirements for Tika & Tesseract OCR
 RUN apt-get install -y libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
 	apt-get install -y python3-pip && pip3 install numpy pycuda matplotlib scikit-image && \
     apt-get install -y fonts-deva gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond ttf-mscorefonts-installer && \
