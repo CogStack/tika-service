@@ -23,7 +23,7 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-add-repository non-free && \
     apt-add-repository contrib && \
     apt-get update && apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind libtiff-dev build-essential nvidia-driver nvidia-egl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd nvidia-opencl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential nvidia-driver nvidia-egl-icd pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd nvidia-opencl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
 RUN apt-get install -y libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
 	apt-get install -y python3-pip && pip3 install numpy pycuda matplotlib scikit-image && \
     apt-get install -y fonts-deva gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond ttf-mscorefonts-installer && \
