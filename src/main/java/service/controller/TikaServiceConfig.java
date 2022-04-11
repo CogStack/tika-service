@@ -35,4 +35,5 @@ public class TikaServiceConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${processing.fail-on-non-document-types:true}")
     boolean failOnNonDocumentTypes;
+
 }

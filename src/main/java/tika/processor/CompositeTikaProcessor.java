@@ -34,11 +34,14 @@ import tika.utils.TikaUtils;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
@@ -195,8 +198,19 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             // parse the metadata and store the result
             Map<String, Object> resultMeta = TikaUtils.extractMetadata(metadata);
 
+            String outputText = "";
+
+            if (compositeTikaProcessorConfig.isEnforceEncodingOutput())
+            {
+                if (Objects.equals(compositeTikaProcessorConfig.getOutputEncoding(), "")) {
+                    compositeTikaProcessorConfig.setOutputEncoding("UTF-8");
+                }
+                String detectENCODING = TikaUtils.detectEncoding(stream);
+                outputText = new String(outStream.toString().getBytes(detectENCODING), compositeTikaProcessorConfig.getOutputEncoding());
+            }
+
             result = TikaProcessingResult.builder()
-                    .text(outStream.toString(StandardCharsets.UTF_8))
+                    .text(outputText)
                     .metadata(resultMeta)
                     .success(true)
                     .timestamp(OffsetDateTime.now())
@@ -351,28 +365,15 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
 
         boolean isHTML = mediaType.getSubtype().contains("html");
+        stream.reset();
 
         // hack to deal with docs that have no type assigned
         if (!isHTML)
         {
+            String detectedEncoding = TikaUtils.detectEncoding(stream);
             byte[] streamBytes = IOUtils.toByteArray(stream);
-            stream.reset();
 
-            String result = "";
-
-            // detect charset (pick the one with the highest confidence)
-            try {
-                CharsetDetector charsetDetector = new CharsetDetector();
-                charsetDetector.setText(stream);
-                CharsetMatch charsetMatch = charsetDetector.detect();
-
-                result = new String(streamBytes, charsetMatch.getName());
-            }
-            catch (Exception e){
-                e.printStackTrace();
-                logger.error("Failed to check for HTML type in text" + e.getMessage());
-            }
-
+            String result = new String(streamBytes, detectedEncoding);
             if (result.contains("<html>") && result.contains("</html>")) {
                 isHTML = true;
             }

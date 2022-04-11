@@ -94,4 +94,13 @@ public class CompositeTikaProcessorConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.bulk.num-consumers:8}")
     private int batchNumConsumers;
+
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.post-ocr.output-encoding:UTF-8}")
+    private String outputEncoding;
+
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.post-ocr.enforce-encoding-output:true}")
+    private boolean enforceEncodingOutput;
 }

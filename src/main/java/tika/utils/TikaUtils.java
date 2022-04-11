@@ -1,11 +1,15 @@
 package tika.utils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.parser.txt.CharsetDetector;
+import org.apache.tika.parser.txt.CharsetMatch;
 import tika.model.MetadataKeys;
 
+import java.io.InputStream;
 import java.util.*;
 
 import static tika.model.MetadataKeys.IMAGE_PROCESSING_ENABLED;
@@ -79,6 +83,27 @@ public class TikaUtils {
         extractOcrApplied(docMeta, resultMeta);
 
         return resultMeta;
+    }
+
+    public static String detectEncoding(final InputStream inputStream) {
+        String result = "";
+
+        // detect charset (pick the one with the highest confidence)
+        try {
+            CharsetDetector charsetDetector = new CharsetDetector();
+            charsetDetector.setText(inputStream);
+            CharsetMatch charsetMatch = charsetDetector.detect();
+            inputStream.reset();
+
+            result = charsetMatch.getName();
+        }
+        catch (Exception e) {
+            Logger logger = LogManager.getLogger(TikaUtils.class);
+            e.printStackTrace();
+            logger.error("Failed to detect encoding type in text" + e.getMessage());
+        }
+
+        return result;
     }
 
     static private void extractPageCount(final Metadata docMeta, Map<String, Object> resultMeta) {

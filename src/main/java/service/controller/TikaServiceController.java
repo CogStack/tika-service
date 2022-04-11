@@ -92,10 +92,8 @@ public class TikaServiceController implements ErrorController {
             if (streamContent.length == 0) {
                 final String message = "Empty content";
                 logger.info(message);
-
                 return createEmptyDocumentResponseEntity(message);
             }
-
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
             ByteArrayInputStream byteBuffer = new ByteArrayInputStream(streamContent);
