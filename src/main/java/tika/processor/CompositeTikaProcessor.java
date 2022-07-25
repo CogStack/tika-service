@@ -191,6 +191,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             }
             else {
                 // otherwise, run default documents parser
+                stream.reset();
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
                 metadata.add(MetadataKeys.X_TIKA_PARSED_BY, AutoDetectParser.class.getName());
             }
