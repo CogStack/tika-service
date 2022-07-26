@@ -60,15 +60,15 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3'
 
 	// tika
-	implementation group: 'org.apache.tika', name: 'tika', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-parsers-standard-package', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.4.0'
-	implementation group: 'org.apache.tika', name: 'tika-parsers-ml', version: '2.4.0', ext: 'pom'
+	implementation group: 'org.apache.tika', name: 'tika', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-core', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-app', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parsers', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parsers-standard-package', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parsers-ml', version: '2.4.1', ext: 'pom'
 
 	// tika-dependencies
 	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.25'
