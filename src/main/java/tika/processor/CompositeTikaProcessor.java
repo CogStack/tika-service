@@ -207,7 +207,14 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     compositeTikaProcessorConfig.setOutputEncoding("UTF-8");
                 }
                 String detectENCODING = TikaUtils.detectEncoding(stream);
-                outputText = new String(outStream.toString().getBytes(detectENCODING), compositeTikaProcessorConfig.getOutputEncoding());
+                try {
+                    outputText = new String(outStream.toString().getBytes(detectENCODING), compositeTikaProcessorConfig.getOutputEncoding());
+                }
+                catch(Exception e) {
+                    outputText = outStream.toString();
+                    logger.error("Failed to convert text to encoding:" + compositeTikaProcessorConfig.getOutputEncoding());
+                    logger.error("Outputting Text in detected encoding:" + detectENCODING );
+                }
             }
 
             result = TikaProcessingResult.builder()
@@ -402,7 +409,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         defaultParseContext = new ParseContext();
         defaultParseContext.set(TikaConfig.class, tikaConfig);
         defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
-        defaultParseContext.set(AutoDetectParser.class, defaultParser);
+            defaultParseContext.set(AutoDetectParser.class, defaultParser);
         defaultParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
