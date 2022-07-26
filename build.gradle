@@ -68,6 +68,7 @@ dependencies {
 	implementation group: 'org.apache.tika', name: 'tika-batch', version: '2.4.0'
 	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.4.0'
 	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.4.0'
+	implementation group: 'org.apache.tika', name: 'tika-parsers-ml', version: '2.4.0', ext: 'pom'
 
 	// tika-dependencies
 	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.25'
