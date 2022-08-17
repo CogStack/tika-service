@@ -11,8 +11,8 @@ server:
     threads:
       max: 16
 
-  ssl:
-    enabled: true
+  #ssl:
+  #  enabled: true
 
     #key-store: classpath:root-ca.p12
     #key-store-password: "cogstackNifi"
