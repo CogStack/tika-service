@@ -114,7 +114,7 @@ The provided metadata associated with the document and the used parsers can incl
 
 Using `curl` to send the document to Tika server instance running on localhost on `8090` port:
 
-`curl -F file=@test.pdf http://localhost:8090/api/process_file | jq`
+`curl -k -F file=@test.pdf https://localhost:8090/api/process_file | jq`
 
 Returned result:
 ```
@@ -140,7 +140,7 @@ Returned result:
 
 For this feature to work you must set the following `use-legacy-tika-processor-as-default: false` in application.yaml.
 
-`curl -F file=@test1.pdf -F file=@test2.pdf http://localhost:8090/api/process_bulk`
+`curl -k -F file=@test1.pdf -F file=@test2.pdf https://localhost:8090/api/process_bulk`
 
 Returned result:
 ```
