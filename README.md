@@ -58,6 +58,12 @@ To run Tika service container:
 
 The service will be listening on port `8090` on the host machine.
 
+## Security 
+
+The `application.yaml` now has SSL mod enable by default.
+
+The `.p12` certificate is taken directly from the [NiFi repo](https://github.com/CogStack/CogStack-NiFi/blob/cf92351db5b09aad11c7ad5c916d25f2b8603232/security/root-ca.p12ß)
+
 ## Important settings for TESSERACT OCR 
 
 When processing large documents (and in large amounts) it is important to benchmark the performance depending on the use case. 

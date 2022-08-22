@@ -11,14 +11,13 @@ server:
     threads:
       max: 16
 
-  #ssl:
-  #  enabled: true
-
-    #key-store: classpath:root-ca.p12
-    #key-store-password: "cogstackNifi"
-    #key-store-type: pkcs12
-    #key-alias: root-ca
-    #key-password: "cogstackNifi"
+  ssl:
+    enabled: true
+    key-store: classpath:root-ca.p12
+    key-store-password: "cogstackNifi"
+    key-store-type: pkcs12
+    key-alias: root-ca
+    key-password: "cogstackNifi"
 
 spring:
   servlet:
