@@ -32,6 +32,7 @@ import tika.model.TikaProcessingResult;
 import tika.utils.TikaUtils;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -201,20 +202,22 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
             String outputText = "";
 
-            if (compositeTikaProcessorConfig.isEnforceEncodingOutput())
-            {
+            if (compositeTikaProcessorConfig.isEnforceEncodingOutput()) {
                 if (Objects.equals(compositeTikaProcessorConfig.getOutputEncoding(), "")) {
                     compositeTikaProcessorConfig.setOutputEncoding("UTF-8");
                 }
-                String detectENCODING = TikaUtils.detectEncoding(stream);
+                String detectedEncoding = TikaUtils.detectEncoding(new ByteArrayInputStream(outStream.toByteArray()));
                 try {
-                    outputText = new String(outStream.toString().getBytes(detectENCODING), compositeTikaProcessorConfig.getOutputEncoding());
+                    outputText = new String(outStream.toString().getBytes(detectedEncoding), compositeTikaProcessorConfig.getOutputEncoding());
                 }
                 catch(Exception e) {
                     outputText = outStream.toString();
                     logger.error("Failed to convert text to encoding:" + compositeTikaProcessorConfig.getOutputEncoding());
-                    logger.error("Outputting Text in detected encoding:" + detectENCODING );
+                    logger.error("Outputting Text in detected encoding:" + detectedEncoding );
                 }
+            }
+            else {
+                outputText = outStream.toString();
             }
 
             result = TikaProcessingResult.builder()
