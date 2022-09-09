@@ -3,6 +3,8 @@
 This project implements Apache Tika running as a web service using Spring Boot. It exposes a REST API so that a client can send a document in binary format and receive back the extracted text. The supported document formats are the ones as in Tika.
 Some of the key motivation behind developing own wrapper over Tika instead of using the already available [Tika server](https://cwiki.apache.org/confluence/display/tika/TikaJAXRS) is a better control over used document parsers (such as PDFParser, Tesseract OCR and the legacy one taken from [CogStack-Pipeline](https://github.com/CogStack/CogStack-Pipeline)) and control over returned results with HTTP return codes.
 
+Feel free to ask questions on the github issue tracker or on our [discourse website](https://discourse.cogstack.org) which is frequently used by our development team!
+
 # Building
 
 To build the application, run in the main directory:
