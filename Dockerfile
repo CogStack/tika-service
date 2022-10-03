@@ -50,7 +50,6 @@ RUN curl -s -L https://nvidia.github.io/nvidia-docker/$(. /etc/os-release;echo $
 RUN curl -s -L https://nvidia.github.io/libnvidia-container/experimental/$(. /etc/os-release;echo $ID$VERSION_ID)/libnvidia-container-experimental.list | tee /etc/apt/sources.list.d/libnvidia-container-experimental.list
 
 RUN apt-get update && apt-get upgrade -y
-
 # RUN apt-get install -y nvidia-docker2 nvidia-container-toolkit
 
 # Other requirements for Tika & Tesseract OCR
@@ -58,7 +57,7 @@ RUN apt-get install -y libimage-exiftool-perl libtika-java libtomcat9-java libto
 	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
     apt-get install -y fonts-deva gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond && \
     apt-get install -y --fix-missing ghostscript ghostscript-x gsfonts gsfonts-other gsfonts-x11 && \
-    apt-get install -y --fix-missing imagemagick tesseract-ocr tesseract-ocr-dev tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
+    apt-get install -y --fix-missing imagemagick tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
 	#apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
 	#apt-get install -y imagemagick=$IMAGEMAGICK_VERSION --fix-missing && \
 	apt-get clean autoclean && \
