@@ -55,7 +55,7 @@ RUN apt-get update && apt-get upgrade -y
 
 # Other requirements for Tika & Tesseract OCR
 RUN apt-get install -y libimage-exiftool-perl libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
-	apt-get install -y python3-pip && pip3 install numpy pycuda matplotlib scikit-image && \
+	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
     apt-get install -y fonts-deva gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond && \
     apt-get install -y --fix-missing ghostscript ghostscript-x gsfonts gsfonts-other gsfonts-x11 && \
     apt-get install -y --fix-missing imagemagick tesseract-ocr tesseract-ocr-dev tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
