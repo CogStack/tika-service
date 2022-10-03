@@ -15,6 +15,14 @@ ENV TESSERACT_VERSION 4.1.1-2.1
 ENV TESSERACT_RES_VERSION 1:4.00~git30-7274cfa-1.1
 ENV IMAGEMAGICK_VERSION 8:6.9.11.60+dfsg-1
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_PRIORITY=critical
+
+ENV NVIDIA_DRIVER_VERSION=510
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
 # add tesseract key
 RUN apt-get update && apt-get upgrade -y && \
@@ -32,7 +40,18 @@ RUN apt-get update && apt-get upgrade -y && \
 #RUN apt-get -y install cuda
 
 # OpenCL
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential dkms nvidia-driver nvidia-egl-icd pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd nvidia-opencl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends initramfs-tools xz-utils ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential clinfo dkms pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd # nvidia-opencl-icd  nvidia-driver nvidia-egl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
+
+# NVIDIA Docker
+RUN export distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+
+RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
+RUN curl -s -L https://nvidia.github.io/nvidia-docker/$(. /etc/os-release;echo $ID$VERSION_ID)/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list
+RUN curl -s -L https://nvidia.github.io/libnvidia-container/experimental/$(. /etc/os-release;echo $ID$VERSION_ID)/libnvidia-container-experimental.list | tee /etc/apt/sources.list.d/libnvidia-container-experimental.list
+
+RUN apt-get update && apt-get upgrade -y
+
+# RUN apt-get install -y nvidia-docker2 nvidia-container-toolkit
 
 # Other requirements for Tika & Tesseract OCR
 RUN apt-get install -y libimage-exiftool-perl libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
@@ -45,6 +64,12 @@ RUN apt-get install -y libimage-exiftool-perl libtika-java libtomcat9-java libto
 	apt-get clean autoclean && \
     apt-get autoremove --purge -y && \
     rm -rf /var/lib/apt/lists/*
+
+# RUN apt-get install x11-xserver-utils
+# RUN xhost +local:username
+
+RUN mkdir -p /etc/OpenCL/vendors && \
+    echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 
 # setup the build environment
 RUN mkdir -p /docker_build
