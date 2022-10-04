@@ -69,13 +69,27 @@ dependencies {
 	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.4.1'
 	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.4.1'
 	implementation group: 'org.apache.tika', name: 'tika-parsers-ml', version: '2.4.1', ext: 'pom'
+	implementation group: 'org.apache.tika', name: 'tika-langdetect', version: '2.4.1', ext: 'pom'
+	implementation group: 'org.apache.tika', name: 'tika-parser-text-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-pdf-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-html-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-microsoft-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-image-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-zip-commons', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-langdetect-optimaize', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-ocr-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-scientific-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-digest-commons', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-miscoffice-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-sqlite3-module', version: '2.4.1'
+	implementation group: 'org.apache.tika', name: 'tika-parser-crypto-module', version: '2.4.1'
 
 	// tika-dependencies
-	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.25'
-	implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.25'
-	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.3'
+	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.27'
+	implementation group: 'org.apache.pdfbox', name: 'fontbox', version: '2.0.27'
+	implementation group: 'org.apache.pdfbox', name: 'jbig2-imageio', version: '3.0.4'
 	implementation group: 'com.github.jai-imageio', name: 'jai-imageio-jpeg2000', version: '1.4.0'
-	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
+	implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.39.3.0'
 }
 
 jar {
