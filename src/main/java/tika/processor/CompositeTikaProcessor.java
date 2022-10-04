@@ -412,7 +412,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         defaultParseContext = new ParseContext();
         defaultParseContext.set(TikaConfig.class, tikaConfig);
         defaultParseContext.set(TesseractOCRConfig.class, tessConfig);
-            defaultParseContext.set(AutoDetectParser.class, defaultParser);
+        defaultParseContext.set(AutoDetectParser.class, defaultParser);
         defaultParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
@@ -435,7 +435,6 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
         pdfOcrConfig.setOcrDPI(compositeTikaProcessorConfig.getPdfOcrDPI());
         pdfOcrConfig.setDetectAngles(compositeTikaProcessorConfig.isPdfOcrDetectAngles());
-
         if (compositeTikaProcessorConfig.isPdfOcrOnlyStrategy()) {
             pdfOcrConfig.setExtractInlineImages(false);
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_ONLY);
@@ -446,6 +445,10 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             // warn: note that applying 'OCR_AND_TEXT_EXTRACTION' the content can be duplicated
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_AND_TEXT_EXTRACTION);
         }
+        pdfOcrConfig.setDropThreshold(pdfOcrConfig.getDropThreshold());
+        pdfOcrConfig.setOcrImageQuality(pdfOcrConfig.getOcrImageQuality());
+        pdfOcrConfig.setOcrRenderingStrategy(PDFParserConfig.OCR_RENDERING_STRATEGY.ALL);
+        pdfOcrConfig.setImageStrategy(PDFParserConfig.IMAGE_STRATEGY.RENDER_PAGES_BEFORE_PARSE);
 
         pdfOcrParser = new PDFParser();
         pdfOcrParseContext = new ParseContext();

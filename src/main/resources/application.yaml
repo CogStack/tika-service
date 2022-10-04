@@ -46,10 +46,12 @@ tika:
       ocr-only-strategy: false
       min-doc-text-length: 1
       min-doc-byte-size: 100
+      image-quality: 1.0f
+      drop-threshold: 1.0f
       apply-rotation: false
-      ocr-detect-angles: false
+      ocr-detect-angles: true
       # dpi valid range: 0->inf, default from Tika is 300
-      ocr-dpi: 200
+      ocr-dpi: 300
       use-legacy-ocr-parser-for-single-page-doc: false
 
     post-ocr:

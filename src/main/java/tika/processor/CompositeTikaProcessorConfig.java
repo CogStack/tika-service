@@ -71,6 +71,16 @@ public class CompositeTikaProcessorConfig {
     @Value("${tika.parsers.pdf-ocr-parser.ocr-dpi:300}")
     private int pdfOcrDPI;
 
+    // Drop Threshold for image detection
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.pdf-ocr-parser.drop-threshold:1.0f}")
+    private float pdfOcrDropThreshold;
+
+    // Drop Threshold for image detection
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.pdf-ocr-parser.image-quality:2.0f}")
+    private float pdfOcrImageQuality;
+
     // apply OCR only when trying to extract text from previously parsed document (w/o OCR)
     // that extracted characters were less than N
     @JsonView(JsonPropertyAccessView.Public.class)
@@ -94,7 +104,6 @@ public class CompositeTikaProcessorConfig {
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.bulk.num-consumers:8}")
     private int batchNumConsumers;
-
 
     @JsonView(JsonPropertyAccessView.Public.class)
     @Value("${tika.post-ocr.output-encoding:UTF-8}")
