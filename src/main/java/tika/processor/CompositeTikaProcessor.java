@@ -123,6 +123,8 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
     protected TikaProcessingResult processStream(TikaInputStream stream) {
 
+        var currentTimeNanos =  System.nanoTime();
+
         TikaProcessingResult result;
         try {
             final int MIN_TEXT_BUFFER_SIZE = 1;
@@ -217,6 +219,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     .metadata(resultMeta)
                     .success(true)
                     .timestamp(OffsetDateTime.now())
+                    .processingElapsedTime((long) ((System.nanoTime() - currentTimeNanos) * 1e-9))
                     .build();
 
             outStream.close();

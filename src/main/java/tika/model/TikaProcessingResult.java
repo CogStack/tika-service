@@ -37,4 +37,7 @@ public class TikaProcessingResult {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     OffsetDateTime timestamp;
+
+    // total elapsed time in seconds
+    long processingElapsedTime;
 }
