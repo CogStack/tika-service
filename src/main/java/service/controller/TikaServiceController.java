@@ -173,7 +173,7 @@ public class TikaServiceController implements ErrorController {
 
     private TikaProcessingResult processStream(ByteArrayInputStream stream) throws IOException {
         TemporaryResources temporaryResources = new TemporaryResources();
-        Path tmpFilePath = temporaryResources.createTempFile();
+        File tmpFilePath = temporaryResources.createTemporaryFile();
         logger.info("Storing tmp file at :" + tmpFilePath.toString());
         File tmpFile = new File(tmpFilePath.toString());
 
@@ -181,6 +181,7 @@ public class TikaServiceController implements ErrorController {
         TikaProcessingResult result = tikaProcessor.process(tikaInputStream);
 
         if (tmpFile.exists()) {
+            logger.info("Deleting tmp file:" + tmpFile.toPath());
             Files.delete(tmpFile.toPath());
         }
         tikaInputStream.close();

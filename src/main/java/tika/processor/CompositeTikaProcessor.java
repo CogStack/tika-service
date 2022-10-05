@@ -15,8 +15,6 @@ import org.apache.tika.parser.html.HtmlParser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.parser.pdf.PDFParser;
 import org.apache.tika.parser.pdf.PDFParserConfig;
-import org.apache.tika.parser.txt.CharsetDetector;
-import org.apache.tika.parser.txt.CharsetMatch;
 import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,12 +33,6 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -432,23 +424,41 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     private void initializePdfOcrParser() {
         PDFParserConfig pdfOcrConfig = new PDFParserConfig();
         pdfOcrConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
-
         pdfOcrConfig.setOcrDPI(compositeTikaProcessorConfig.getPdfOcrDPI());
         pdfOcrConfig.setDetectAngles(compositeTikaProcessorConfig.isPdfOcrDetectAngles());
+
         if (compositeTikaProcessorConfig.isPdfOcrOnlyStrategy()) {
             pdfOcrConfig.setExtractInlineImages(false);
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_ONLY);
         }
         else {
             pdfOcrConfig.setExtractUniqueInlineImagesOnly(true); // do not extract multiple inline images
-            //pdfOcrConfig.setExtractInlineImages(true);
             // warn: note that applying 'OCR_AND_TEXT_EXTRACTION' the content can be duplicated
             pdfOcrConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.OCR_AND_TEXT_EXTRACTION);
         }
-        pdfOcrConfig.setDropThreshold(pdfOcrConfig.getDropThreshold());
-        pdfOcrConfig.setOcrImageQuality(pdfOcrConfig.getOcrImageQuality());
-        pdfOcrConfig.setOcrRenderingStrategy(PDFParserConfig.OCR_RENDERING_STRATEGY.ALL);
-        pdfOcrConfig.setImageStrategy(PDFParserConfig.IMAGE_STRATEGY.RENDER_PAGES_BEFORE_PARSE);
+
+        pdfOcrConfig.setDropThreshold(compositeTikaProcessorConfig.getPdfOcrDropThreshold());
+        pdfOcrConfig.setOcrImageQuality(compositeTikaProcessorConfig.getPdfOcrImageQuality());
+
+        PDFParserConfig.OCR_RENDERING_STRATEGY ocrRenderStrategy = PDFParserConfig.OCR_RENDERING_STRATEGY.ALL;
+        PDFParserConfig.IMAGE_STRATEGY ocrImageStrategy = PDFParserConfig.IMAGE_STRATEGY.RAW_IMAGES;
+
+        switch (compositeTikaProcessorConfig.getPdfOcrRenderingStrategy()) {
+            case "ALL" -> ocrRenderStrategy = PDFParserConfig.OCR_RENDERING_STRATEGY.ALL;
+            case "NO_TEXT" -> ocrRenderStrategy = PDFParserConfig.OCR_RENDERING_STRATEGY.NO_TEXT;
+            case "TEXT_ONLY" -> ocrRenderStrategy = PDFParserConfig.OCR_RENDERING_STRATEGY.TEXT_ONLY;
+            case "VECTOR_GRAPHICS_ONLY" -> ocrRenderStrategy = PDFParserConfig.OCR_RENDERING_STRATEGY.VECTOR_GRAPHICS_ONLY;
+        }
+
+        switch (compositeTikaProcessorConfig.getPdfOcrImageStrategy()) {
+            case "NONE" -> ocrImageStrategy = PDFParserConfig.IMAGE_STRATEGY.NONE;
+            case "RAW_IMAGES" -> ocrImageStrategy = PDFParserConfig.IMAGE_STRATEGY.RAW_IMAGES;
+            case "RENDER_PAGES_BEFORE_PARSE" -> ocrImageStrategy = PDFParserConfig.IMAGE_STRATEGY.RENDER_PAGES_BEFORE_PARSE;
+            case "RENDER_PAGES_AT_PAGE_END" -> ocrImageStrategy = PDFParserConfig.IMAGE_STRATEGY.RENDER_PAGES_AT_PAGE_END;
+        }
+
+        pdfOcrConfig.setOcrRenderingStrategy(ocrRenderStrategy);
+        pdfOcrConfig.setImageStrategy(ocrImageStrategy);
 
         pdfOcrParser = new PDFParser();
         pdfOcrParseContext = new ParseContext();

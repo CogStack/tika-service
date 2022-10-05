@@ -1,7 +1,7 @@
 # application configuration
 #
 application:
-  version: 0.3.1
+  version: 0.4.0
 
 # general spring boot and server configuration
 #
@@ -9,7 +9,7 @@ server:
   port: 8090
   tomcat:
     threads:
-      max: 16
+      max: 32
 
   ssl:
     enabled: true
@@ -20,11 +20,22 @@ server:
     key-password: "cogstackNifi"
 
 spring:
+  task:
+    execution:
+      pool:
+        queue-capacity: 128
+        max-size: 128
+    scheduling:
+      thread-name-prefix: "tika~"
+      pool:
+        size: 16
+
   servlet:
-    multipart.max-file-size: 32768MB
-    multipart.max-request-size: 32768MB
-    multipart.file-size-threshold: 16384MB
-    multipart.enabled: true
+    multipart:
+      max-file-size: 32768MB
+      max-request-size: 32768MB
+      file-size-threshold: 16384MB
+      enabled: true
 
 # tika configuration
 #
@@ -49,10 +60,14 @@ tika:
       image-quality: 1.0f
       drop-threshold: 1.0f
       apply-rotation: false
-      ocr-detect-angles: true
+      ocr-detect-angles: false
       # dpi valid range: 0->inf, default from Tika is 300
-      ocr-dpi: 300
+      ocr-dpi: 200
       use-legacy-ocr-parser-for-single-page-doc: false
+      # values: "ALL", "NO_TEXT", "TEXT_ONLY", "VECTOR_GRAPHICS_ONLY"
+      ocr-rendering-strategy: "ALL"
+      # values: "NONE", "RAW_IMAGES", "RENDER_PAGES_BEFORE_PARSE", "RENDER_PAGES_AT_PAGE_END"
+      image-render-strategy: "RAW_IMAGES"
 
     post-ocr:
       output-encoding: "UTF-8"
@@ -77,11 +92,11 @@ processing:
 
 logging:
   level:
-    root: ERROR
-    tika.processor: ERROR
-    org.springframework.web: ERROR
-    service.controller: ERROR
-    org.hibernate: ERROR
+    root: INFO
+    tika.processor: INFO
+    org.springframework.web: INFO
+    service.controller: INFO
+    org.hibernate: INFO
   file:
     path: "./"
     name: "app.log"
