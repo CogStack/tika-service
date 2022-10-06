@@ -53,9 +53,15 @@ RUN apt-get update && apt-get upgrade -y
 # RUN apt-get install -y nvidia-docker2 nvidia-container-toolkit
 
 # Other requirements for Tika & Tesseract OCR
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
+RUN apt-get install -y --no-install-recommends fontconfig ttf-mscorefonts-installer
+ADD ./extras/localfonts.conf /etc/fonts/local.conf
+RUN fc-cache -f -v
+
 RUN apt-get install -y libimage-exiftool-perl libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
 	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
-    apt-get install -y fonts-deva gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond && \
+    apt-get install -y ttf-mscorefonts-installer fontconfig && \
+    apt-get install -y fonts-deva fonts-dejavu gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond fonts-noto-cjk fonts-takao-gothic fonts-vlgothic && \
     apt-get install -y --fix-missing ghostscript ghostscript-x gsfonts gsfonts-other gsfonts-x11 && \
     apt-get install -y --fix-missing imagemagick tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
 	#apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
