@@ -415,13 +415,15 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         PDFParserConfig pdfTextOnlyConfig = new PDFParserConfig();
         pdfTextOnlyConfig.setExtractInlineImages(false);
         pdfTextOnlyConfig.setExtractUniqueInlineImagesOnly(false); // do not extract multiple inline images
+        pdfTextOnlyConfig.setImageStrategy(PDFParserConfig.IMAGE_STRATEGY.NONE);
+        pdfTextOnlyConfig.setOcrRenderingStrategy(PDFParserConfig.OCR_RENDERING_STRATEGY.TEXT_ONLY);
         pdfTextOnlyConfig.setOcrStrategy(PDFParserConfig.OCR_STRATEGY.NO_OCR);
 
         pdfTextParser = new PDFParser();
         pdfTextParseContext = new ParseContext();
         pdfTextParseContext.set(TikaConfig.class, tikaConfig);
         pdfTextParseContext.set(PDFParserConfig.class, pdfTextOnlyConfig);
-        pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        // pdfTextParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
     private void initializePdfOcrParser() {
@@ -468,7 +470,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         pdfOcrParseContext.set(TikaConfig.class, tikaConfig);
         pdfOcrParseContext.set(PDFParserConfig.class, pdfOcrConfig);
         pdfOcrParseContext.set(TesseractOCRConfig.class, tessConfig);
-        pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
+        //pdfOcrParseContext.set(Parser.class, defaultParser); //need to add this to make sure recursive parsing happens!
     }
 
     private void initializePdfLegacyOcrParser() {
