@@ -8,7 +8,7 @@
 # JDK base
 #
 
-FROM openjdk:17.0.2-bullseye AS jdk-base-builder
+FROM ubuntu:kinetic AS jdk-base-builder
 
 # freeze the versions of the Tesseract+ImageMagick for reproducibility
 ENV TESSERACT_VERSION 4.1.1-2.1
@@ -19,18 +19,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_PRIORITY=critical
 
 ENV NVIDIA_DRIVER_VERSION=510
+ENV OPENJDK_VERSION=17
 
 # nvidia-container-runtime
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
 # add tesseract key
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y apt-transport-https apt-utils && \
-    apt-get install -y curl software-properties-common && \
-    apt-add-repository non-free && \
-    apt-add-repository contrib && \
-    apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y apt-transport-https apt-utils curl software-properties-common gnupg
+RUN apt-get update && apt-get upgrade -y
+
+# add extra repos
+RUN apt-add-repository multiverse universe # ppa:graphics-drivers/ppa
+RUN apt-get update && apt-get upgrade -y
 
 # Nvidia cuda
 #RUN wget https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda-repo-debian11-11-6-local_11.6.2-510.47.03-1_amd64.deb
@@ -39,8 +41,12 @@ RUN apt-get update && apt-get upgrade -y && \
 #RUN apt-get update --fix-missing && apt-get upgrade -y
 #RUN apt-get -y install cuda
 
+
+# OpenJDK
+RUN apt-get install -y openjdk-$OPENJDK_VERSION-jdk
+
 # OpenCL
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends initramfs-tools xz-utils ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential clinfo dkms pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev beignet-opencl-icd # nvidia-opencl-icd  nvidia-driver nvidia-egl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends initramfs-tools xz-utils ocl-icd-dev ocl-icd-opencl-dev ocl-icd-libopencl1 oclgrind opencl-headers libtiff-dev build-essential clinfo dkms pocl-opencl-icd intel-opencl-icd mesa-opencl-icd libpocl-dev # nvidia-opencl-icd  nvidia-driver nvidia-egl-icd nvidia-egl-common nvidia-cuda-dev nvidia-cuda-toolkit
 
 # NVIDIA Docker
 RUN export distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
@@ -50,6 +56,7 @@ RUN curl -s -L https://nvidia.github.io/nvidia-docker/$(. /etc/os-release;echo $
 RUN curl -s -L https://nvidia.github.io/libnvidia-container/experimental/$(. /etc/os-release;echo $ID$VERSION_ID)/libnvidia-container-experimental.list | tee /etc/apt/sources.list.d/libnvidia-container-experimental.list
 
 RUN apt-get update && apt-get upgrade -y
+
 # RUN apt-get install -y nvidia-docker2 nvidia-container-toolkit
 
 # Other requirements for Tika & Tesseract OCR
@@ -61,8 +68,8 @@ RUN fc-cache -f -v
 RUN apt-get install -y libimage-exiftool-perl libtika-java libtomcat9-java libtomcat9-embed-java libtcnative-1 && \
 	apt-get install -y python3-pip && pip3 install numpy matplotlib scikit-image && \
     apt-get install -y ttf-mscorefonts-installer fontconfig && \
-    apt-get install -y fonts-deva fonts-dejavu gsfonts fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond fonts-noto-cjk fonts-takao-gothic fonts-vlgothic && \
-    apt-get install -y --fix-missing ghostscript ghostscript-x gsfonts gsfonts-other gsfonts-x11 && \
+    apt-get install -y ffmpeg gstreamer1.0-libav fonts-deva fonts-dejavu fonts-gfs-didot fonts-gfs-didot-classic fonts-junicode fonts-ebgaramond fonts-noto-cjk fonts-takao-gothic fonts-vlgothic && \
+    apt-get install -y --fix-missing ghostscript ghostscript-x gsfonts gsfonts-other gsfonts-x11 fonts-croscore fonts-crosextra-caladea fonts-crosextra-carlito fonts-liberation fonts-open-sans fonts-noto-core fonts-ibm-plex fonts-urw-base35 && \
     apt-get install -y --fix-missing imagemagick tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd tesseract-ocr-lat tesseract-ocr-fra tesseract-ocr-deu && \
 	#apt-get install -y tesseract-ocr=$TESSERACT_VERSION tesseract-ocr-eng=$TESSERACT_RES_VERSION tesseract-ocr-osd=$TESSERACT_RES_VERSION && \
 	#apt-get install -y imagemagick=$IMAGEMAGICK_VERSION --fix-missing && \
