@@ -148,7 +148,9 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 if (outStream.size() >= compositeTikaProcessorConfig.getPdfMinDocTextLength() && stream.getPosition() > compositeTikaProcessorConfig.getPdfMinDocByteSize()) {
                     // since we are performing a second pass over the document, we need to reset cursor position
                     // in both input and output streams
-                    stream.reset();
+
+                    if(stream.getPosition() != 0)
+                        stream.reset();
                     outStream.reset();
 
                     final boolean useOcrLegacyParser = compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()
@@ -178,7 +180,9 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                 }
             }
             else if (isDocumentOfHTMLType(stream)) {
-                stream.reset();
+                if(stream.getPosition() != 0)
+                        stream.reset();
+                //stream.reset();
                 HtmlParser htmlParser = new HtmlParser();
                 defaultParseContext.set(HtmlParser.class, htmlParser);
                 htmlParser.parse(stream, handler, metadata, defaultParseContext);
@@ -186,7 +190,8 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             }
             else {
                 // otherwise, run default documents parser
-                stream.reset();
+                if(stream.getPosition() != 0)
+                    stream.reset();
                 defaultParser.parse(stream, handler, metadata, defaultParseContext);
                 metadata.add(MetadataKeys.X_TIKA_PARSED_BY, AutoDetectParser.class.getName());
             }
@@ -371,7 +376,6 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         MediaType mediaType = defaultParser.getDetector().detect(stream, metadata);
 
         boolean isHTML = mediaType.getSubtype().contains("html");
-        stream.reset();
 
         // hack to deal with docs that have no type assigned
         if (!isHTML)
