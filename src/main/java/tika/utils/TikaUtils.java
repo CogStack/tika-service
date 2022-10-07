@@ -82,7 +82,7 @@ public class TikaUtils {
         });
 
         Arrays.stream(metaKeysMultiValue).forEach(name -> {
-            if (docMeta.getValues(name.toLowerCase()) != null)
+            if (docMeta.getValues(name) != null)
                 resultMeta.put(name, docMeta.getValues(name));
         });
 
