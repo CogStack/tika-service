@@ -1,6 +1,5 @@
 package tika.utils;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +24,13 @@ public class TikaUtils {
      * The metadata keys that should be extracted by the processor
      */
     private static final String[] metaKeysSingleValue = {MetadataKeys.CONTENT_TYPE, MetadataKeys.CREATION_DATE,
-            MetadataKeys.LAST_MODIFIED, MetadataKeys.OCR_APPLIED};
+            MetadataKeys.LAST_MODIFIED, MetadataKeys.OCR_APPLIED, MetadataKeys.CREATION_DATE,
+            MetadataKeys.LAST_SAVED_DATE, MetadataKeys.AUTHOR, MetadataKeys.CATEGORY, MetadataKeys.KEYWORDS,
+            MetadataKeys.APPLICATION_NAME, MetadataKeys.CONTENT_ENCODING, MetadataKeys.WORD_COUNT,
+            MetadataKeys.CHARACTER_COUNT, MetadataKeys.MIME_TYPE_TAG, MetadataKeys.MODIFIED_DATE, MetadataKeys.COMPANY,
+            MetadataKeys.COMMENTS, MetadataKeys.CREATOR, MetadataKeys.IDENTIFIER, MetadataKeys.SUBJECT,
+            MetadataKeys.DESCRIPTION};
+
     private static final String[] metaKeysMultiValue = {MetadataKeys.X_TIKA_PARSED_BY};
 
     public static <T> List<List<T>> getBatchesFromList(List<T> collection, int batchSize){
@@ -68,13 +73,16 @@ public class TikaUtils {
      */
     public static Map<String, Object> extractMetadata(final Metadata docMeta) {
         Map<String, Object> resultMeta = new HashMap<>();
+
+        var meta_keys = docMeta.names();
+
         Arrays.stream(metaKeysSingleValue).forEach(name -> {
             if (docMeta.get(name) != null)
                 resultMeta.put(name, docMeta.get(name));
         });
 
         Arrays.stream(metaKeysMultiValue).forEach(name -> {
-            if (docMeta.getValues(name) != null)
+            if (docMeta.getValues(name.toLowerCase()) != null)
                 resultMeta.put(name, docMeta.getValues(name));
         });
 
