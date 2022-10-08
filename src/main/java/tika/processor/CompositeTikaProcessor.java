@@ -231,7 +231,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
         }
         catch (Exception e) {
             logger.error(e.getMessage());
-
+            e.printStackTrace();
             result = TikaProcessingResult.builder()
                     .error("Exception caught while processing the document: " + e.getMessage())
                     .success(false)

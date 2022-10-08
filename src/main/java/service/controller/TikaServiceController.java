@@ -2,6 +2,7 @@ package service.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import common.JsonPropertyAccessView;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.io.TemporaryResources;
@@ -26,7 +27,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 
 /**
@@ -87,23 +87,25 @@ public class TikaServiceController implements ErrorController {
     @PostMapping(value = apiFullPath + "/process", produces = "application/json")
     public ResponseEntity<ServiceResponseContent> process(HttpServletRequest request) {
         try {
-            byte[] streamContent = request.getInputStream().readAllBytes();
+            byte[] streamContent = IOUtils.toByteArray(request.getInputStream());
 
             if (streamContent.length == 0) {
                 final String message = "Empty content";
                 logger.info(message);
                 return createEmptyDocumentResponseEntity(message);
             }
+
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
             ByteArrayInputStream byteBuffer = new ByteArrayInputStream(streamContent);
             TikaProcessingResult result = processStream(byteBuffer);
+
             return createProcessedDocumentResponseEntity(result);
         }
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
             logger.error(message);
-
+            e.printStackTrace();
             return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -130,6 +132,7 @@ public class TikaServiceController implements ErrorController {
         catch (Exception e) {
             final String message = "Error processing: " + e.getMessage();
             logger.error(message);
+            e.printStackTrace();
             return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -157,7 +160,7 @@ public class TikaServiceController implements ErrorController {
         catch (Exception e) {
             final String message = "Error processing the query: " + e.getMessage();
             logger.error(message);
-
+            e.printStackTrace();
             return new ResponseEntity<>(createErrorResponse(message), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
