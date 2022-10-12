@@ -118,6 +118,6 @@ public class CompositeTikaProcessorConfig {
     private String outputEncoding;
 
     @JsonView(JsonPropertyAccessView.Public.class)
-    @Value("${tika.post-ocr.enforce-encoding-output:true}")
+    @Value("${tika.post-ocr.enforce-encoding-output:false}")
     private boolean enforceEncodingOutput;
 }
