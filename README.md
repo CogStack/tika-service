@@ -114,7 +114,7 @@ The provided metadata associated with the document and the used parsers can incl
 
 Additional metadata may be available depending on the file type:
 
-&nbsp;MS OFFICE metadata tags:
+&nbsp;MS OFFICE metadata tags (for docx, doc, xls, etc. documents):
   - `meta:comments` - doc comments
   - `meta:last-author` - last user who edited the doc
   - `Category` - doc category (if available)
@@ -208,7 +208,7 @@ Returned result:
 # Configuration
 
 ## Configuration file
-All the available service and document processors parameteres are stored in a single `src/main/resources/application.yaml` file. 
+All the available service and document processors parameters are stored in a single `src/main/resources/application.yaml` file. 
 
 Although the initial configuration file is bundled with the application jar file, a modified one can be provided as a parameter when running the Java application. For example, when running the Tika service in the Docker container, the script `scripts/run.sh` runs the Tika service with custom configuration file `application.yaml` located in `/app/config/` directory: 
 `java -Dspring.config.location=/app/config/ -jar /app/service-*.jar`
@@ -258,6 +258,11 @@ The keys under `legacy-pdf-parser` define the behavior of the Tika PDF parser us
 - `min-doc-text-length` - if the available text in the document (before applying OCR) is higher than this value then skip OCR (default: `10`).
 if you have documents containing only embedded images this should probably be set to `1` (if nothing is processed, because if the document contains no text and just images it might be skipped)
 
+Post ocr settings to force ENCODING, `post-ocr` subsection of `tika`:
+- `output-encoding` - default "UTF-8", this is what we most likely will need in 99% of the cases that handle the English language.
+- `enforce-encoding-output` - default "false", if this is set to true, the output text will be UTF-8 (or the value of `output-encoding`) compliant,
+                            all other chars are removed, there may be problems when enabling this option in some cases, please ensure the output is correct and the docs can be processed, if not then it is best to leave this option off.
+  
 # Supported file types and limitations
 
 The service is able to extract free-text from most known file types (PDF, docx, tiff, png, html etc.), please make sure to enable the `enable-image-processing` setting.
