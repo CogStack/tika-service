@@ -99,6 +99,7 @@ The extraction results are represented in JSON format where the available main f
 - `timestamp` - the content processing timestamp,
 - `success` - specifies whether the extraction accomplished successfully,
 - `error` - the message in case of processing error (assumes `success : false`).
+- `processingElapsedTime` - how long did it take to process the document, useful for benchmarking
 
 The content extraction result can contain such fields:
 - `text` - the extracted text,
@@ -111,6 +112,28 @@ The provided metadata associated with the document and the used parsers can incl
 - `Page-Count` - the document page count (extracted from the document metadata by Tika),
 - `Creation-Date` - the document creation date (extracted from the document metadata by Tika).
 
+Additional metadata may be available depending on the file type:
+
+&nbsp;MS OFFICE metadata tags:
+  - `meta:comments` - doc comments
+  - `meta:last-author` - last user who edited the doc
+  - `Category` - doc category (if available)
+  - `dc:creator` - user that created the doc
+  - `Keywords` - doc keywords (if available)
+  - `meta:word-count` - word count (built in, it is not done for other doc types)
+  - `meta:character-count` - build in char count for MS documents
+  - `Last-Save-Date` - datetime at which the doc was last saved
+  - `dcterms:modified` - datetime at which the doc was last modified
+  - `extended-properties:Application` - application used to create the doc
+  - `extender-properties:Company` - company that owns the doc
+  - `dcterms:created` - doc creation date
+  - `dc:description` - doc description
+  - `dc:identifier` - doc identifier
+  - `dc:subject` - doc subject
+
+&nbsp; HTML metadata tags:
+  - `Last-Modified` - datetime at which doc was last modified 
+  - `Content-Encoding` - encoding detected in the original doc
 
 # Example use
 
