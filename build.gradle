@@ -1,6 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.7.3'
+	id 'org.springframework.boot' version '2.7.4'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -40,19 +41,19 @@ dependencies {
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
 
-	implementation 'org.springframework.boot:spring-boot-starter-web:2.7.3'
-	implementation 'org.springframework.boot:spring-boot-starter-batch:2.7.3'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.7.4'
+	implementation 'org.springframework.boot:spring-boot-starter-batch:2.7.4'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.3'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
 
 	compileOnly 'org.projectlombok:lombok:1.18.24'
-	annotationProcessor 'org.projectlombok:lombok:1.18.24'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.7.3'
 
-	implementation 'org.apache.commons:commons-text:1.9'
+	annotationProcessor 'org.projectlombok:lombok:1.18.24'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.7.4'
+
+	implementation 'org.apache.commons:commons-text:1.10.0'
 
 	// json serialization
 	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.13.4'
@@ -69,11 +70,16 @@ dependencies {
 	implementation group: 'org.apache.tika', name: 'tika-xmp', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-serialization', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parsers-ml', version: '2.5.0', ext: 'pom'
+	implementation group: 'org.apache.tika', name: 'tika-parent', version: '2.5.0', ext: 'pom'
 	implementation group: 'org.apache.tika', name: 'tika-langdetect', version: '2.5.0', ext: 'pom'
+	implementation group: 'org.apache.tika', name: 'tika-pipes-iterator-csv', version: '2.5.0'
+	implementation group: 'org.apache.tika', name: 'tika-parser-nlp-module', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parser-text-module', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parser-pdf-module', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parser-html-module', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parser-microsoft-module', version: '2.5.0'
+	implementation group: 'org.apache.tika', name: 'tika-parser-miscoffice-module', version: '2.5.0'
+	implementation group: 'org.apache.tika', name: 'tika-parser-apple-module', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parser-image-module', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-parser-zip-commons', version: '2.5.0'
 	implementation group: 'org.apache.tika', name: 'tika-langdetect-optimaize', version: '2.5.0'
