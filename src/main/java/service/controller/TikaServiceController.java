@@ -77,8 +77,13 @@ public class TikaServiceController implements ErrorController {
     @GetMapping(value = apiFullPath + "/info", produces = "application/json")
     @JsonView(JsonPropertyAccessView.Public.class)
     public @ResponseBody
-    ServiceInformation info() {
-        return serviceInfo;
+        ServiceInformation info() {
+            return serviceInfo;
+    }
+
+    @GetMapping(value = "/")
+    public String home() {
+        return "Tika Service, you can see the current configuration of the service by going to /api/info";
     }
 
     /**
@@ -98,6 +103,7 @@ public class TikaServiceController implements ErrorController {
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
             ByteArrayInputStream byteBuffer = new ByteArrayInputStream(streamContent);
+
             TikaProcessingResult result = processStream(byteBuffer);
 
             return createProcessedDocumentResponseEntity(result);
@@ -126,7 +132,7 @@ public class TikaServiceController implements ErrorController {
             var results = tikaProcessor.process(multipartFiles);
 
             ServiceResponseContent serviceResponseContent = new ServiceResponseContent();
-            serviceResponseContent.setResults(results);
+
             return new ResponseEntity<ServiceResponseContent>(serviceResponseContent, HttpStatus.OK);
         }
         catch (Exception e) {
@@ -154,6 +160,7 @@ public class TikaServiceController implements ErrorController {
             // we are buffering the stream using ByteArrayInputStream in order to enable
             // re-reading the binary document content
             ByteArrayInputStream byteBuffer = new ByteArrayInputStream(file.getBytes());
+
             TikaProcessingResult result = processStream(byteBuffer);
             return createProcessedDocumentResponseEntity(result);
         }
@@ -177,18 +184,17 @@ public class TikaServiceController implements ErrorController {
     private TikaProcessingResult processStream(ByteArrayInputStream stream) throws IOException {
         TemporaryResources temporaryResources = new TemporaryResources();
         File tmpFilePath = temporaryResources.createTemporaryFile();
+
         logger.info("Storing tmp file at :" + tmpFilePath.toString());
-        File tmpFile = new File(tmpFilePath.toString());
 
         TikaInputStream tikaInputStream = TikaInputStream.get(stream, temporaryResources);
         TikaProcessingResult result = tikaProcessor.process(tikaInputStream);
 
-        if (tmpFile.exists()) {
-            logger.info("Deleting tmp file:" + tmpFile.toPath());
-            Files.delete(tmpFile.toPath());
+        if (tmpFilePath.exists()) {
+            logger.info("Deleting tmp file:" + tmpFilePath.toPath());
+            Files.delete(tmpFilePath.toPath());
         }
         tikaInputStream.close();
-
         logger.info("Running processor: " + tikaProcessor.getClass().toString());
 
         return result;

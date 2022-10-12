@@ -14,11 +14,13 @@ import service.controller.TikaServiceController;
  */
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class TikaServiceApplication {
+
 	private final static Logger logger = LogManager.getLogger(TikaServiceController.class);
 
 	public static void main(String[] args) {
 		try {
-			SpringApplication.run(TikaServiceApplication.class, args);
+			var springApplication = new SpringApplication(TikaServiceApplication.class);
+			springApplication.run(args);
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage());

@@ -30,9 +30,7 @@ import tika.model.TikaProcessingResult;
 import tika.utils.TikaUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -124,9 +122,23 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
     protected TikaProcessingResult processStream(TikaInputStream stream) {
 
         var currentTimeNanos =  System.nanoTime();
-
         TikaProcessingResult result;
+
         try {
+            ByteArrayInputStream newStream = null;
+
+            if (stream.markSupported())
+                stream.mark(Integer.MAX_VALUE);
+
+            if(stream.hasInputStreamFactory()) {
+                newStream = new ByteArrayInputStream(stream.getInputStreamFactory().getInputStream().readAllBytes());
+            }
+            else {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                stream.transferTo(outputStream);
+                newStream = new ByteArrayInputStream(outputStream.toByteArray());
+            }
+
             final int MIN_TEXT_BUFFER_SIZE = 1;
             ByteArrayOutputStream outStream = new ByteArrayOutputStream(MIN_TEXT_BUFFER_SIZE);
             BodyContentHandler handler = new BodyContentHandler(outStream);
@@ -134,23 +146,22 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
             metadata.add(IMAGE_PROCESSING_ENABLED, String.valueOf(tessConfig.isEnableImagePreprocessing()));
 
             // mark the stream for multi-pass processing
-            if (stream.markSupported()) {
-                stream.mark(Integer.MAX_VALUE);
+            if (newStream.markSupported()) {
+                newStream.mark(Integer.MAX_VALUE);
             }
 
             // try to detect whether the document is PDF
-            if (isDocumentOfPdfType(stream)) {
+            if (isDocumentOfPdfType(newStream)) {
                 // firstly try the default parser
-                pdfTextParser.parse(stream, handler, metadata, pdfTextParseContext);
+                pdfTextParser.parse(newStream, handler, metadata, pdfTextParseContext);
 
                 // check if there have been enough characters read / extracted and that we read enough bytes from the stream
                 // (images embedded in the documents will occupy quite more space than just raw text)
-                if (outStream.size() >= compositeTikaProcessorConfig.getPdfMinDocTextLength() && stream.getPosition() > compositeTikaProcessorConfig.getPdfMinDocByteSize()) {
+                if (outStream.size() >= compositeTikaProcessorConfig.getPdfMinDocTextLength()) {
                     // since we are performing a second pass over the document, we need to reset cursor position
                     // in both input and output streams
 
-                    if(stream.getPosition() != 0)
-                        stream.reset();
+                    newStream.reset();
                     outStream.reset();
 
                     final boolean useOcrLegacyParser = compositeTikaProcessorConfig.isUseLegacyOcrParserForSinglePageDocuments()
@@ -161,17 +172,15 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     metadata = new Metadata();
                     metadata.add(IMAGE_PROCESSING_ENABLED, String.valueOf(tessConfig.isEnableImagePreprocessing()));
 
-                    if (stream.getLength() >= 1) {
-                        if (useOcrLegacyParser) {
-                            pdfSinglePageOcrParser.parse(stream, handler, metadata, pdfSinglePageOcrParseContext);
-                            // since we use the parser manually, update the metadata with the name of the parser class used
-                            metadata.add(MetadataKeys.X_TIKA_PARSED_BY, LegacyPdfProcessorParser.class.getName());
-                        }
-                        else {
-                            pdfOcrParser.parse(stream, handler, metadata, pdfOcrParseContext);
-                            // since we use the parser manually, update the metadata with the name of the parser class used
-                            metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
-                        }
+                    if (useOcrLegacyParser) {
+                        pdfSinglePageOcrParser.parse(newStream, handler, metadata, pdfSinglePageOcrParseContext);
+                        // since we use the parser manually, update the metadata with the name of the parser class used
+                        metadata.add(MetadataKeys.X_TIKA_PARSED_BY, LegacyPdfProcessorParser.class.getName());
+                    }
+                    else {
+                        pdfOcrParser.parse(newStream, handler, metadata, pdfOcrParseContext);
+                        // since we use the parser manually, update the metadata with the name of the parser class used
+                        metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
                     }
                 }
                 else {
@@ -179,20 +188,17 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
                     metadata.add(MetadataKeys.X_TIKA_PARSED_BY, PDFParser.class.getName());
                 }
             }
-            else if (isDocumentOfHTMLType(stream)) {
-                if(stream.getPosition() != 0)
-                        stream.reset();
-                //stream.reset();
+            else if (isDocumentOfHTMLType(newStream)) {
+                newStream.reset();
                 HtmlParser htmlParser = new HtmlParser();
                 defaultParseContext.set(HtmlParser.class, htmlParser);
-                htmlParser.parse(stream, handler, metadata, defaultParseContext);
+                htmlParser.parse(newStream, handler, metadata, defaultParseContext);
                 metadata.add(MetadataKeys.X_TIKA_PARSED_BY, HtmlParser.class.getName());
             }
             else {
                 // otherwise, run default documents parser
-                if(stream.getPosition() != 0)
-                    stream.reset();
-                defaultParser.parse(stream, handler, metadata, defaultParseContext);
+                newStream.reset();
+                defaultParser.parse(newStream, handler, metadata, defaultParseContext);
                 metadata.add(MetadataKeys.X_TIKA_PARSED_BY, AutoDetectParser.class.getName());
             }
 
