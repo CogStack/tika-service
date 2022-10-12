@@ -44,6 +44,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.7.4'
 	implementation 'org.springframework.boot:spring-boot-starter-batch:2.7.4'
 
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.3'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
