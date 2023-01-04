@@ -66,7 +66,11 @@ tika:
       ocr-rendering-strategy: "ALL"
       # values: "NONE", "RAW_IMAGES", "RENDER_PAGES_BEFORE_PARSE", "RENDER_PAGES_AT_PAGE_END"
       ocr-image-strategy: "RAW_IMAGES"
-
+      # values:
+      #  - "AUTO"
+      #  - "NO_OCR" - exactly what it says, it WONT do any OCR
+      #  - "OCR_AND_TEXT_EXTRACTION" - OCR and text extraction, WARNING, this will result in DUPLICATED TEXT
+      #  - "OCR_ONLY" - only do OCR, without text extraction (this is done separately)
       ocr-strategy: "OCR_ONLY"
 
     legacy-pdf-parser:

@@ -157,7 +157,7 @@ public class CompositeTikaProcessor extends AbstractTikaProcessor {
 
                 // check if there have been enough characters read / extracted and that we read enough bytes from the stream
                 // (images embedded in the documents will occupy quite more space than just raw text)
-                if (outStream.size() >= compositeTikaProcessorConfig.getPdfMinDocTextLength()) {
+                if (outStream.size() >= compositeTikaProcessorConfig.getPdfMinDocTextLength() && !Objects.equals(compositeTikaProcessorConfig.getPdfOcrStrategy(), "NO_OCR")) {
                     // since we are performing a second pass over the document, we need to reset cursor position
                     // in both input and output streams
 
