@@ -64,7 +64,7 @@ tika:
       # values: "ALL", "NO_TEXT", "TEXT_ONLY", "VECTOR_GRAPHICS_ONLY"
       ocr-rendering-strategy: "ALL"
       # values: "NONE", "RAW_IMAGES", "RENDER_PAGES_BEFORE_PARSE", "RENDER_PAGES_AT_PAGE_END"
-      ocr-render-strategy: "RAW_IMAGES"
+      ocr-image-strategy: "RAW_IMAGES"
 
     legacy-pdf-parser:
       image-magick:
