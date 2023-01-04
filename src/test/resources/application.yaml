@@ -51,6 +51,7 @@ tika:
       filter: "triangle"
 
     pdf-ocr-parser:
+      # deprecated setting, no longer has any impact
       ocr-only-strategy: false
       min-doc-text-length: 1
       min-doc-byte-size: 100
@@ -65,6 +66,8 @@ tika:
       ocr-rendering-strategy: "ALL"
       # values: "NONE", "RAW_IMAGES", "RENDER_PAGES_BEFORE_PARSE", "RENDER_PAGES_AT_PAGE_END"
       ocr-image-strategy: "RAW_IMAGES"
+
+      ocr-strategy: "OCR_ONLY"
 
     legacy-pdf-parser:
       image-magick:

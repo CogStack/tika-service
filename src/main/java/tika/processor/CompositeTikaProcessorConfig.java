@@ -89,6 +89,10 @@ public class CompositeTikaProcessorConfig {
     @Value("${tika.parsers.pdf-ocr-parser.ocr-image-strategy:RAW_IMAGES}")
     private String pdfOcrImageStrategy;
 
+    @JsonView(JsonPropertyAccessView.Public.class)
+    @Value("${tika.parsers.pdf-ocr-parser.ocr-strategy:AUTO}")
+    private String pdfOcrStrategy;
+
     // apply OCR only when trying to extract text from previously parsed document (w/o OCR)
     // that extracted characters were less than N
     @JsonView(JsonPropertyAccessView.Public.class)
