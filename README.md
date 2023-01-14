@@ -225,7 +225,7 @@ The configuration file is stored in yaml format with the following available pro
 The following keys reside under `tika.processing` node:
 - `use-legacy-tika-processor-as-default` - whether to use the legacy Tika PDF parser (as used in CogStack Pipeline) for backward compatibility (default: `true`),
 - `fail-on-empty-files` - whether to fail the request and report an error when client provided an empty document (default: `false`),
-- `fail-on-non-document-types` - whether to fail the request and report an erorr when client provided a not supported and/or non-document content (default: `true`).
+- `fail-on-non-document-types` - whether to fail the request and report an error when client provided a not supported and/or non-document content (default: `true`).
 
 ### Tika parsers configuration
 The following keys reside under `tika.parsers` node.
@@ -248,6 +248,21 @@ The keys under `pdf-ocr-parser` define the default behavior of the PDF parser th
 - `use-legacy-ocr-parser-for-single-page-doc` - in case of single-page PDF documents, whether to use the legacy parser (default: `false`).
 - `ocr-detect-angles` - used in conjunction with apply rotation, so if apply-rotation is not used this should be false (default: `false`)
 - `ocr-dpi` - a bit ambiguous as this is also provided in the tesseract-ocr-parser, DPI used to render the image (default: `150`)  
+
+- `ocr-rendering-strategy`, values: "ALL" -render everything (images and text), "NO_TEXT", "TEXT_ONLY", "VECTOR_GRAPHICS_ONLY" - only vector images are rendered
+
+values: "NONE", "RAW_IMAGES", "RENDER_PAGES_BEFORE_PARSE", "RENDER_PAGES_AT_PAGE_END"
+- `ocr-image-strategy` - how do are the images rendered, raw_images renders them on the go, while the others are before parse and at the end
+
+#### IMPORTANT
+- `ocr-strategy` - this is the value that affects if OCR is performed at ALL, options:
+  - "AUTO"
+  - "NO_OCR" - exactly what it says, it WONT do any OCR
+  - "OCR_AND_TEXT_EXTRACTION" - OCR and text extraction, WARNING, this will result in DUPLICATED TEXT
+  - "OCR_ONLY" - only do OCR, without text extraction (this is done separately)
+  - 
+With the above setting you can speed up the workflows of certain processes, if you know you DO NOT need to OCR images,
+then it makes total sense to disable this as it will improve the service's speed by a substantial amount, resulting in near instant results. OCR should definitely be disabled for use with process_bulk.
 
 Please check the `application.yaml` file for range limits on these settings.
 
